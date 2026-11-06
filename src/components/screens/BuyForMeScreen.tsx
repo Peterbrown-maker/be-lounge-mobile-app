@@ -344,14 +344,14 @@ RULES:
   return (
     <KeyboardAvoidingView
     style={styles.container}
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
     keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
   >
    
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={20} color="#fff" />
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerText}>🛍️ AI Shopping Assistant</Text>
@@ -414,7 +414,7 @@ RULES:
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
             >
-              <X size={24} color="#111827" />
+              <X size={24} color="#111111" />
             </TouchableOpacity>
 
             {selectedMenuItem && (
@@ -580,7 +580,7 @@ RULES:
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <Text style={styles.sendButtonText}>Send</Text>
           )}
@@ -594,10 +594,10 @@ RULES:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FAFAFA",
   },
   header: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#000000",
     padding: 16,
     paddingTop: 40,
     paddingBottom: 16,
@@ -619,12 +619,12 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#FFFFFF",
     marginBottom: 4,
   },
   locationText: {
     fontSize: 14,
-    color: "#E0E7FF",
+    color: "#E5E5E5",
   },
   messageList: {
     flex: 1,
@@ -637,21 +637,21 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
   },
   userMsg: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#000000",
     alignSelf: "flex-end",
   },
   aiMsg: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     alignSelf: "flex-start",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#E5E5E5",
   },
   userText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 15,
   },
   aiText: {
-    color: "#111827",
+    color: "#111111",
     fontSize: 15,
     lineHeight: 22,
   },
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
   },
   menuTitle: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#737373",
     marginBottom: 8,
     fontWeight: "600",
   },
@@ -672,29 +672,29 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   menuButton: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: "#F5F5F5",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: "#D4D4D4",
     minWidth: 140,
   },
   menuButtonText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#92400E",
+    color: "#262626",
     marginBottom: 2,
   },
   menuButtonPrice: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#B45309",
+    color: "#262626",
     marginBottom: 4,
   },
   menuButtonDetails: {
     fontSize: 11,
-    color: "#78350F",
+    color: "#171717",
     fontWeight: "500",
     marginTop: 2,
   },
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "85%",
@@ -723,35 +723,35 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
     marginBottom: 4,
   },
   modalPrice: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#3B82F6",
+    color: "#000000",
     marginBottom: 20,
   },
   section: {
     marginBottom: 24,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#E5E5E5",
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
     marginBottom: 8,
   },
   includeItem: {
     fontSize: 14,
-    color: "#374151",
+    color: "#404040",
     marginVertical: 4,
   },
   addonSubtitle: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#737373",
     marginBottom: 8,
     fontStyle: "italic",
   },
@@ -762,106 +762,106 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginVertical: 4,
     borderRadius: 8,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FAFAFA",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#E5E5E5",
   },
   addonOptionSelected: {
-    backgroundColor: "#DBEAFE",
-    borderColor: "#3B82F6",
+    backgroundColor: "#E5E5E5",
+    borderColor: "#000000",
   },
   addonCheck: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
     borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderColor: "#E5E5E5",
   },
   checkmark: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#3B82F6",
+    color: "#000000",
   },
   addonInfo: {
     flex: 1,
   },
   addonName: {
     fontSize: 14,
-    color: "#111827",
+    color: "#111111",
     fontWeight: "500",
   },
   addonPrice: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#3B82F6",
+    color: "#000000",
   },
   addOnsSummary: {
-    backgroundColor: "#F0F9FF",
+    backgroundColor: "#FAFAFA",
     padding: 12,
     borderRadius: 8,
     marginBottom: 20,
     borderLeftWidth: 4,
-    borderLeftColor: "#3B82F6",
+    borderLeftColor: "#000000",
   },
   addOnsSummaryTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
     marginBottom: 8,
   },
   addOnsSummaryItem: {
     fontSize: 12,
-    color: "#374151",
+    color: "#404040",
     marginVertical: 2,
   },
   addOnsTotal: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#3B82F6",
+    color: "#000000",
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "#93C5FD",
+    borderTopColor: "#A3A3A3",
   },
   modalFooter: {
     flexDirection: "row",
     gap: 12,
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#E5E5E5",
   },
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#F5F5F5",
     alignItems: "center",
   },
   cancelButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: "#404040",
   },
   addButton: {
     flex: 2,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#000000",
     alignItems: "center",
   },
   addButtonText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: "#FFFFFF",
   },
   orderSummary: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#E5E5E5",
     padding: 16,
     maxHeight: 300,
   },
@@ -874,10 +874,10 @@ const styles = StyleSheet.create({
   orderTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
   },
   clearButton: {
-    color: "#EF4444",
+    color: "#000000",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -891,7 +891,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#F5F5F5",
   },
   orderItemInfo: {
     flex: 1,
@@ -901,30 +901,30 @@ const styles = StyleSheet.create({
   },
   orderItemName: {
     fontSize: 14,
-    color: "#374151",
+    color: "#404040",
     flex: 1,
   },
   orderItemPrice: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#111827",
+    color: "#111111",
   },
   itemDetails: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#737373",
     paddingHorizontal: 8,
     paddingBottom: 4,
     fontStyle: "italic",
   },
   itemAddOns: {
     fontSize: 12,
-    color: "#059669",
+    color: "#262626",
     paddingHorizontal: 8,
     paddingBottom: 8,
     fontWeight: "500",
   },
   removeButton: {
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "#F5F5F5",
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   removeButtonText: {
-    color: "#DC2626",
+    color: "#000000",
     fontSize: 18,
     fontWeight: "700",
   },
@@ -941,27 +941,27 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingTop: 12,
     borderTopWidth: 2,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#E5E5E5",
     marginBottom: 12,
   },
   totalText: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
   },
   totalAmount: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#3B82F6",
+    color: "#000000",
   },
   payButton: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#000000",
     padding: 14,
     borderRadius: 12,
     alignItems: "center",
   },
   payButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
   },
@@ -969,23 +969,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#E5E5E5",
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
+    borderColor: "#D4D4D4",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FAFAFA",
   },
   sendButton: {
     marginLeft: 8,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#000000",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
@@ -993,10 +993,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sendButtonDisabled: {
-    backgroundColor: "#93C5FD",
+    backgroundColor: "#A3A3A3",
   },
   sendButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 15,
   },

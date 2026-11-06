@@ -1,4 +1,5 @@
-import { apiService } from './api';
+// Local, offline restaurant data — no backend calls.
+import { ALL_MENU_ITEMS } from '../data/brianosMenu';
 
 export interface Restaurant {
   id: string;
@@ -29,7 +30,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  image: string;
+  image: any; // local require()'d asset (or a uri string)
   category: string;
   isAvailable: boolean;
   created_at: string;
@@ -43,264 +44,73 @@ export interface PopularFoodCategory {
   description: string;
 }
 
-/**
- * Extract data from wrapped API response
- */
-const extractData = <T,>(response: any): T => {
-  console.log('Extracting data from response:', response);
+const NOW = new Date().toISOString();
 
-  if (response && typeof response === 'object' && response.data !== undefined) {
-    console.log('Extracted data property:', response.data);
-    return response.data as T;
-  }
-
-  console.log('Using response directly as data');
-  return response as T;
+export const BRIANOS_RESTAURANT: Restaurant = {
+  id: 'brianos',
+  name: "Briano's",
+  description: 'Flame grills, platters, seafood and cocktails',
+  image: '',
+  images: [],
+  address: 'Soshanguve, Pretoria',
+  latitude: -25.5,
+  longitude: 28.1,
+  rating: 4.8,
+  delivery_time: '25-35 min',
+  delivery_fee: 15,
+  is_open: true,
+  category: 'Grill',
+  popular_food: 'Grills',
+  emoji: '🍗',
+  created_at: NOW,
+  updated_at: NOW,
 };
 
-class RestaurantsApiService {
-  /**
-   * Parse images from string or array to array of strings
-   */
-  private parseImages(imagesData: any): string[] {
-    if (!imagesData) {
-      console.log('RestaurantsApiService: No images data provided');
-      return [];
-    }
+const RESTAURANTS: Restaurant[] = [BRIANOS_RESTAURANT];
 
-    // If it's already an array, validate and return
-    if (Array.isArray(imagesData)) {
-      const validImages = imagesData.filter(img => 
-        img && typeof img === 'string' && img.length > 0
-      );
-      console.log(`RestaurantsApiService: Parsed array, ${validImages.length} valid images`);
-      return validImages;
-    }
+const MENU: MenuItem[] = ALL_MENU_ITEMS.map((item) => ({
+  id: item.id,
+  restaurant_id: BRIANOS_RESTAURANT.id,
+  name: item.name,
+  description: item.description,
+  price: item.price,
+  image: item.image,
+  category: item.category,
+  isAvailable: true,
+  created_at: NOW,
+  updated_at: NOW,
+}));
 
-    // If it's a JSON string, try to parse it
-    if (typeof imagesData === 'string') {
-      // Check if it looks like JSON
-      if (imagesData.startsWith('[')) {
-        try {
-          const parsed = JSON.parse(imagesData);
-          if (Array.isArray(parsed)) {
-            const validImages = parsed.filter(img => 
-              img && typeof img === 'string' && img.length > 0
-            );
-            console.log(`RestaurantsApiService: Parsed JSON string, ${validImages.length} valid images`);
-            return validImages;
-          }
-        } catch (e) {
-          console.warn('RestaurantsApiService: Failed to parse images JSON:', e);
-        }
-      } else if (imagesData.length > 0) {
-        // Single image string
-        console.log('RestaurantsApiService: Single image string detected');
-        return [imagesData];
-      }
-    }
-
-    console.log('RestaurantsApiService: Could not parse images');
-    return [];
-  }
-
-  /**
-   * Get all restaurants
-   */
+class RestaurantsService {
   async getRestaurants(): Promise<Restaurant[]> {
-    try {
-      console.log('RestaurantsApiService: Fetching all restaurants');
-      const response = await apiService.get<any>('/restaurants');
-      const restaurants = extractData<Restaurant[]>(response);
-
-      if (!Array.isArray(restaurants)) {
-        console.warn('Restaurants response is not an array:', restaurants);
-        return [];
-      }
-
-      // Parse images for all restaurants
-      const restaurantsWithImages = restaurants.map(r => ({
-        ...r,
-        images: this.parseImages(r.images)
-      }));
-
-      console.log(`RestaurantsApiService: Successfully fetched ${restaurantsWithImages.length} restaurants`);
-      return restaurantsWithImages;
-    } catch (error) {
-      console.error('RestaurantsApiService: Error fetching restaurants:', error);
-      throw error;
-    }
+    return RESTAURANTS;
   }
 
-  /**
-   * Get restaurant by ID
-   */
   async getRestaurantById(restaurantId: string): Promise<Restaurant> {
-    try {
-      console.log(`RestaurantsApiService: Fetching restaurant ${restaurantId}`);
-      const response = await apiService.get<any>(`/restaurants/${restaurantId}`);
-      const restaurant = extractData<Restaurant>(response);
-
-      console.log(`RestaurantsApiService: Successfully fetched restaurant ${restaurantId}`);
-      return {
-        ...restaurant,
-        images: this.parseImages(restaurant.images)
-      };
-    } catch (error) {
-      console.error('RestaurantsApiService: Error fetching restaurant:', error);
-      throw error;
-    }
+    return RESTAURANTS.find((r) => r.id === restaurantId) || BRIANOS_RESTAURANT;
   }
 
-  /**
-   * Get restaurant menu items with images
-   */
-  async getRestaurantMenu(restaurantId: string): Promise<MenuItem[]> {
-    try {
-      console.log(`RestaurantsApiService: Fetching menu for restaurant ${restaurantId}`);
-      const response = await apiService.get<any>(`/menu?restaurant_id=${restaurantId}`);
-
-      console.log('RestaurantsApiService: Raw menu response:', response);
-
-      const menuData = extractData<any[]>(response);
-
-      if (!Array.isArray(menuData)) {
-        console.warn('RestaurantsApiService: Menu data is not an array:', menuData);
-        return [];
-      }
-
-      const menuWithImages = menuData.map((item: any) => ({
-        id: String(item.id),
-        restaurant_id: String(item.restaurant_id),
-        name: item.name || '',
-        description: item.description || '',
-        price: parseFloat(String(item.price)) || 0,
-        image: formatImageUrl(item.image),
-        category: item.category || 'Main',
-        isAvailable: item.isAvailable !== false,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-      }));
-
-      console.log(`RestaurantsApiService: Successfully fetched ${menuWithImages.length} menu items`);
-      return menuWithImages;
-    } catch (error) {
-      console.error('RestaurantsApiService: Error fetching menu:', error);
-      return [];
-    }
+  // Single-restaurant app: every restaurant id gets the Briano's menu.
+  async getRestaurantMenu(_restaurantId: string): Promise<MenuItem[]> {
+    return MENU;
   }
 
-  /**
-   * Get all popular food categories
-   */
   async getPopularFoodCategories(): Promise<PopularFoodCategory[]> {
-    try {
-      console.log('RestaurantsApiService: Fetching popular food categories');
-      const response = await apiService.get<any>('/restaurants/categories/all');
-
-      console.log('RestaurantsApiService: Raw categories response:', response);
-
-      const categoriesData = extractData<any[]>(response);
-
-      if (!Array.isArray(categoriesData)) {
-        console.warn('RestaurantsApiService: Categories data is not an array:', categoriesData);
-        return [];
-      }
-
-      const formattedCategories = categoriesData.map((cat: any) => ({
-        id: cat.id,
-        name: cat.name,
-        emoji: formatImageUrl(cat.emoji),
-        description: cat.description || '',
-      }));
-
-      console.log(`RestaurantsApiService: Successfully fetched ${formattedCategories.length} food categories`);
-      return formattedCategories;
-    } catch (error) {
-      console.error('RestaurantsApiService: Error fetching popular food categories:', error);
-      throw error;
-    }
+    const names = Array.from(new Set(MENU.map((m) => m.category)));
+    return names.map((name, i) => ({ id: i + 1, name, emoji: '', description: '' }));
   }
 
-  /**
-   * Get restaurants by popular food category
-   */
-  async getRestaurantsByPopularFood(popularFood: string): Promise<Restaurant[]> {
-    try {
-      console.log(`RestaurantsApiService: Fetching restaurants by category ${popularFood}`);
-      const response = await apiService.get<any>(
-        `/restaurants/category/${encodeURIComponent(popularFood)}`
-      );
-
-      const restaurants = extractData<Restaurant[]>(response);
-
-      if (!Array.isArray(restaurants)) {
-        console.warn('RestaurantsApiService: Restaurants data is not an array:', restaurants);
-        return [];
-      }
-
-      // Parse images for all restaurants
-      const restaurantsWithImages = restaurants.map(r => ({
-        ...r,
-        images: this.parseImages(r.images)
-      }));
-
-      console.log(`RestaurantsApiService: Successfully fetched ${restaurantsWithImages.length} restaurants for ${popularFood}`);
-      return restaurantsWithImages;
-    } catch (error) {
-      console.error('RestaurantsApiService: Error fetching restaurants by category:', error);
-      throw error;
-    }
+  async getRestaurantsByPopularFood(_popularFood: string): Promise<Restaurant[]> {
+    return RESTAURANTS;
   }
 
-  /**
-   * Search restaurants
-   */
   async searchRestaurants(query: string): Promise<Restaurant[]> {
-    try {
-      console.log(`RestaurantsApiService: Searching for "${query}"`);
-      const response = await apiService.get<any>(
-        `/restaurants/search?q=${encodeURIComponent(query)}`
-      );
-
-      const restaurants = extractData<Restaurant[]>(response);
-
-      if (!Array.isArray(restaurants)) {
-        console.warn('RestaurantsApiService: Search results are not an array:', restaurants);
-        return [];
-      }
-
-      // Parse images for all restaurants
-      const restaurantsWithImages = restaurants.map(r => ({
-        ...r,
-        images: this.parseImages(r.images)
-      }));
-
-      console.log(`RestaurantsApiService: Search found ${restaurantsWithImages.length} restaurants`);
-      return restaurantsWithImages;
-    } catch (error) {
-      console.error('RestaurantsApiService: Error searching restaurants:', error);
-      throw error;
-    }
+    const q = query.trim().toLowerCase();
+    if (!q) return RESTAURANTS;
+    const menuHit = MENU.some((m) => m.name.toLowerCase().includes(q));
+    return RESTAURANTS.filter((r) => menuHit || r.name.toLowerCase().includes(q));
   }
 }
 
-/**
- * Format image URLs to proper data URLs
- */
-const formatImageUrl = (image: string | null | undefined): string => {
-  if (!image) return '';
-
-  if (typeof image === 'string' && image.startsWith('data:')) {
-    return image;
-  }
-
-  if (typeof image === 'string' && image.length > 0) {
-    return `data:image/jpeg;base64,${image}`;
-  }
-
-  return '';
-};
-
-export const restaurantsApiService = new RestaurantsApiService();
+export const restaurantsApiService = new RestaurantsService();
 export default restaurantsApiService;

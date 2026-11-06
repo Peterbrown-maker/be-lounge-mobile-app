@@ -4,17 +4,30 @@ import {
   Animated,
   Dimensions,
   FlatList,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width: screenWidth } = Dimensions.get("window");
-const CARD_WIDTH = screenWidth - 48;
+const SIDE = 16;
+const GAP = 12;
+const CARD_WIDTH = screenWidth - SIDE * 2;
+const CARD_HEIGHT = 216;
+const SNAP = CARD_WIDTH + GAP;
+
+// Matches the Home screen's light palette; offer cards stay black (Briano's brand).
+const C = {
+  text: "#0A0A0A",
+  muted: "#737373",
+  surface: "#F5F5F5",
+  border: "#E5E5E5",
+  ember: "#FF6B1A",
+  onCard: "#FFFFFF",
+  cardBorder: "#1F1F1F",
+};
 
 interface SpecialOffer {
   id: string;
@@ -44,8 +57,8 @@ const SPECIAL_OFFERS: SpecialOffer[] = [
     emoji: "🎵",
     discount: "UP TO 30% OFF",
     validOn: "Every Sunday",
-    color: "#DC2626",
-    bgGradient: ["#DC2626", "#991B1B"],
+    color: "#000000",
+    bgGradient: ["#000000", "#171717"],
     features: [
       "Live band performances",
       "Family-style platters",
@@ -62,8 +75,8 @@ const SPECIAL_OFFERS: SpecialOffer[] = [
     emoji: "🛒",
     discount: "20% OFF PLATTERS",
     validOn: "Every Saturday",
-    color: "#EA580C",
-    bgGradient: ["#EA580C", "#C2410C"],
+    color: "#000000",
+    bgGradient: ["#000000", "#000000"],
     features: [
       "Fresh local produce",
       "Special market menu",
@@ -80,8 +93,8 @@ const SPECIAL_OFFERS: SpecialOffer[] = [
     emoji: "🎲",
     discount: "PLAY & WIN",
     validOn: "Every Monday",
-    color: "#2E7D32",
-    bgGradient: ["#2E7D32", "#1B5E20"],
+    color: "#000000",
+    bgGradient: ["#000000", "#171717"],
     features: [
       "Team quiz competitions",
       "Bingo games with prizes",
@@ -98,8 +111,8 @@ const SPECIAL_OFFERS: SpecialOffer[] = [
     emoji: "🥞",
     discount: "BUY 2 GET 1",
     validOn: "Sat & Sunday 10am-3pm",
-    color: "#1E40AF",
-    bgGradient: ["#1E40AF", "#1E3A8A"],
+    color: "#262626",
+    bgGradient: ["#262626", "#171717"],
     features: [
       "All-day brunch menu",
       "Specialty coffees",
@@ -116,8 +129,8 @@ const SPECIAL_OFFERS: SpecialOffer[] = [
     emoji: "🎉",
     discount: "50% OFF DRINKS",
     validOn: "Monday-Friday 5-7pm",
-    color: "#7C3AED",
-    bgGradient: ["#7C3AED", "#5B21B6"],
+    color: "#000000",
+    bgGradient: ["#000000", "#171717"],
     features: [
       "Discounted beverages",
       "Appetizer combos",
@@ -127,231 +140,130 @@ const SPECIAL_OFFERS: SpecialOffer[] = [
   },
 ];
 
-export const SpecialOffersCarousel: React.FC<SpecialOffersCarouselProps> = ({
-  onOfferPress,
-}) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+export const SpecialOffersCarousel: React.FC<SpecialOffersCarouselProps> = ({ onOfferPress }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList<SpecialOffer>>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const last = SPECIAL_OFFERS.length - 1;
 
-  const bgColor = isDark ? "#1a1a1a" : "#ffffff";
-  const textColor = isDark ? "#ffffff" : "#000000";
+  const goTo = (index: number) => {
+    const i = Math.max(0, Math.min(last, index));
+    flatListRef.current?.scrollToOffset({ offset: i * SNAP, animated: true });
+    setCurrentIndex(i);
+  };
 
-  // Auto-slide effect
+  // Auto-slide every 5s; restarts after any manual change.
   useEffect(() => {
-    const autoSlideInterval = setInterval(() => {
-      const nextIndex = (currentIndex + 1) % SPECIAL_OFFERS.length;
-      flatListRef.current?.scrollToIndex({
-        index: nextIndex,
-        animated: true,
-      });
-      setCurrentIndex(nextIndex);
-    }, 4000); // Change slide every 4 seconds
-
-    return () => clearInterval(autoSlideInterval);
+    const t = setTimeout(() => goTo(currentIndex === last ? 0 : currentIndex + 1), 5000);
+    return () => clearTimeout(t);
   }, [currentIndex]);
 
   const renderOffer = ({ item, index }: { item: SpecialOffer; index: number }) => {
-    const inputRange = [(index - 1) * CARD_WIDTH, index * CARD_WIDTH, (index + 1) * CARD_WIDTH];
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.9, 1, 0.9],
-      extrapolate: "clamp",
-    });
-    const opacity = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.6, 1, 0.6],
-      extrapolate: "clamp",
-    });
+    const inputRange = [(index - 1) * SNAP, index * SNAP, (index + 1) * SNAP];
+    const scale = scrollX.interpolate({ inputRange, outputRange: [0.94, 1, 0.94], extrapolate: "clamp" });
 
     return (
       <Animated.View
-        style={[
-          styles.cardContainer,
-          {
-            transform: [{ scale }],
-            opacity,
-          },
-        ]}
+        style={[styles.cardContainer, { transform: [{ scale }], marginRight: index === last ? 0 : GAP }]}
       >
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => onOfferPress?.(item)}
-          style={{ flex: 1 }}
-        >
+        <TouchableOpacity activeOpacity={0.9} onPress={() => onOfferPress?.(item)} style={{ flex: 1 }}>
           <LinearGradient
-            colors={item.bgGradient}
+            colors={["#1F1F1F", "#0B0B0B"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.card}
           >
-            {/* Header with emoji and discount */}
-            <View style={styles.cardHeader}>
-              <View style={styles.emojiBox}>
-                <Text style={styles.emoji}>{item.emoji}</Text>
-              </View>
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>{item.discount}</Text>
-              </View>
-            </View>
+            {/* Ember glow in the corner */}
+            <View style={styles.glow} />
 
-            {/* Title and subtitle */}
-            <View style={styles.cardTitleContainer}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
-            </View>
-
-            {/* Description */}
-            <Text style={styles.cardDescription}>{item.description}</Text>
-
-            {/* Valid on */}
-            <View style={styles.validOnContainer}>
-              <Text style={styles.validOnLabel}>Valid:</Text>
-              <Text style={styles.validOnText}>{item.validOn}</Text>
-            </View>
-
-            {/* Features */}
-            <View style={styles.featuresContainer}>
-              {item.features.slice(0, 2).map((feature, idx) => (
-                <View key={idx} style={styles.featureRow}>
-                  <Text style={styles.featureBullet}>✓</Text>
-                  <Text style={styles.featureText}>{feature}</Text>
+            {/* Content is centred in the card */}
+            <View style={styles.cardBody}>
+              <View style={styles.cardTopRow}>
+                <View style={styles.emojiBox}>
+                  <Text style={styles.emoji}>{item.emoji}</Text>
                 </View>
-              ))}
-            </View>
+                <View style={styles.discountBadge}>
+                  <Text style={styles.discountText}>{item.discount}</Text>
+                </View>
+              </View>
 
-            {/* CTA Button */}
-            <TouchableOpacity
-              style={styles.ctaButton}
-              onPress={() => onOfferPress?.(item)}
-            >
-              <Text style={styles.ctaButtonText}>Explore Deal</Text>
-            </TouchableOpacity>
+              <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.cardSubtitle} numberOfLines={1}>{item.subtitle}</Text>
+              <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
+
+              <View style={styles.cardFooter}>
+                <Text style={styles.validOnText} numberOfLines={1}>🗓  {item.validOn}</Text>
+                <View style={styles.ctaButton}>
+                  <Text style={styles.ctaButtonText}>Explore deal</Text>
+                  <ChevronRight size={14} color="#000" />
+                </View>
+              </View>
+            </View>
           </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
     );
   };
 
-  const handleNext = () => {
-    if (currentIndex < SPECIAL_OFFERS.length - 1) {
-      flatListRef.current?.scrollToIndex({
-        index: currentIndex + 1,
-        animated: true,
-      });
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      flatListRef.current?.scrollToIndex({
-        index: currentIndex - 1,
-        animated: true,
-      });
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const dotContainerStyle = {
-    backgroundColor: isDark ? "#333" : "#f0f0f0",
-  };
-
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header — arrows live here so they never cover card content */}
       <View style={styles.headerContainer}>
-        <View>
-          <Text style={[styles.headerTitle, { color: textColor }]}>
-            Special Offers
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: "#888" }]}>
-            Limited time deals
-          </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>Special Offers</Text>
+          <Text style={styles.headerSubtitle}>Limited time deals</Text>
         </View>
-      </View>
-
-      {/* Carousel */}
-      <View style={styles.carouselContainer}>
-        {/* Left Navigation Button */}
         <TouchableOpacity
-          style={[
-            styles.navButton,
-            styles.navButtonLeft,
-            { opacity: currentIndex === 0 ? 0.3 : 1 },
-          ]}
-          onPress={handlePrev}
+          style={[styles.navButton, currentIndex === 0 && styles.navDisabled]}
+          onPress={() => goTo(currentIndex - 1)}
           disabled={currentIndex === 0}
+          accessibilityLabel="Previous offer"
         >
-          <ChevronLeft size={24} color="#F59E0B" />
+          <ChevronLeft size={20} color={C.text} />
         </TouchableOpacity>
-
-        {/* Carousel FlatList */}
-        <FlatList
-          ref={flatListRef}
-          data={SPECIAL_OFFERS}
-          renderItem={renderOffer}
-          keyExtractor={(item) => item.id}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          scrollEventThrottle={32}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: false }
-          )}
-          onMomentumScrollEnd={(event) => {
-            const contentOffsetX = event.nativeEvent.contentOffset.x;
-            const newIndex = Math.round(contentOffsetX / CARD_WIDTH);
-            setCurrentIndex(newIndex);
-          }}
-          contentContainerStyle={styles.carouselContent}
-        />
-
-        {/* Right Navigation Button */}
         <TouchableOpacity
-          style={[
-            styles.navButton,
-            styles.navButtonRight,
-            { opacity: currentIndex === SPECIAL_OFFERS.length - 1 ? 0.3 : 1 },
-          ]}
-          onPress={handleNext}
-          disabled={currentIndex === SPECIAL_OFFERS.length - 1}
+          style={[styles.navButton, currentIndex === last && styles.navDisabled]}
+          onPress={() => goTo(currentIndex + 1)}
+          disabled={currentIndex === last}
+          accessibilityLabel="Next offer"
         >
-          <ChevronRight size={24} color="#F59E0B" />
+          <ChevronRight size={20} color={C.text} />
         </TouchableOpacity>
       </View>
 
-      {/* Dots Indicator */}
-      <View style={[styles.dotsContainer, dotContainerStyle]}>
-        {SPECIAL_OFFERS.map((_, index) => (
+      <FlatList
+        ref={flatListRef}
+        data={SPECIAL_OFFERS}
+        renderItem={renderOffer}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={SNAP}
+        decelerationRate="fast"
+        disableIntervalMomentum
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+          useNativeDriver: false,
+        })}
+        onMomentumScrollEnd={(e) => setCurrentIndex(Math.round(e.nativeEvent.contentOffset.x / SNAP))}
+        contentContainerStyle={{ paddingHorizontal: SIDE }}
+        style={{ height: CARD_HEIGHT }}
+      />
+
+      <View style={styles.dotsContainer}>
+        {SPECIAL_OFFERS.map((offer, index) => (
           <TouchableOpacity
-            key={index}
+            key={offer.id}
+            onPress={() => goTo(index)}
+            hitSlop={8}
             style={[
               styles.dot,
-              {
-                backgroundColor: index === currentIndex ? "#F59E0B" : "#ccc",
-                width: index === currentIndex ? 24 : 8,
-              },
+              index === currentIndex
+                ? { backgroundColor: C.ember, width: 22 }
+                : { backgroundColor: "#D4D4D4", width: 8 },
             ]}
-            onPress={() => {
-              flatListRef.current?.scrollToIndex({
-                index,
-                animated: true,
-              });
-              setCurrentIndex(index);
-            }}
           />
         ))}
-      </View>
-
-      {/* Quick Info */}
-      <View style={[styles.quickInfo, { backgroundColor: isDark ? "#222" : "#f9f9f9" }]}>
-        <Text style={[styles.quickInfoText, { color: "#888" }]}>
-          💡 Tap any offer to learn more or book now
-        </Text>
       </View>
     </View>
   );
@@ -359,198 +271,54 @@ export const SpecialOffersCarousel: React.FC<SpecialOffersCarouselProps> = ({
 
 export const SpecialOffersSection: React.FC<{
   onOfferPress?: (offer: SpecialOffer) => void;
-}> = ({ onOfferPress }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const bgColor = isDark ? "#1a1a1a" : "#ffffff";
-
-  return (
-    <View style={[styles.section, { backgroundColor: bgColor }]}>
-      <SpecialOffersCarousel onOfferPress={onOfferPress} />
-    </View>
-  );
-};
+}> = ({ onOfferPress }) => (
+  <View style={styles.section}>
+    <SpecialOffersCarousel onOfferPress={onOfferPress} />
+  </View>
+);
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  section: {
-    flex: 1,
-  },
-  headerContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 13,
-  },
-  carouselContainer: {
-    height: 130,
-    position: "relative",
-    marginBottom: 12,
-  },
-  carouselContent: {
-    paddingHorizontal: 16,
-  },
-  cardContainer: {
-    width: CARD_WIDTH,
-    marginHorizontal: 0,
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  card: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    justifyContent: "space-between",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  emojiBox: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emoji: {
-    fontSize: 28,
-  },
-  discountBadge: {
-    backgroundColor: "rgba(255,255,255,0.25)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  discountText: {
-    color: "#ffffff",
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  cardTitleContainer: {
-    marginBottom: 8,
-  },
-  cardTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#ffffff",
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.9)",
-    fontWeight: "500",
-  },
-  cardDescription: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.85)",
-    lineHeight: 18,
-    marginBottom: 10,
-  },
-  validOnContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  validOnLabel: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.7)",
-    marginRight: 4,
-  },
-  validOnText: {
-    fontSize: 11,
-    color: "#ffffff",
-    fontWeight: "600",
-  },
-  featuresContainer: {
-    marginBottom: 12,
-  },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  featureBullet: {
-    color: "#ffffff",
-    fontSize: 12,
-    fontWeight: "bold",
-    marginRight: 8,
-  },
-  featureText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 12,
-    flex: 1,
-  },
-  ctaButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  ctaButtonText: {
-    color: "#ffffff",
-    fontSize: 13,
-    fontWeight: "600",
-  },
+  container: { marginTop: 24 },
+  section: { flex: 1 },
+
+  headerContainer: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: SIDE, marginBottom: 12 },
+  headerTitle: { color: C.text, fontSize: 18, fontWeight: "700" },
+  headerSubtitle: { color: C.muted, fontSize: 13, marginTop: 2 },
   navButton: {
-    position: "absolute",
-    top: "50%",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(245,158,11,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-    transform: [{ translateY: -20 }],
+    width: 36, height: 36, borderRadius: 18, backgroundColor: C.surface,
+    borderWidth: 1, borderColor: C.border, alignItems: "center", justifyContent: "center",
   },
-  navButtonLeft: {
-    left: 4,
+  navDisabled: { opacity: 0.35 },
+
+  cardContainer: { width: CARD_WIDTH, height: CARD_HEIGHT, borderRadius: 20, overflow: "hidden" },
+  card: {
+    flex: 1, borderRadius: 20, borderWidth: 1, borderColor: C.cardBorder,
+    paddingHorizontal: 18, justifyContent: "center", // vertical centring
   },
-  navButtonRight: {
-    right: 4,
+  glow: {
+    position: "absolute", top: -60, right: -60, width: 180, height: 180,
+    borderRadius: 90, backgroundColor: "rgba(255,107,26,0.18)",
   },
-  dotsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-    marginHorizontal: 16,
+  cardBody: { gap: 4 },
+  cardTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
+  emojiBox: {
+    width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center", justifyContent: "center",
   },
-  dot: {
-    height: 8,
-    borderRadius: 4,
+  emoji: { fontSize: 22 },
+  discountBadge: { backgroundColor: C.ember, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
+  discountText: { color: "#000", fontSize: 11, fontWeight: "800", letterSpacing: 0.5 },
+  cardTitle: { color: C.onCard, fontSize: 22, fontWeight: "800" },
+  cardSubtitle: { color: C.ember, fontSize: 13, fontWeight: "600" },
+  cardDescription: { color: "#D4D4D4", fontSize: 13, lineHeight: 18 },
+  cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 10 },
+  validOnText: { color: C.muted, fontSize: 12, flexShrink: 1 },
+  ctaButton: {
+    flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: C.onCard,
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999,
   },
-  quickInfo: {
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  quickInfoText: {
-    fontSize: 12,
-    textAlign: "center",
-  },
+  ctaButtonText: { color: "#000", fontSize: 12, fontWeight: "700" },
+
+  dotsContainer: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 12 },
+  dot: { height: 8, borderRadius: 4 },
 });

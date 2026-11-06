@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   defaultVariant: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#000000',
   },
   ghostVariant: {
     backgroundColor: 'transparent',
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   ghostText: {
-    color: '#1F2937',
+    color: '#262626',
     fontWeight: '600',
     textAlign: 'center',
   },

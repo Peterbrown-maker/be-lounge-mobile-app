@@ -1,614 +1,391 @@
-import { ArrowLeft, CheckCircle, Zap } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/src/auth/AuthContext";
+import { ScreenHeader } from "@/src/components/ScreenHeader";
+import { ordersApiService } from "@/src/services/orders";
+import { BRIANOS_RESTAURANT } from "@/src/services/restaurants";
+import { R, T } from "@/src/theme";
+import { Banknote, Check, CreditCard, Lock } from "lucide-react-native";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Animated,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import type { BookingData } from "./CheckoutScreen";
+
+type Method = "card" | "cash";
 
 interface PaymentProps {
   onBack?: () => void;
+  /** Delivery orders continue to live tracking. */
   onPaymentSuccess?: (paymentData: PaymentData) => void;
+  /** Collect / sit-in orders finish here and return home. */
+  onDone?: () => void;
   bookingData: BookingData;
-}
-
-interface BookingData {
-  bookingType: "delivery" | "sitin" | "takeaway";
-  deliveryAddress?: string;
-  sitInTime?: string;
-  partySize?: number;
-  location?: string;
-  specialRequests?: string;
-  totalPrice: number;
-  userEmail?: string;
-  userName?: string;
 }
 
 interface PaymentData {
   paymentId: string;
   amount: number;
-  paymentMethod: "paystack" | "card";
+  paymentMethod: Method;
   status: "pending" | "completed" | "failed";
   bookingData: BookingData;
   timestamp: string;
+  deliveryCode?: string;
+  orderId?: number;
 }
 
-export const PaymentScreen: React.FC<PaymentProps> = ({
-  onBack,
-  onPaymentSuccess,
-  bookingData,
-}) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+const SEATING_LABEL: Record<string, string> = { inside: "Inside", patio: "Patio", private: "VIP area" };
 
-  const [paymentMethod, setPaymentMethod] = useState<"paystack" | "card">("paystack");
+export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess, onDone, bookingData }) => {
+  const { user } = useAuth();
+  const isFree = bookingData.totalPrice <= 0;
+  const isDelivery = bookingData.bookingType === "delivery";
+
+  const [method, setMethod] = useState<Method>("card");
+  const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCVV, setCardCVV] = useState("");
-  const [cardName, setCardName] = useState("");
   const [processing, setProcessing] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [paymentId, setPaymentId] = useState("");
+  const [done, setDone] = useState<{ paymentId: string; code?: string } | null>(null);
 
-  const bgColor = isDark ? "#1a1a1a" : "#ffffff";
-  const textColor = isDark ? "#ffffff" : "#000000";
-  const borderColor = isDark ? "#333333" : "#e0e0e0";
-  const accentColor = "#F59E0B";
-
-  const pulseAnim = new Animated.Value(0);
-
+  const pop = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    if (showSuccess) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 0,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-  }, [showSuccess]);
+    if (done) Animated.spring(pop, { toValue: 1, friction: 5, tension: 80, useNativeDriver: true }).start();
+  }, [done]);
 
-  const handlePaymentSubmit = async () => {
-    if (paymentMethod === "card") {
-      if (!cardNumber || !cardExpiry || !cardCVV || !cardName) {
-        alert("Please fill in all card details");
-        return;
-      }
-      if (cardNumber.replace(/\s/g, "").length < 16) {
-        alert("Invalid card number");
-        return;
-      }
-    }
+  const subtotal = bookingData.subtotal ?? bookingData.totalPrice;
+  const deliveryFee = bookingData.deliveryFee ?? 0;
 
+  const cashLabel = isDelivery ? "Cash on delivery" : bookingData.bookingType === "sitin" ? "Pay at the table" : "Pay at the counter";
+
+  const validCard = () => {
+    const digits = cardNumber.replace(/\s/g, "");
+    if (!cardName.trim()) return "Enter the name on the card";
+    if (digits.length < 16) return "Card number should be 16 digits";
+    const [mm, yy] = cardExpiry.split("/").map((n) => parseInt(n, 10));
+    if (!mm || mm > 12 || !yy) return "Expiry should be MM/YY";
+    if (cardCVV.length < 3) return "CVV should be 3 or 4 digits";
+    return "";
+  };
+
+  const submit = async () => {
+    if (!isFree && method === "card") {
+      const err = validCard();
+      if (err) return Alert.alert("Check your card", err);
+    }
     setProcessing(true);
-
-    // Simulate payment processing with Paystack
-    setTimeout(() => {
-      const newPaymentId = `PAY-${Date.now()}`;
-      setPaymentId(newPaymentId);
-      setProcessing(false);
-      setShowSuccess(true);
-
-      // Show success for 3 seconds then proceed to driver tracking
-      setTimeout(() => {
-        const paymentData: PaymentData = {
-          paymentId: newPaymentId,
-          amount: bookingData.totalPrice,
-          paymentMethod,
-          status: "completed",
-          bookingData,
-          timestamp: new Date().toISOString(),
-        };
-        onPaymentSuccess?.(paymentData);
-      }, 2500);
-    }, 2000);
-  };
-
-  const formatCardNumber = (text: string) => {
-    const cleaned = text.replace(/\D/g, "");
-    const formatted = cleaned
-      .slice(0, 16)
-      .replace(/(\d{4})/g, "$1 ")
-      .trim();
-    setCardNumber(formatted);
-  };
-
-  const formatExpiry = (text: string) => {
-    const cleaned = text.replace(/\D/g, "").slice(0, 4);
-    if (cleaned.length >= 2) {
-      setCardExpiry(`${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`);
-    } else {
-      setCardExpiry(cleaned);
+    let code: string | undefined;
+    let orderId: number | undefined;
+    try {
+      // Save to local order history.
+      const res = await ordersApiService.createOrder({
+        user_id: user?.uid || "guest",
+        restaurant_id: BRIANOS_RESTAURANT.id,
+        total_amount: Math.max(bookingData.totalPrice, 0.01),
+        delivery_fee: deliveryFee,
+        delivery_address:
+          bookingData.deliveryAddress ||
+          (bookingData.bookingType === "sitin"
+            ? `Table for ${bookingData.partySize} at ${bookingData.sitInTime}`
+            : "Collect at Briano's"),
+        delivery_latitude: bookingData.deliveryLatitude ?? BRIANOS_RESTAURANT.latitude,
+        delivery_longitude: bookingData.deliveryLongitude ?? BRIANOS_RESTAURANT.longitude,
+        special_instructions: bookingData.specialRequests,
+        items: (bookingData.items?.length ? bookingData.items : [{ id: "table", name: "Table booking", price: 0, quantity: 1 }]).map(
+          (i) => ({ menu_item_id: i.id, quantity: i.quantity, price: i.price })
+        ),
+      });
+      code = res.delivery_code;
+      orderId = res.id;
+    } catch (e) {
+      console.warn("Could not save order locally:", e);
     }
+
+    // Simulated payment (no payment server in this prototype).
+    setTimeout(() => {
+      setProcessing(false);
+      const paymentId = `BR-${Date.now().toString().slice(-6)}`;
+      setDone({ paymentId, code });
+      if (isDelivery) {
+        setTimeout(() => {
+          onPaymentSuccess?.({
+            paymentId,
+            amount: bookingData.totalPrice,
+            paymentMethod: method,
+            status: method === "cash" ? "pending" : "completed",
+            bookingData,
+            timestamp: new Date().toISOString(),
+            deliveryCode: code,
+            orderId,
+          });
+        }, 2200);
+      }
+    }, isFree ? 500 : 1500);
   };
 
-  if (showSuccess) {
+  const formatCardNumber = (t: string) =>
+    setCardNumber(t.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 "));
+  const formatExpiry = (t: string) => {
+    const d = t.replace(/\D/g, "").slice(0, 4);
+    setCardExpiry(d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d);
+  };
+
+  // ----- Success -----
+  if (done) {
+    const title = isDelivery ? "Order placed!" : bookingData.bookingType === "sitin" ? "Table booked!" : "Order placed!";
+    const subtitle = isDelivery
+      ? "The braai's on. Finding you a driver…"
+      : bookingData.bookingType === "sitin"
+        ? `See you at ${bookingData.sitInTime} · ${bookingData.partySize} guests · ${SEATING_LABEL[bookingData.location || "inside"]}`
+        : "We'll have it ready at the counter in about 20 minutes.";
     return (
-      <View style={[styles.container, { backgroundColor: bgColor }]}>
-        <LinearGradient
-          colors={["#10B981", "#059669"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.successContainer}
-        >
-          <Animated.View
-            style={[
-              styles.checkCircle,
-              {
-                transform: [
-                  {
-                    scale: pulseAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 1.2],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <CheckCircle size={80} color="#ffffff" strokeWidth={1.5} />
-          </Animated.View>
-          <Text style={styles.successTitle}>Payment Successful!</Text>
-          <Text style={styles.successSubtitle}>Your order has been confirmed</Text>
-          <View style={styles.paymentInfoBox}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Payment ID:</Text>
-              <Text style={styles.infoValue}>{paymentId}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Amount:</Text>
-              <Text style={styles.infoValue}>R{bookingData.totalPrice.toFixed(2)}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Type:</Text>
-              <Text style={styles.infoValue}>
-                {bookingData.bookingType.charAt(0).toUpperCase() + bookingData.bookingType.slice(1)}
-              </Text>
-            </View>
+      <View style={[styles.container, styles.success]}>
+        <Animated.View style={[styles.successBadge, { transform: [{ scale: pop }] }]}>
+          <Check size={44} color="#000" strokeWidth={3} />
+        </Animated.View>
+        <Text style={styles.successTitle}>{title}</Text>
+        <Text style={styles.successSub}>{subtitle}</Text>
+
+        <View style={styles.receipt}>
+          <ReceiptRow label="Reference" value={done.paymentId} />
+          {!isFree && <ReceiptRow label="Amount" value={`R${bookingData.totalPrice.toFixed(2)}`} />}
+          {!isFree && <ReceiptRow label="Payment" value={method === "card" ? "Card" : cashLabel} />}
+          {!!done.code && isDelivery && <ReceiptRow label="Delivery code" value={done.code} highlight />}
+        </View>
+
+        {isDelivery ? (
+          <View style={styles.successFooter}>
+            <ActivityIndicator color={T.emberText} />
           </View>
-          <Text style={styles.processingText}>Initializing your order...</Text>
-        </LinearGradient>
+        ) : (
+          <TouchableOpacity style={styles.successBtn} onPress={onDone} activeOpacity={0.85}>
+            <Text style={styles.successBtnText}>Back to home</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
 
+  // ----- Form -----
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <LinearGradient
-        colors={[accentColor, "#FB923C"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={24} color="#ffffff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Payment</Text>
-        <View style={{ width: 24 }} />
-      </LinearGradient>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScreenHeader title={isFree ? "Confirm booking" : "Payment"} onBack={onBack} />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Order Summary */}
-        <View style={[styles.section, { borderColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Order Summary</Text>
-          <View style={styles.summaryRow}>
-            <Text style={[styles.summaryLabel, { color: textColor }]}>Subtotal</Text>
-            <Text style={[styles.summaryValue, { color: textColor }]}>
-              R{(bookingData.totalPrice * 0.9).toFixed(2)}
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {/* Summary */}
+        <View style={styles.card}>
+          {bookingData.bookingType === "sitin" && (
+            <Text style={styles.summaryLead}>
+              Table for {bookingData.partySize} · {bookingData.sitInTime} · {SEATING_LABEL[bookingData.location || "inside"]}
             </Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={[styles.summaryLabel, { color: textColor }]}>Delivery Fee</Text>
-            <Text style={[styles.summaryValue, { color: textColor }]}>
-              {bookingData.bookingType === "delivery" ? `R${(bookingData.totalPrice * 0.1).toFixed(2)}` : "Free"}
-            </Text>
-          </View>
-          <View style={[styles.summaryDivider, { borderColor }]} />
-          <View style={styles.summaryRow}>
-            <Text style={[styles.totalLabel, { color: textColor }]}>Total Amount</Text>
-            <Text style={[styles.totalValue, { color: accentColor, fontSize: 20 }]}>
-              R{bookingData.totalPrice.toFixed(2)}
-            </Text>
-          </View>
+          )}
+          {isDelivery && !!bookingData.deliveryAddress && (
+            <Text style={styles.summaryLead} numberOfLines={2}>To: {bookingData.deliveryAddress}</Text>
+          )}
+          {!isFree && (
+            <>
+              <Row label="Subtotal" value={`R${subtotal.toFixed(2)}`} />
+              <Row label="Delivery fee" value={deliveryFee ? `R${deliveryFee.toFixed(2)}` : "Free"} />
+              <View style={styles.divider} />
+              <Row label="Total" value={`R${bookingData.totalPrice.toFixed(2)}`} bold />
+            </>
+          )}
         </View>
 
-        {/* Payment Method Selection */}
-        <View style={[styles.section, { borderColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Payment Method</Text>
-
-          {/* Paystack Option */}
-          <TouchableOpacity
-            style={[
-              styles.methodOption,
-              {
-                backgroundColor: paymentMethod === "paystack" ? accentColor : isDark ? "#222" : "#f5f5f5",
-                borderColor: accentColor,
-              },
-            ]}
-            onPress={() => setPaymentMethod("paystack")}
-          >
-            <View style={styles.methodContent}>
-              <Zap
-                size={24}
-                color={paymentMethod === "paystack" ? "#ffffff" : accentColor}
-              />
-              <View style={{ marginLeft: 12 }}>
-                <Text
-                  style={[
-                    styles.methodTitle,
-                    { color: paymentMethod === "paystack" ? "#ffffff" : textColor },
-                  ]}
-                >
-                  Paystack
-                </Text>
-                <Text
-                  style={[
-                    styles.methodDesc,
-                    { color: paymentMethod === "paystack" ? "rgba(255,255,255,0.8)" : "#888" },
-                  ]}
-                >
-                  Fast & Secure
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                styles.radio,
-                {
-                  backgroundColor: paymentMethod === "paystack" ? "#ffffff" : "transparent",
-                  borderColor: paymentMethod === "paystack" ? "#ffffff" : borderColor,
-                },
-              ]}
-            >
-              {paymentMethod === "paystack" && (
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: accentColor,
-                  }}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-
-          {/* Card Option */}
-          <TouchableOpacity
-            style={[
-              styles.methodOption,
-              {
-                backgroundColor: paymentMethod === "card" ? accentColor : isDark ? "#222" : "#f5f5f5",
-                borderColor: accentColor,
-                marginTop: 10,
-              },
-            ]}
-            onPress={() => setPaymentMethod("card")}
-          >
-            <View style={styles.methodContent}>
-              <View
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 4,
-                  backgroundColor: paymentMethod === "card" ? "#ffffff" : accentColor,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text style={{ fontSize: 12, fontWeight: "bold", color: accentColor }}>💳</Text>
-              </View>
-              <View style={{ marginLeft: 12 }}>
-                <Text
-                  style={[
-                    styles.methodTitle,
-                    { color: paymentMethod === "card" ? "#ffffff" : textColor },
-                  ]}
-                >
-                  Credit/Debit Card
-                </Text>
-                <Text
-                  style={[
-                    styles.methodDesc,
-                    { color: paymentMethod === "card" ? "rgba(255,255,255,0.8)" : "#888" },
-                  ]}
-                >
-                  Visa, Mastercard
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                styles.radio,
-                {
-                  backgroundColor: paymentMethod === "card" ? "#ffffff" : "transparent",
-                  borderColor: paymentMethod === "card" ? "#ffffff" : borderColor,
-                },
-              ]}
-            >
-              {paymentMethod === "card" && (
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: accentColor,
-                  }}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Card Details */}
-        {paymentMethod === "card" && (
-          <View style={[styles.section, { borderColor }]}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Card Details</Text>
-
-            <TextInput
-              style={[styles.input, { color: textColor, borderColor }]}
-              placeholder="Full Name"
-              placeholderTextColor={isDark ? "#888" : "#999"}
-              value={cardName}
-              onChangeText={setCardName}
+        {!isFree && (
+          <>
+            <Text style={styles.sectionTitle}>How do you want to pay?</Text>
+            <MethodOption
+              Icon={CreditCard}
+              title="Card"
+              hint="Visa or Mastercard"
+              active={method === "card"}
+              onPress={() => setMethod("card")}
+            />
+            <MethodOption
+              Icon={Banknote}
+              title={cashLabel}
+              hint="Cash or card machine"
+              active={method === "cash"}
+              onPress={() => setMethod("cash")}
             />
 
-            <TextInput
-              style={[styles.input, { color: textColor, borderColor, marginTop: 10 }]}
-              placeholder="Card Number"
-              placeholderTextColor={isDark ? "#888" : "#999"}
-              value={cardNumber}
-              onChangeText={formatCardNumber}
-              keyboardType="number-pad"
-              maxLength={19}
-            />
-
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-              <TextInput
-                style={[styles.input, { color: textColor, borderColor, flex: 1 }]}
-                placeholder="MM/YY"
-                placeholderTextColor={isDark ? "#888" : "#999"}
-                value={cardExpiry}
-                onChangeText={formatExpiry}
-                keyboardType="number-pad"
-                maxLength={5}
-              />
-              <TextInput
-                style={[styles.input, { color: textColor, borderColor, flex: 1 }]}
-                placeholder="CVV"
-                placeholderTextColor={isDark ? "#888" : "#999"}
-                value={cardCVV}
-                onChangeText={(text) => setCardCVV(text.replace(/\D/g, "").slice(0, 4))}
-                keyboardType="number-pad"
-                maxLength={4}
-                secureTextEntry
-              />
-            </View>
-          </View>
+            {method === "card" && (
+              <View style={{ marginTop: 12, gap: 10 }}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Name on card"
+                  placeholderTextColor={T.placeholder}
+                  value={cardName}
+                  onChangeText={setCardName}
+                  autoCapitalize="words"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Card number"
+                  placeholderTextColor={T.placeholder}
+                  value={cardNumber}
+                  onChangeText={formatCardNumber}
+                  keyboardType="number-pad"
+                  maxLength={19}
+                />
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder="MM/YY"
+                    placeholderTextColor={T.placeholder}
+                    value={cardExpiry}
+                    onChangeText={formatExpiry}
+                    keyboardType="number-pad"
+                    maxLength={5}
+                  />
+                  <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder="CVV"
+                    placeholderTextColor={T.placeholder}
+                    value={cardCVV}
+                    onChangeText={(t) => setCardCVV(t.replace(/\D/g, "").slice(0, 4))}
+                    keyboardType="number-pad"
+                    maxLength={4}
+                    secureTextEntry
+                  />
+                </View>
+                <View style={styles.secure}>
+                  <Lock size={13} color={T.muted} />
+                  <Text style={styles.secureText}>Demo checkout — no real card is charged.</Text>
+                </View>
+              </View>
+            )}
+          </>
         )}
-
-        {/* Paystack Info */}
-        {paymentMethod === "paystack" && (
-          <View style={[styles.section, { borderColor, backgroundColor: isDark ? "#222" : "#f0fdf4" }]}>
-            <Text style={[styles.infoTitle, { color: "#10B981" }]}>🔒 Paystack Integration</Text>
-            <Text style={[styles.infoText, { color: textColor, marginTop: 8 }]}>
-              Your payment will be processed securely through Paystack. No card details are stored on our servers.
-            </Text>
-          </View>
-        )}
-
-        <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* Payment Button */}
-      <View style={[styles.footer, { borderTopColor: borderColor }]}>
-        <TouchableOpacity
-          style={[
-            styles.payButton,
-            {
-              backgroundColor: accentColor,
-              opacity: processing ? 0.7 : 1,
-            },
-          ]}
-          onPress={handlePaymentSubmit}
-          disabled={processing}
-        >
+      <View style={styles.footer}>
+        <TouchableOpacity style={[styles.cta, processing && { opacity: 0.7 }]} onPress={submit} disabled={processing} activeOpacity={0.85}>
           {processing ? (
-            <ActivityIndicator color="#ffffff" size="small" />
+            <ActivityIndicator color="#000" />
           ) : (
-            <Text style={styles.payButtonText}>Pay R{bookingData.totalPrice.toFixed(2)}</Text>
+            <Text style={styles.ctaText}>
+              {isFree ? "Confirm booking" : method === "card" ? `Pay R${bookingData.totalPrice.toFixed(2)}` : "Place order"}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
+const MethodOption = ({
+  Icon,
+  title,
+  hint,
+  active,
+  onPress,
+}: {
+  Icon: typeof CreditCard;
+  title: string;
+  hint: string;
+  active: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.method, active && styles.methodActive]}
+    onPress={onPress}
+    accessibilityState={{ selected: active }}
+    activeOpacity={0.8}
+  >
+    <View style={styles.methodIcon}>
+      <Icon size={18} color={T.text} />
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={styles.methodTitle}>{title}</Text>
+      <Text style={styles.methodHint}>{hint}</Text>
+    </View>
+    <View style={[styles.radio, active && styles.radioActive]}>{active && <View style={styles.radioDot} />}</View>
+  </TouchableOpacity>
+);
+
+const Row = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
+  <View style={styles.row}>
+    <Text style={[styles.rowLabel, bold && styles.rowBold]}>{label}</Text>
+    <Text style={[styles.rowValue, bold && styles.rowBold]}>{value}</Text>
+  </View>
+);
+
+const ReceiptRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+  <View style={styles.row}>
+    <Text style={styles.rowLabel}>{label}</Text>
+    <Text style={[styles.rowValue, highlight && { color: T.emberText, fontWeight: "800", letterSpacing: 2 }]}>{value}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
+  container: { flex: 1, backgroundColor: T.bg },
+  content: { padding: 16, paddingBottom: 32 },
+  card: { backgroundColor: T.surface, borderRadius: R.lg, padding: 14 },
+  summaryLead: { color: T.text, fontSize: 14, fontWeight: "700", marginBottom: 8 },
+  divider: { height: 1, backgroundColor: T.border, marginVertical: 8 },
+  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 4, gap: 12 },
+  rowLabel: { color: T.muted, fontSize: 14 },
+  rowValue: { color: T.text, fontSize: 14, fontWeight: "600", flexShrink: 1, textAlign: "right" },
+  rowBold: { color: T.text, fontSize: 17, fontWeight: "800" },
+  sectionTitle: { color: T.text, fontSize: 17, fontWeight: "800", marginTop: 22, marginBottom: 10 },
+
+  method: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 16,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  section: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: R.lg,
+    backgroundColor: T.surface,
+    borderWidth: 1.5,
+    borderColor: T.surface,
     marginBottom: 10,
   },
-  summaryLabel: {
-    fontSize: 14,
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  summaryDivider: {
-    height: 1,
-    marginVertical: 12,
-    borderTopWidth: 1,
-  },
-  totalLabel: {
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-  totalValue: {
-    fontWeight: "bold",
-  },
-  methodOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 2,
-    justifyContent: "space-between",
-  },
-  methodContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  methodTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  methodDesc: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
+  methodActive: { borderColor: T.text, backgroundColor: T.bg },
+  methodIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: T.bg, alignItems: "center", justifyContent: "center" },
+  methodTitle: { color: T.text, fontSize: 15, fontWeight: "700" },
+  methodHint: { color: T.muted, fontSize: 12, marginTop: 1 },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: T.border, alignItems: "center", justifyContent: "center" },
+  radioActive: { borderColor: T.text },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: T.text },
+
+  input: { height: 50, borderRadius: R.md, backgroundColor: T.surface, paddingHorizontal: 14, fontSize: 15, color: T.text },
+  secure: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 2 },
+  secureText: { color: T.muted, fontSize: 12 },
+
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: T.border, backgroundColor: T.bg },
+  cta: { height: 56, borderRadius: R.lg, backgroundColor: T.ember, alignItems: "center", justifyContent: "center" },
+  ctaText: { color: "#000", fontSize: 16, fontWeight: "800" },
+
+  success: { alignItems: "center", justifyContent: "center", padding: 24 },
+  successBadge: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: T.ember,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 20,
+    shadowColor: T.ember,
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  infoText: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingBottom: 16,
-    borderTopWidth: 1,
-  },
-  payButton: {
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  payButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  successContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  checkCircle: {
-    marginBottom: 24,
-  },
-  successTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#ffffff",
-    marginBottom: 8,
-  },
-  successSubtitle: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.9)",
-    marginBottom: 24,
-  },
-  paymentInfoBox: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    width: "100%",
-    marginBottom: 16,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  infoLabel: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 13,
-  },
-  infoValue: {
-    color: "#ffffff",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  processingText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 14,
-    marginTop: 8,
-  },
+  successTitle: { color: T.text, fontSize: 28, fontWeight: "800" },
+  successSub: { color: T.muted, fontSize: 15, textAlign: "center", marginTop: 6, lineHeight: 22 },
+  receipt: { alignSelf: "stretch", backgroundColor: T.surface, borderRadius: R.lg, padding: 14, marginTop: 24 },
+  successFooter: { marginTop: 24 },
+  successBtn: { alignSelf: "stretch", height: 56, borderRadius: R.lg, backgroundColor: T.text, alignItems: "center", justifyContent: "center", marginTop: 24 },
+  successBtnText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
 });

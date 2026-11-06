@@ -1,592 +1,253 @@
-import {
-  Bike,
-  ChefHat,
-  Clock,
-  Home,
-  MapPin,
-  Package,
-  Shield,
-  ShoppingBag,
-  Sparkles,
-
-  Users,
-  Zap,
-} from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { ArrowRight, CalendarDays, Flame, LocateFixed, Music2, ShoppingBag, Utensils, Zap } from "lucide-react-native";
+import { useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
   FlatList,
-  Platform,
+  Image,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
+
+const C = {
+  bg: "#FFFFFF",
+  surface: "#F5F5F5",
+  border: "#E5E5E5",
+  text: "#0A0A0A",
+  muted: "#737373",
+  ember: "#FF6B1A",
+  emberText: "#C2410C",
+  emberSoft: "rgba(255,107,26,0.12)",
+};
 
 interface OnboardingScreenProps {
   onComplete: () => void;
 }
 
-interface Slide {
-  title: string;
-  subtitle: string;
-  description: string;
-  gradientColors: [string, string, string];
-  accentColor: string;
-  renderIllustration: (animValue: Animated.Value) => React.ReactNode;
+interface Chip {
+  label: string;
+  Icon: typeof Zap;
 }
 
-const slides: Slide[] = [
+interface Slide {
+  kicker: string;
+  title: string;
+  description: string;
+  image: any;
+  KickerIcon: typeof Zap;
+  chips: Chip[];
+}
+
+const SLIDES: Slide[] = [
   {
-    title: "Flavor Hospitality's\nOwn Delivery App",
-    subtitle: "WELCOME TO FLAVOR HOS",
-    description:
-      "Order from our restaurant, book sit-in tables, and get everything delivered fast — all from Flavor Hospitality.",
-    gradientColors: ["#1a1410", "#2d2416", "#3d3520"],
-    accentColor: "#F59E0B",
-    renderIllustration: (anim: Animated.Value) => {
-      const float1 = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -8] });
-      const float2 = anim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] });
-      const float3 = anim.interpolate({ inputRange: [0, 1], outputRange: [-4, 4] });
-      return (
-        <View style={illustStyles.container}>
-          {/* Central chef hat icon */}
-          <Animated.View style={[illustStyles.centerIcon, { transform: [{ translateY: float1 }] }]}>
-            <LinearGradient colors={["#F59E0B", "#DC8C03"]} style={illustStyles.centerGradient}>
-              <ChefHat size={52} color="#FFFFFF" strokeWidth={1.5} />
-            </LinearGradient>
-          </Animated.View>
-          {/* Orbiting icons */}
-          <Animated.View style={[illustStyles.orbitIcon, { top: 0, left: 30, transform: [{ translateY: float2 }] }]}>
-            <View style={[illustStyles.smallIcon, { backgroundColor: "rgba(34,197,94,0.15)" }]}>
-              <ChefHat size={22} color="#22C55E" strokeWidth={1.5} />
-            </View>
-          </Animated.View>
-          <Animated.View style={[illustStyles.orbitIcon, { top: 10, right: 20, transform: [{ translateY: float3 }] }]}>
-            <View style={[illustStyles.smallIcon, { backgroundColor: "rgba(245,158,11,0.15)" }]}>
-              <Package size={22} color="#F59E0B" strokeWidth={1.5} />
-            </View>
-          </Animated.View>
-          <Animated.View style={[illustStyles.orbitIcon, { bottom: 20, left: 15, transform: [{ translateY: float3 }] }]}>
-            <View style={[illustStyles.smallIcon, { backgroundColor: "rgba(168,85,247,0.15)" }]}>
-              <ShoppingBag size={22} color="#A855F7" strokeWidth={1.5} />
-            </View>
-          </Animated.View>
-          <Animated.View style={[illustStyles.orbitIcon, { bottom: 10, right: 30, transform: [{ translateY: float1 }] }]}>
-            <View style={[illustStyles.smallIcon, { backgroundColor: "rgba(236,72,153,0.15)" }]}>
-              <MapPin size={22} color="#EC4899" strokeWidth={1.5} />
-            </View>
-          </Animated.View>
-          {/* Decorative rings */}
-          <View style={[illustStyles.ring1, { borderColor: "rgba(245,158,11,0.15)" }]} />
-          <View style={[illustStyles.ring2, { borderColor: "rgba(245,158,11,0.08)" }]} />
-        </View>
-      );
-    },
+    kicker: "SHISANYAMA",
+    KickerIcon: Flame,
+    title: "Straight off\nthe braai",
+    description: "Flame-grilled chops, wors, wings and ribs with pap and sides — the way it should be done.",
+    image: require("../../assets/brianos/mixed_grill_platter.jpg"),
+    chips: [
+      { label: "Platters", Icon: Utensils },
+      { label: "Grills", Icon: Flame },
+    ],
   },
   {
-    title: "Book Sit-in,\nTake-away & Delivery",
-    subtitle: "YOUR CHOICE",
-    description:
-      "Choose how you want your meal: delivered hot, sit down with us, or pick it up yourself.",
-    gradientColors: ["#1a1410", "#2d2416", "#3d3520"],
-    accentColor: "#F59E0B",
-    renderIllustration: (anim: Animated.Value) => {
-      const float1 = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -6] });
-      const float2 = anim.interpolate({ inputRange: [0, 1], outputRange: [-6, 6] });
-      const scale = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.05, 1] });
-      return (
-        <View style={illustStyles.container}>
-          {/* Service grid */}
-          <View style={illustStyles.serviceGrid}>
-            <Animated.View style={[illustStyles.serviceCard, { transform: [{ translateY: float1 }, { scale }] }]}>
-              <LinearGradient colors={["rgba(245,158,11,0.2)", "rgba(245,158,11,0.05)"]} style={illustStyles.serviceGradient}>
-                <Home size={28} color="#FBBF24" strokeWidth={1.5} />
-                <Text style={[illustStyles.serviceLabel, { color: "#FBBF24" }]}>Sit-in</Text>
-              </LinearGradient>
-            </Animated.View>
-            <Animated.View style={[illustStyles.serviceCard, { transform: [{ translateY: float2 }] }]}>
-              <LinearGradient colors={["rgba(34,197,94,0.2)", "rgba(34,197,94,0.05)"]} style={illustStyles.serviceGradient}>
-                <ShoppingBag size={28} color="#4ADE80" strokeWidth={1.5} />
-                <Text style={[illustStyles.serviceLabel, { color: "#4ADE80" }]}>Take-away</Text>
-              </LinearGradient>
-            </Animated.View>
-            <Animated.View style={[illustStyles.serviceCard, { transform: [{ translateY: float2 }] }]}>
-              <LinearGradient colors={["rgba(59,130,246,0.2)", "rgba(59,130,246,0.05)"]} style={illustStyles.serviceGradient}>
-                <Package size={28} color="#60A5FA" strokeWidth={1.5} />
-                <Text style={[illustStyles.serviceLabel, { color: "#60A5FA" }]}>Delivery</Text>
-              </LinearGradient>
-            </Animated.View>
-            <Animated.View style={[illustStyles.serviceCard, { transform: [{ translateY: float1 }, { scale }] }]}>
-              <LinearGradient colors={["rgba(168,85,247,0.2)", "rgba(168,85,247,0.05)"]} style={illustStyles.serviceGradient}>
-                <Sparkles size={28} color="#C084FC" strokeWidth={1.5} />
-                <Text style={[illustStyles.serviceLabel, { color: "#C084FC" }]}>Special Offers</Text>
-              </LinearGradient>
-            </Animated.View>
-          </View>
-          {/* Center connector */}
-          <Animated.View style={[illustStyles.connectorCenter, { transform: [{ scale }] }]}>
-            <ChefHat size={20} color="#F59E0B" strokeWidth={2} />
-          </Animated.View>
-        </View>
-      );
-    },
+    kicker: "THE CLUB",
+    KickerIcon: Music2,
+    title: "Then the night\ngets going",
+    description: "Amapiano Fridays, deep house Saturdays, Sunday chill sessions. Book a table and pull through.",
+    image: require("../../assets/brianos/cocktails.jpg"),
+    chips: [
+      { label: "Weekly line-up", Icon: Music2 },
+      { label: "Book a table", Icon: CalendarDays },
+    ],
   },
   {
-    title: "Fast, Safe &\nDeliciously Delivered",
-    subtitle: "WHY FLAVOR HOS",
-    description:
-      "Verified delivery partners, real-time tracking, and your food arrives fresh and on time.",
-    gradientColors: ["#1a1410", "#2d2416", "#3d3520"],
-    accentColor: "#F59E0B",
-    renderIllustration: (anim: Animated.Value) => {
-      const float1 = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] });
-      const float2 = anim.interpolate({ inputRange: [0, 1], outputRange: [-5, 5] });
-      const pulse = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.1, 1] });
-      return (
-        <View style={illustStyles.container}>
-          {/* Central shield */}
-          <Animated.View style={[illustStyles.centerIcon, { transform: [{ translateY: float1 }, { scale: pulse }] }]}>
-            <LinearGradient colors={["#F59E0B", "#DC8C03"]} style={illustStyles.centerGradient}>
-              <Shield size={48} color="#FFFFFF" strokeWidth={1.5} />
-            </LinearGradient>
-          </Animated.View>
-          {/* Feature badges */}
-          <Animated.View style={[illustStyles.featureBadge, { top: 5, left: 10, transform: [{ translateY: float2 }] }]}>
-            <View style={illustStyles.badgeInner}>
-              <Clock size={16} color="#F59E0B" strokeWidth={2} />
-              <Text style={illustStyles.badgeText}>On Time</Text>
-            </View>
-          </Animated.View>
-          <Animated.View style={[illustStyles.featureBadge, { top: 15, right: 5, transform: [{ translateY: float1 }] }]}>
-            <View style={illustStyles.badgeInner}>
-              <MapPin size={16} color="#F59E0B" strokeWidth={2} />
-              <Text style={illustStyles.badgeText}>Live Track</Text>
-            </View>
-          </Animated.View>
-          <Animated.View style={[illustStyles.featureBadge, { bottom: 25, left: 20, transform: [{ translateY: float1 }] }]}>
-            <View style={illustStyles.badgeInner}>
-              <Users size={16} color="#F59E0B" strokeWidth={2} />
-              <Text style={illustStyles.badgeText}>Verified</Text>
-            </View>
-          </Animated.View>
-          <Animated.View style={[illustStyles.featureBadge, { bottom: 15, right: 15, transform: [{ translateY: float2 }] }]}>
-            <View style={illustStyles.badgeInner}>
-              <Sparkles size={16} color="#F59E0B" strokeWidth={2} />
-              <Text style={illustStyles.badgeText}>Fresh Food</Text>
-            </View>
-          </Animated.View>
-          <View style={[illustStyles.ring1, { borderColor: "rgba(245,158,11,0.15)" }]} />
-          <View style={[illustStyles.ring2, { borderColor: "rgba(245,158,11,0.08)" }]} />
-        </View>
-      );
-    },
+    kicker: "DELIVERY",
+    KickerIcon: LocateFixed,
+    title: "Delivered to\nwhere you are",
+    description: "We use your live location — no address to type. Or collect it, or eat in with the squad.",
+    image: require("../../assets/brianos/hero_feast.jpg"),
+    chips: [
+      { label: "Delivery", Icon: Zap },
+      { label: "Collect", Icon: ShoppingBag },
+      { label: "Sit-in", Icon: Utensils },
+    ],
   },
 ];
 
+const IMAGE_HEIGHT = Math.min(height * 0.48, 440);
+
 export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
+  const [index, setIndex] = useState(0);
+  const listRef = useRef<FlatList<Slide>>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const isLast = index === SLIDES.length - 1;
 
-  // Floating animation loop
-  const floatAnim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
-        Animated.timing(floatAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-
-  const handleNext = () => {
-    if (currentSlide < slides.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentSlide + 1, animated: true });
-    } else {
-      onComplete();
-    }
+  const next = () => {
+    if (isLast) return onComplete();
+    listRef.current?.scrollToOffset({ offset: (index + 1) * width, animated: true });
+    setIndex(index + 1);
   };
 
-  const renderSlide = ({ item, index }: { item: Slide; index: number }) => {
-    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
-
-    const contentOpacity = scrollX.interpolate({
-      inputRange,
-      outputRange: [0, 1, 0],
-      extrapolate: "clamp",
-    });
-
-    const contentSlide = scrollX.interpolate({
-      inputRange,
-      outputRange: [50, 0, -50],
-      extrapolate: "clamp",
-    });
-
-    const illustScale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.7, 1, 0.7],
-      extrapolate: "clamp",
-    });
+  const renderSlide = ({ item, index: i }: { item: Slide; index: number }) => {
+    const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+    const imageScale = scrollX.interpolate({ inputRange, outputRange: [1.12, 1, 1.12], extrapolate: "clamp" });
+    const textShift = scrollX.interpolate({ inputRange, outputRange: [40, 0, -40], extrapolate: "clamp" });
+    const textOpacity = scrollX.interpolate({ inputRange, outputRange: [0, 1, 0], extrapolate: "clamp" });
 
     return (
       <View style={styles.slide}>
-        <LinearGradient
-          colors={item.gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
+        <View style={styles.imageCard}>
+          <Animated.Image source={item.image} style={[styles.image, { transform: [{ scale: imageScale }] }]} />
+          <LinearGradient colors={["transparent", "rgba(0,0,0,0.55)"]} style={StyleSheet.absoluteFill} />
+          <View style={styles.chipRow}>
+            {item.chips.map(({ label, Icon }) => (
+              <View key={label} style={styles.chip}>
+                <Icon size={14} color={C.text} />
+                <Text style={styles.chipText}>{label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
 
-        {/* Background accent glow */}
-        <View style={[styles.accentGlow, { backgroundColor: item.accentColor + "08" }]} />
-
-        {/* Illustration area */}
-        <Animated.View style={[styles.illustrationArea, { opacity: contentOpacity, transform: [{ scale: illustScale }] }]}>
-          {item.renderIllustration(floatAnim)}
-        </Animated.View>
-
-        {/* Text content */}
-        <Animated.View
-          style={[
-            styles.textArea,
-            { opacity: contentOpacity, transform: [{ translateY: contentSlide }] },
-          ]}
-        >
-          <Text style={[styles.slideSubtitle, { color: item.accentColor }]}>
-            {item.subtitle}
-          </Text>
-          <Text style={styles.slideTitle}>{item.title}</Text>
-          <Text style={styles.slideDescription}>{item.description}</Text>
+        <Animated.View style={[styles.textBlock, { opacity: textOpacity, transform: [{ translateX: textShift }] }]}>
+          <View style={styles.kicker}>
+            <item.KickerIcon size={14} color={C.emberText} />
+            <Text style={styles.kickerText}>{item.kicker}</Text>
+          </View>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.description}>{item.description}</Text>
         </Animated.View>
       </View>
     );
   };
 
-  const currentAccentColor = slides[currentSlide].accentColor;
-
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1410" />
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
 
-      {/* Skip button */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.skipButton} onPress={onComplete}>
-          <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        <Image source={require("../../assets/brianos/logo-black.png")} style={styles.logo} resizeMode="contain" />
+        {!isLast && (
+          <TouchableOpacity onPress={onComplete} hitSlop={10} accessibilityLabel="Skip introduction">
+            <Text style={styles.skip}>Skip</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
-      {/* Slides */}
-      <FlatList
-        ref={flatListRef}
-        data={slides}
+      <Animated.FlatList
+        ref={listRef}
+        data={SLIDES}
         renderItem={renderSlide}
-        keyExtractor={(_, i) => i.toString()}
+        keyExtractor={(s) => s.kicker}
         horizontal
         pagingEnabled
-        showsHorizontalScrollIndicator={false}
         bounces={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / width);
-          setCurrentSlide(index);
-        }}
+        showsHorizontalScrollIndicator={false}
+        // JS driver: the progress dots animate `width`, which the native driver can't do.
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
         scrollEventThrottle={16}
+        onMomentumScrollEnd={(e) => setIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
       />
 
-      {/* Bottom section */}
-      <View style={styles.bottomSection}>
-        <LinearGradient
-          colors={["transparent", slides[currentSlide].gradientColors[1]]}
-          style={StyleSheet.absoluteFill}
-        />
-
-        {/* Progress dots */}
-        <View style={styles.dotsContainer}>
-          {slides.map((_, index) => {
-            const dotWidth = scrollX.interpolate({
-              inputRange: [(index - 1) * width, index * width, (index + 1) * width],
-              outputRange: [8, 28, 8],
-              extrapolate: "clamp",
-            });
-            const dotOpacity = scrollX.interpolate({
-              inputRange: [(index - 1) * width, index * width, (index + 1) * width],
-              outputRange: [0.3, 1, 0.3],
+      <View style={styles.footer}>
+        <View style={styles.dots}>
+          {SLIDES.map((s, i) => {
+            const w = scrollX.interpolate({
+              inputRange: [(i - 1) * width, i * width, (i + 1) * width],
+              outputRange: [8, 26, 8],
               extrapolate: "clamp",
             });
             return (
               <Animated.View
-                key={index}
-                style={[
-                  styles.dot,
-                  {
-                    width: dotWidth,
-                    opacity: dotOpacity,
-                    backgroundColor: currentAccentColor,
-                  },
-                ]}
+                key={s.kicker}
+                style={[styles.dot, { width: w, backgroundColor: i === index ? C.ember : C.border }]}
               />
             );
           })}
         </View>
 
-        {/* CTA Button */}
-        <TouchableOpacity onPress={handleNext} activeOpacity={0.85}>
-          <LinearGradient
-            colors={
-              currentSlide === slides.length - 1
-                ? ["#F59E0B", "#DC8C03"]
-                : [currentAccentColor, currentAccentColor + "DD"]
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.ctaButton}
-          >
-            <Text style={styles.ctaText}>
-              {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
-            </Text>
-            {currentSlide === slides.length - 1 && (
-              <Sparkles size={18} color="#FFFFFF" strokeWidth={2} style={{ marginLeft: 8 }} />
-            )}
-          </LinearGradient>
+        <TouchableOpacity
+          onPress={next}
+          activeOpacity={0.85}
+          style={[styles.cta, isLast && { backgroundColor: C.ember }]}
+          accessibilityLabel={isLast ? "Get started" : "Next"}
+        >
+          <Text style={[styles.ctaText, isLast && { color: "#000" }]}>{isLast ? "Let's get started" : "Next"}</Text>
+          <ArrowRight size={18} color={isLast ? "#000" : "#FFF"} />
         </TouchableOpacity>
-
-        {/* Page counter */}
-        <Text style={styles.pageCounter}>
-          {currentSlide + 1} / {slides.length}
-        </Text>
       </View>
     </View>
   );
 };
 
-// Illustration sub-styles
-const illustStyles = StyleSheet.create({
-  container: {
-    width: width * 0.75,
-    height: width * 0.75,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  centerIcon: {
-    zIndex: 2,
-  },
-  centerGradient: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#2563EB",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  orbitIcon: {
-    position: "absolute",
-    zIndex: 1,
-  },
-  smallIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  ring1: {
-    position: "absolute",
-    width: width * 0.55,
-    height: width * 0.55,
-    borderRadius: width * 0.275,
-    borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.12)",
-    borderStyle: "dashed",
-  },
-  ring2: {
-    position: "absolute",
-    width: width * 0.7,
-    height: width * 0.7,
-    borderRadius: width * 0.35,
-    borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.06)",
-  },
-  serviceGrid: {
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.bg },
+  header: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 14,
-    width: width * 0.65,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+    minHeight: 52,
   },
-  serviceCard: {
-    width: (width * 0.65 - 14) / 2,
-    borderRadius: 16,
+  logo: { width: 110, height: 34 },
+  skip: { color: C.muted, fontSize: 15, fontWeight: "600" },
+
+  slide: { width, paddingHorizontal: 20 },
+  imageCard: {
+    height: IMAGE_HEIGHT,
+    borderRadius: 28,
     overflow: "hidden",
+    backgroundColor: C.surface,
   },
-  serviceGradient: {
-    paddingVertical: 20,
+  image: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
+  chipRow: { position: "absolute", left: 14, right: 14, bottom: 14, flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+  },
+  chipText: { color: C.text, fontSize: 13, fontWeight: "700" },
+
+  textBlock: { paddingTop: 24, paddingHorizontal: 4 },
+  kicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    backgroundColor: C.emberSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    marginBottom: 12,
+  },
+  kickerText: { color: C.emberText, fontSize: 12, fontWeight: "800", letterSpacing: 1.5 },
+  title: { color: C.text, fontSize: 32, fontWeight: "800", lineHeight: 38, letterSpacing: -0.5 },
+  description: { color: C.muted, fontSize: 16, lineHeight: 24, marginTop: 10 },
+
+  footer: { paddingHorizontal: 20, paddingBottom: 20, paddingTop: 8, gap: 18 },
+  dots: { flexDirection: "row", gap: 6, alignItems: "center" },
+  dot: { height: 8, borderRadius: 4 },
+  cta: {
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: C.text,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
   },
-  serviceLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-  },
-  connectorCenter: {
-    position: "absolute",
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(245,158,11,0.15)",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.2)",
-  },
-  featureBadge: {
-    position: "absolute",
-    zIndex: 1,
-  },
-  badgeInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.8)",
-    letterSpacing: 0.3,
-  },
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1a1410",
-  },
-  header: {
-    position: "absolute",
-    top: Platform.OS === "android" ? (StatusBar.currentHeight || 0) + 8 : 56,
-    right: 20,
-    zIndex: 10,
-  },
-  skipButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  skipText: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  slide: {
-    width,
-    height: height - 200,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  accentGlow: {
-    position: "absolute",
-    width: width * 1.5,
-    height: width * 1.5,
-    borderRadius: width * 0.75,
-    top: -width * 0.3,
-    alignSelf: "center",
-  },
-  illustrationArea: {
-    marginBottom: 20,
-  },
-  textArea: {
-    paddingHorizontal: 32,
-    alignItems: "center",
-  },
-  slideSubtitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 3,
-    marginBottom: 12,
-  },
-  slideTitle: {
-    fontSize: 30,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    textAlign: "center",
-    lineHeight: 38,
-    marginBottom: 14,
-  },
-  slideDescription: {
-    fontSize: 15,
-    color: "rgba(148,163,184,0.9)",
-    textAlign: "center",
-    lineHeight: 22,
-    maxWidth: 300,
-  },
-  bottomSection: {
-    paddingHorizontal: 24,
-    paddingBottom: Platform.OS === "android" ? 32 : 44,
-    paddingTop: 16,
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
-    gap: 6,
-  },
-  dot: {
-    height: 6,
-    borderRadius: 3,
-  },
-  ctaButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 14,
-    shadowColor: "#F59E0B",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  ctaText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  pageCounter: {
-    textAlign: "center",
-    color: "rgba(148,163,184,0.4)",
-    fontSize: 12,
-    marginTop: 14,
-    fontWeight: "500",
-  },
+  ctaText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
 });

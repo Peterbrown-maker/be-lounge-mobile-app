@@ -1,9 +1,10 @@
 import * as Haptics from "expo-haptics";
-import { useEffect, useRef, useState, useCallback, memo } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { ArrowRight, Eye, EyeOff, Lock, Mail, Phone, User, X } from "lucide-react-native";
+import { memo, useCallback, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
-  Animated,
-  Dimensions,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -18,58 +19,69 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  Phone,
-  User,
-  AlertCircle,
-  ArrowRight,
-  X,
-} from "lucide-react-native";
 import { useAuth } from "../../auth/AuthContext";
 
-const { width } = Dimensions.get("window");
+const C = {
+  bg: "#FFFFFF",
+  surface: "#F5F5F5",
+  border: "#E5E5E5",
+  text: "#0A0A0A",
+  muted: "#737373",
+  placeholder: "#A3A3A3",
+  ember: "#FF6B1A",
+  emberText: "#C2410C",
+  error: "#DC2626",
+};
 
-// Memoized input to prevent re-renders from parent
-const FocusInput = memo(({
-  icon: Icon,
-  rightIcon,
-  style,
-  ...props
-}: TextInputProps & {
-  icon: React.FC<{ size: number; color: string; strokeWidth: number }>;
-  rightIcon?: React.ReactNode;
-}) => {
-  const [focused, setFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  return (
-    <View style={[styles.inputContainer, focused && styles.inputFocused]}>
-      <Icon size={18} color={focused ? "#2563EB" : "#94A3B8"} strokeWidth={1.8} />
-      <TextInput
-        ref={inputRef}
-        placeholderTextColor="#94A3B8"
-        {...props}
-        onFocus={(e) => {
-          setFocused(true);
-          props.onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          setFocused(false);
-          props.onBlur?.(e);
-        }}
-        style={[styles.input, style]}
-      />
-      {rightIcon}
-    </View>
-  );
-});
+// Memoized so typing doesn't re-render the whole form (keeps focus stable).
+const FocusInput = memo(
+  ({
+    icon: Icon,
+    rightIcon,
+    label,
+    error,
+    inputRef,
+    style,
+    ...props
+  }: TextInputProps & {
+    inputRef?: React.Ref<TextInput>;
+    icon: React.FC<{ size: number; color: string; strokeWidth: number }>;
+    rightIcon?: React.ReactNode;
+    label: string;
+    error?: string;
+  }) => {
+    const [focused, setFocused] = useState(false);
+    return (
+      <View style={styles.field}>
+        <Text style={styles.label}>{label}</Text>
+        <View style={[styles.inputContainer, focused && styles.inputFocused, !!error && styles.inputError]}>
+          <Icon size={18} color={focused ? C.text : C.placeholder} strokeWidth={1.8} />
+          <TextInput
+            ref={inputRef}
+            placeholderTextColor={C.placeholder}
+            {...props}
+            onFocus={(e) => {
+              setFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              props.onBlur?.(e);
+            }}
+            style={[styles.input, style]}
+          />
+          {rightIcon}
+        </View>
+        {!!error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
+    );
+  }
+);
+FocusInput.displayName = "FocusInput";
 
-FocusInput.displayName = 'FocusInput';
+type Errors = Partial<Record<"name" | "email" | "password", string>>;
 
 export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
   const { signIn, signUp, resetPassword } = useAuth();
@@ -79,289 +91,238 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [errors, setErrors] = useState<Errors>({});
   const [loading, setLoading] = useState(false);
 
-  // Animations (only for header, not form - animated forms break TextInput focus)
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const [resetEmail, setResetEmail] = useState("");
+  const [showReset, setShowReset] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
 
-  const handleSwitch = useCallback(() => {
+  const switchMode = useCallback((login: boolean) => {
     Haptics.selectionAsync();
-    setIsLogin(!isLogin);
-  }, [isLogin]);
+    setIsLogin(login);
+    setErrors({});
+  }, []);
 
-  const handleAuth = useCallback(async () => {
+  const validate = (): boolean => {
+    const next: Errors = {};
+    if (!isLogin && name.trim().length < 2) next.name = "Tell us your name";
+    if (!EMAIL_RE.test(email.trim())) next.email = "Enter a valid email address";
+    if (password.length < 6) next.password = "At least 6 characters";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleAuth = async () => {
+    if (!validate()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
     setLoading(true);
     try {
-      if (isLogin) {
-        await signIn(email, password);
-      } else {
-        await signUp(email, password, name, phone);
-      }
+      if (isLogin) await signIn(email.trim(), password);
+      else await signUp(email.trim(), password, name.trim(), phone.trim());
+      onLogin?.();
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert(isLogin ? "Couldn't sign in" : "Couldn't create account", error.message);
     } finally {
       setLoading(false);
     }
-  }, [isLogin, email, password, name, phone, signIn, signUp]);
+  };
 
-  const handleForgotPasswordSubmit = useCallback(async () => {
-    if (!resetEmail.trim()) {
-      Alert.alert("Error", "Please enter your email address.");
+  const handleReset = async () => {
+    if (!EMAIL_RE.test(resetEmail.trim())) {
+      Alert.alert("Check your email", "Please enter a valid email address.");
       return;
     }
+    setResetLoading(true);
     try {
-      await resetPassword(resetEmail);
-      setShowForgotPasswordModal(false);
-      Alert.alert("Password Reset Sent", "Check your email for password reset instructions.");
+      await resetPassword(resetEmail.trim());
+      setShowReset(false);
+      Alert.alert("Reset link sent", "Check your inbox for instructions to reset your password.");
     } catch (error: any) {
       Alert.alert("Error", error.message);
+    } finally {
+      setResetLoading(false);
     }
-  }, [resetEmail, resetPassword]);
-
-  const handleShowPassword = useCallback(() => {
-    setShowPassword(!showPassword);
-  }, [showPassword]);
-
-  const handleOpenForgotPassword = useCallback(() => {
-    setResetEmail(email);
-    setShowForgotPasswordModal(true);
-  }, [email]);
-
-  const handleCloseForgotPassword = useCallback(() => {
-    setShowForgotPasswordModal(false);
-  }, []);
+  };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding"
-    >
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={false}
       >
-        {/* Decorative top accent */}
-        <View style={styles.topDecor}>
+        {/* Photo header */}
+        <View style={styles.hero}>
+          <Image source={require("../../assets/brianos/hero_feast.jpg")} style={styles.heroImage} />
           <LinearGradient
-            colors={["#2563EB", "#1D4ED8"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.decorCircle}
+            colors={["rgba(0,0,0,0.25)", "rgba(0,0,0,0.75)"]}
+            style={StyleSheet.absoluteFill}
           />
-          <View style={styles.decorCircleOutline} />
-          <View style={styles.decorDot1} />
-          <View style={styles.decorDot2} />
+          <View style={styles.heroContent}>
+            <Image source={require("../../assets/brianos/logo-white.png")} style={styles.heroLogo} resizeMode="contain" />
+            <Text style={styles.heroTagline}>SHISANYAMA · BAR · LOUNGE</Text>
+          </View>
         </View>
 
-        {/* Header */}
-        <Animated.View
-          style={[
-            styles.header,
-            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-          ]}
-        >
-          <Image
-            source={require("../../assets/images/Flavor-Logo-New-No-Glow-1-e1779706388288.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={styles.title}>
-            {isLogin ? "Welcome back" : "Create account"}
-          </Text>
+        {/* Sheet */}
+        <View style={styles.sheet}>
+          <Text style={styles.title}>{isLogin ? "Welcome back" : "Join the table"}</Text>
           <Text style={styles.subtitle}>
             {isLogin
-              ? "Sign in to order deliveries with Flavor Hospitality"
-              : "Join Flavor Hos Deliveries today"}
+              ? "Sign in to order off the braai and book your spot."
+              : "Create an account to order, book tables and track deliveries."}
           </Text>
-        </Animated.View>
 
-        {/* Form */}
-        <View style={styles.form}>
-          {/* Sign up: name field */}
+          {/* Mode switch */}
+          <View style={styles.segment}>
+            {[
+              { login: true, label: "Sign in" },
+              { login: false, label: "Create account" },
+            ].map(({ login, label }) => {
+              const active = isLogin === login;
+              return (
+                <TouchableOpacity
+                  key={label}
+                  style={[styles.segmentBtn, active && styles.segmentBtnActive]}
+                  onPress={() => switchMode(login)}
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
           {!isLogin && (
             <FocusInput
+              label="Full name"
               icon={User}
-              placeholder="Full name"
+              placeholder="Thabo Mokoena"
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
+              returnKeyType="next"
+              onSubmitEditing={() => emailRef.current?.focus()}
+              error={errors.name}
             />
           )}
 
-          {/* Email */}
           <FocusInput
+            inputRef={emailRef}
+            label="Email"
             icon={Mail}
-            placeholder="Email address"
+            placeholder="you@example.com"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoComplete="email"
+            returnKeyType="next"
+            onSubmitEditing={() => (isLogin ? passwordRef.current?.focus() : phoneRef.current?.focus())}
+            error={errors.email}
           />
 
-          {/* Sign up: phone field */}
           {!isLogin && (
             <FocusInput
+              inputRef={phoneRef}
+              label="Phone (optional)"
               icon={Phone}
-              placeholder="Phone number (optional)"
+              placeholder="071 234 5678"
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
             />
           )}
 
-          {/* Password */}
           <FocusInput
+            inputRef={passwordRef}
+            label="Password"
             icon={Lock}
-            placeholder="Password"
+            placeholder={isLogin ? "Your password" : "At least 6 characters"}
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            autoComplete={isLogin ? "password" : "new-password"}
+            returnKeyType="go"
+            onSubmitEditing={handleAuth}
+            error={errors.password}
             rightIcon={
               <TouchableOpacity
-                onPress={handleShowPassword}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => setShowPassword((v) => !v)}
+                hitSlop={10}
+                accessibilityLabel={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <EyeOff size={18} color="#94A3B8" strokeWidth={1.8} />
+                  <EyeOff size={18} color={C.placeholder} strokeWidth={1.8} />
                 ) : (
-                  <Eye size={18} color="#94A3B8" strokeWidth={1.8} />
+                  <Eye size={18} color={C.placeholder} strokeWidth={1.8} />
                 )}
               </TouchableOpacity>
             }
           />
 
-          {/* Forgot password */}
           {isLogin && (
             <TouchableOpacity
-              style={styles.forgotButton}
-              onPress={handleOpenForgotPassword}
+              style={styles.forgot}
+              onPress={() => {
+                setResetEmail(email);
+                setShowReset(true);
+              }}
             >
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
           )}
-        </View>
 
-        {/* Primary action */}
-        <View style={styles.actions}>
           <TouchableOpacity
             onPress={handleAuth}
             activeOpacity={0.85}
             disabled={loading}
+            style={[styles.primary, loading && { opacity: 0.7 }]}
           >
-            <LinearGradient
-              colors={["#2563EB", "#1D4ED8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.primaryButton, loading && { opacity: 0.7 }]}
-            >
-              <Text style={styles.primaryButtonText}>
-                {loading
-                  ? "Please wait..."
-                  : isLogin
-                  ? "Sign In"
-                  : "Create Account"}
-              </Text>
-              {!loading && (
-                <ArrowRight size={18} color="#FFFFFF" strokeWidth={2} style={{ marginLeft: 8 }} />
-              )}
-            </LinearGradient>
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <Text style={styles.primaryText}>{isLogin ? "Sign in" : "Create account"}</Text>
+                <ArrowRight size={18} color="#FFF" strokeWidth={2} />
+              </>
+            )}
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Social buttons */}
-          <View style={styles.socialRow}>
-            <TouchableOpacity
-              style={styles.socialButton}
-              onPress={() => Alert.alert("Coming Soon", "Google sign-in will be available soon.")}
-            >
-              <Text style={styles.socialIcon}>G</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.socialButton}
-              onPress={() => Alert.alert("Coming Soon", "Apple sign-in will be available soon.")}
-            >
-              <Text style={[styles.socialIcon, { fontSize: 20 }]}></Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Switch mode */}
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
-            </Text>
-            <TouchableOpacity onPress={handleSwitch}>
-              <Text style={styles.switchLink}>
-                {isLogin ? " Sign Up" : " Sign In"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.footerDivider} />
-          <Text style={styles.footerText}>Flavor Hospitality Deliveries</Text>
+          <Text style={styles.legal}>
+            By continuing you confirm you're 18+ for bar orders and agree to Briano's terms.
+          </Text>
         </View>
       </ScrollView>
 
-      {/* Forgot Password Modal */}
-      <Modal
-        visible={showForgotPasswordModal}
-        transparent
-        animationType="fade"
-        onRequestClose={handleCloseForgotPassword}
-      >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={handleCloseForgotPassword}
-        >
-          <Pressable style={styles.modalContent}>
-            {/* Close button */}
-            <TouchableOpacity
-              style={styles.modalClose}
-              onPress={handleCloseForgotPassword}
-            >
-              <X size={20} color="#64748B" strokeWidth={2} />
+      {/* Reset password */}
+      <Modal visible={showReset} transparent animationType="fade" onRequestClose={() => setShowReset(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setShowReset(false)}>
+          <Pressable style={styles.modalCard}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowReset(false)} accessibilityLabel="Close">
+              <X size={20} color={C.muted} strokeWidth={2} />
             </TouchableOpacity>
-
-            <View style={styles.modalIconWrap}>
-              <LinearGradient
-                colors={["#EFF6FF", "#DBEAFE"]}
-                style={styles.modalIconCircle}
-              >
-                <Mail size={24} color="#2563EB" strokeWidth={1.8} />
-              </LinearGradient>
+            <View style={styles.modalIcon}>
+              <Mail size={22} color={C.emberText} strokeWidth={1.8} />
             </View>
-
-            <Text style={styles.modalTitle}>Reset Password</Text>
-            <Text style={styles.modalSubtitle}>
-              Enter your email and we'll send you a reset link.
-            </Text>
-
-            <View style={[styles.inputContainer, styles.modalInput]}>
-              <Mail size={18} color="#94A3B8" strokeWidth={1.8} />
+            <Text style={styles.modalTitle}>Reset your password</Text>
+            <Text style={styles.modalSubtitle}>Enter your email and we'll send you a reset link.</Text>
+            <View style={[styles.inputContainer, { marginTop: 16 }]}>
+              <Mail size={18} color={C.placeholder} strokeWidth={1.8} />
               <TextInput
-                placeholder="Email address"
-                placeholderTextColor="#94A3B8"
+                placeholder="you@example.com"
+                placeholderTextColor={C.placeholder}
                 value={resetEmail}
                 onChangeText={setResetEmail}
                 style={styles.input}
@@ -369,25 +330,12 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
                 autoCapitalize="none"
               />
             </View>
-
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.modalCancel}
-                onPress={handleCloseForgotPassword}
-              >
+              <TouchableOpacity style={styles.modalCancel} onPress={() => setShowReset(false)}>
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleForgotPasswordSubmit}
-                style={{ flex: 1 }}
-                activeOpacity={0.85}
-              >
-                <LinearGradient
-                  colors={["#2563EB", "#1D4ED8"]}
-                  style={styles.modalSend}
-                >
-                  <Text style={styles.modalSendText}>Send Link</Text>
-                </LinearGradient>
+              <TouchableOpacity style={styles.modalSend} onPress={handleReset} disabled={resetLoading}>
+                {resetLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.modalSendText}>Send link</Text>}
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -398,293 +346,107 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, backgroundColor: C.bg },
+  scrollContent: { flexGrow: 1 },
+
+  hero: { height: 240, backgroundColor: "#000" },
+  heroImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
+  heroContent: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 12 },
+  heroLogo: { width: 180, height: 56 },
+  heroTagline: { color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: "700", letterSpacing: 3, marginTop: 8 },
+
+  sheet: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollContent: {
-    flexGrow: 1,
+    marginTop: -28,
+    backgroundColor: C.bg,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight || 0) + 20 : 60,
+    paddingTop: 28,
     paddingBottom: 32,
   },
+  title: { color: C.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
+  subtitle: { color: C.muted, fontSize: 15, lineHeight: 22, marginTop: 6 },
 
-  // Decorative top
-  topDecor: {
-    position: "absolute",
-    top: -60,
-    right: -40,
-    width: 180,
-    height: 180,
+  segment: {
+    flexDirection: "row",
+    backgroundColor: C.surface,
+    borderRadius: 14,
+    padding: 4,
+    marginTop: 22,
+    marginBottom: 18,
   },
-  decorCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    opacity: 0.07,
+  segmentBtn: { flex: 1, height: 42, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  segmentBtnActive: {
+    backgroundColor: C.bg,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  decorCircleOutline: {
-    position: "absolute",
-    top: 20,
-    left: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "rgba(37,99,235,0.08)",
-  },
-  decorDot1: {
-    position: "absolute",
-    top: 80,
-    left: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(37,99,235,0.1)",
-  },
-  decorDot2: {
-    position: "absolute",
-    top: 40,
-    right: 60,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(37,99,235,0.12)",
-  },
+  segmentText: { color: C.muted, fontSize: 14, fontWeight: "600" },
+  segmentTextActive: { color: C.text, fontWeight: "800" },
 
-  // Header
-  header: {
-    marginBottom: 36,
-  },
-  logo: {
-    width: 64,
-    height: 64,
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#0F172A",
-    letterSpacing: -0.5,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: "#64748B",
-    lineHeight: 22,
-  },
-
-  // Form
-  form: {
-    gap: 14,
-    marginBottom: 24,
-  },
+  field: { marginBottom: 14 },
+  label: { color: C.text, fontSize: 13, fontWeight: "700", marginBottom: 6 },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    gap: 10,
+    height: 52,
+    paddingHorizontal: 14,
     borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 16 : 4,
+    backgroundColor: C.surface,
     borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    gap: 12,
+    borderColor: C.surface,
   },
-  inputFocused: {
-    borderColor: "#2563EB",
-    backgroundColor: "#FAFCFF",
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: "#0F172A",
-    paddingVertical: Platform.OS === "ios" ? 0 : 10,
-  },
-  forgotButton: {
-    alignSelf: "flex-end",
-    marginTop: -4,
-  },
-  forgotText: {
-    fontSize: 14,
-    color: "#2563EB",
-    fontWeight: "600",
-  },
+  inputFocused: { borderColor: C.text, backgroundColor: C.bg },
+  inputError: { borderColor: C.error },
+  input: { flex: 1, color: C.text, fontSize: 15, paddingVertical: 0, alignSelf: "stretch" },
+  errorText: { color: C.error, fontSize: 12, marginTop: 5 },
 
-  // Actions
-  actions: {
-    gap: 20,
-  },
-  primaryButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 14,
-    shadowColor: "#2563EB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 0.3,
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#E2E8F0",
-  },
-  dividerText: {
-    fontSize: 13,
-    color: "#94A3B8",
-    paddingHorizontal: 16,
-    fontWeight: "500",
-  },
-  socialRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
-  },
-  socialButton: {
-    width: 56,
+  forgot: { alignSelf: "flex-end", paddingVertical: 4, marginTop: -4, marginBottom: 8 },
+  forgotText: { color: C.emberText, fontSize: 13, fontWeight: "700" },
+
+  primary: {
     height: 56,
-    borderRadius: 16,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  socialIcon: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  switchRow: {
+    borderRadius: 18,
+    backgroundColor: C.text,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
-    alignItems: "center",
+    gap: 8,
+    marginTop: 10,
   },
-  switchText: {
-    fontSize: 15,
-    color: "#64748B",
-  },
-  switchLink: {
-    fontSize: 15,
-    color: "#2563EB",
-    fontWeight: "700",
-  },
+  primaryText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
+  legal: { color: C.placeholder, fontSize: 12, textAlign: "center", marginTop: 18, lineHeight: 18 },
 
-  // Footer
-  footer: {
-    marginTop: "auto",
-    paddingTop: 24,
-    alignItems: "center",
-  },
-  footerDivider: {
-    width: 32,
-    height: 1,
-    backgroundColor: "#E2E8F0",
-    marginBottom: 10,
-  },
-  footerText: {
-    fontSize: 12,
-    color: "#94A3B8",
-    fontWeight: "500",
-  },
-
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(15,23,42,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
-  },
-  modalContent: {
-    width: "100%",
-    maxWidth: 400,
-    backgroundColor: "#FFFFFF",
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-start", padding: 24, paddingTop: 72 },
+  modalCard: { backgroundColor: C.bg, borderRadius: 24, padding: 22 },
+  modalClose: { position: "absolute", top: 14, right: 14, padding: 4, zIndex: 1 },
+  modalIcon: {
+    width: 48,
+    height: 48,
     borderRadius: 24,
-    padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 10,
-  },
-  modalClose: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: "rgba(255,107,26,0.12)",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 1,
+    marginBottom: 12,
   },
-  modalIconWrap: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  modalIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#0F172A",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: "#64748B",
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  modalInput: {
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
+  modalTitle: { color: C.text, fontSize: 20, fontWeight: "800" },
+  modalSubtitle: { color: C.muted, fontSize: 14, marginTop: 4, lineHeight: 20 },
+  modalButtons: { flexDirection: "row", gap: 10, marginTop: 18 },
   modalCancel: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.border,
     alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    justifyContent: "center",
   },
-  modalCancelText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#64748B",
-  },
-  modalSend: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  modalSendText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
+  modalCancelText: { color: C.text, fontWeight: "700" },
+  modalSend: { flex: 1, height: 48, borderRadius: 14, backgroundColor: C.text, alignItems: "center", justifyContent: "center" },
+  modalSendText: { color: "#FFF", fontWeight: "800" },
 });

@@ -19,13 +19,13 @@ export const EmergencyDeliveryScreen = ({ onBack, onContinue }: EmergencyDeliver
 
   return (
     <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // adjust if needed
     style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <ArrowLeft size={20} color="#111827" />
+          <ArrowLeft size={20} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>⚡ Emergency Delivery</Text>
       </View>
@@ -33,7 +33,7 @@ export const EmergencyDeliveryScreen = ({ onBack, onContinue }: EmergencyDeliver
       <ScrollView contentContainerStyle={styles.formContainer} showsVerticalScrollIndicator={false}>
         {/* Priority Info */}
         <View style={styles.priorityCard}>
-          <Zap size={20} color="#FACC15" />
+          <Zap size={20} color="#000000" />
           <Text style={styles.priorityText}>
             Priority delivery — fastest available rider assigned immediately!
           </Text>
@@ -43,7 +43,7 @@ export const EmergencyDeliveryScreen = ({ onBack, onContinue }: EmergencyDeliver
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Pickup Location</Text>
           <View style={styles.inputWrapper}>
-            <MapPin size={20} color="#22C55E" style={styles.iconLeft} />
+            <MapPin size={20} color="#000000" style={styles.iconLeft} />
             <Input
               placeholder="Where to collect?"
               value={pickupLocation}
@@ -57,7 +57,7 @@ export const EmergencyDeliveryScreen = ({ onBack, onContinue }: EmergencyDeliver
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Delivery Location</Text>
           <View style={styles.inputWrapper}>
-            <MapPin size={20} color="#3B82F6" style={styles.iconLeft} />
+            <MapPin size={20} color="#000000" style={styles.iconLeft} />
             <Input
               placeholder="Where to deliver urgently?"
               value={deliveryLocation}
@@ -108,7 +108,7 @@ export const EmergencyDeliveryScreen = ({ onBack, onContinue }: EmergencyDeliver
 
         {/* Emergency Fee Info */}
         <View style={styles.feeCard}>
-          <AlertTriangle size={20} color="#EF4444" />
+          <AlertTriangle size={20} color="#000000" />
           <Text style={styles.feeText}>
             Emergency deliveries include a priority fee of +R15
           </Text>
@@ -129,7 +129,7 @@ export const EmergencyDeliveryScreen = ({ onBack, onContinue }: EmergencyDeliver
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FAFAFA",
   },
   header: {
     flexDirection: "row",
@@ -137,13 +137,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#E5E5E5",
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#F5F5F5",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#111827",
+    color: "#111111",
   },
   formContainer: {
     paddingHorizontal: 20,
@@ -160,13 +160,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   priorityCard: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: "#F5F5F5",
     borderRadius: 16,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 14,
-    color: "#B45309",
+    color: "#262626",
     fontWeight: "600",
     flex: 1,
   },
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
     marginBottom: 8,
   },
   inputWrapper: {
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     paddingHorizontal: 16,
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -207,17 +207,17 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#111827",
+    color: "#111111",
     paddingLeft: 36,
   },
   feeCard: {
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "#F5F5F5",
     borderRadius: 16,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   feeText: {
     fontSize: 14,
-    color: "#B91C1C",
+    color: "#171717",
     fontWeight: "600",
     flex: 1,
   },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   continueButton: {
-    backgroundColor: "#EF4444",
+    backgroundColor: "#000000",
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",

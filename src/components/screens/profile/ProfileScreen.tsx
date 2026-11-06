@@ -1,19 +1,18 @@
 import { useAuth } from "@/src/auth/AuthContext";
-import usersApiService, { UserProfile } from "@/src/services/users";
-// navigation is received via callbacks in props; avoid using router hook here
-import { ArrowLeft, ClipboardList, LogOut, MapPin, Phone, Settings, User } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { ProfileAvatar } from "@/src/components/ProfileAvatar";
+import { ScreenHeader } from "@/src/components/ScreenHeader";
+import { R, T } from "@/src/theme";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
+  Camera,
+  ChevronRight,
+  ClipboardList,
+  LifeBuoy,
+  LogOut,
+  MapPin,
+  Settings,
+  User,
+} from "lucide-react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface ProfileScreenProps {
   onBack: () => void;
@@ -30,154 +29,144 @@ export const ProfileScreen = ({
   onNavigateToSavedAddresses,
   onNavigateToSettings,
   onNavigateToSupport,
-  onNavigateToOrderHistory
+  onNavigateToOrderHistory,
 }: ProfileScreenProps) => {
-  const { signOut } = useAuth();
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { signOut, userProfile, changeProfilePhoto } = useAuth();
 
-  const bg = isDark ? "#05070A" : "#FFFFFF";
-  const text = isDark ? "#FFFFFF" : "#111827";
-  const subtitleText = isDark ? "#9CA3AF" : "#6B7280";
-  const cardBg = isDark ? "#1F2937" : "#F9FAFB";
-  const accentColor = isDark ? "#4F46E5" : "#2563EB";
+  const memberSince = userProfile?.created_at
+    ? new Date(userProfile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    : "";
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const profile = await usersApiService.getUserProfile();
-        setUserProfile(profile);
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Fallback to default values if API fails
-        setUserProfile({
-          id: 1,
-          email: ' ',
-          display_name: ' ',
-          phone: '',
-          profile_image: '',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-
-  const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await signOut();
-              onBack();
-            } catch (error) {
-              console.error('Logout error:', error);
-            }
-          }
-        },
-      ]
-    );
+  const handleChangePhoto = async () => {
+    try {
+      await changeProfilePhoto();
+    } catch (error: any) {
+      Alert.alert("Error", error?.message || "Could not update profile picture.");
+    }
   };
 
+  const handleLogout = () => {
+    Alert.alert("Log out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await signOut();
+            onBack();
+          } catch (error) {
+            console.error("Logout error:", error);
+          }
+        },
+      },
+    ]);
+  };
+
+  const rows = [
+    { icon: User, label: "Edit profile", hint: "Name and phone", onPress: onNavigateToEditProfile },
+    onNavigateToOrderHistory && {
+      icon: ClipboardList,
+      label: "Order history",
+      hint: "Past orders and receipts",
+      onPress: onNavigateToOrderHistory,
+    },
+    { icon: MapPin, label: "Saved places", hint: "Home, work and more", onPress: onNavigateToSavedAddresses },
+    { icon: Settings, label: "Settings", hint: "Notifications and location", onPress: onNavigateToSettings },
+    { icon: LifeBuoy, label: "Help & support", hint: "Call, WhatsApp or email us", onPress: onNavigateToSupport },
+  ].filter(Boolean) as { icon: typeof User; label: string; hint: string; onPress: () => void }[];
+
   return (
-    <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // adjust if needed
+    <View style={styles.container}>
+      <ScreenHeader title="Profile" onBack={onBack} />
 
-    style={[styles.container, { backgroundColor: bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={24} color={text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: text }]}>Profile</Text>
-      </View>
-
-      <ScrollView style={styles.content}>
-        {/* Profile Picture and Info */}
-        <View style={styles.profileSection}>
-          <View style={[styles.profilePicture, { backgroundColor: "#3B82F6" }]}>
-            <Text style={[styles.profileText, { color: text }]}>
-              {userProfile?.display_name?.charAt(0).toUpperCase() || ''}
-            </Text>
-          </View>
-          <Text style={[styles.name, { color: text }]}>
-            {userProfile?.display_name || ''}
-          </Text>
-          <Text style={[styles.email, { color: subtitleText }]}>
-            {userProfile?.email || ' '}
-          </Text>
-        </View>
-
-        {/* Menu Items */}
-        <View style={styles.menuSection}>
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: cardBg }]} onPress={onNavigateToEditProfile}>
-            <User size={20} color={accentColor} />
-            <Text style={[styles.menuText, { color: text }]}>Edit Profile</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Identity card */}
+        <View style={styles.identity}>
+          <TouchableOpacity onPress={handleChangePhoto} activeOpacity={0.8} accessibilityLabel="Change profile picture">
+            <ProfileAvatar size={84} />
+            <View style={styles.cameraBadge}>
+              <Camera size={14} color="#FFFFFF" />
+            </View>
           </TouchableOpacity>
-
-          {onNavigateToOrderHistory && (
-            <TouchableOpacity style={[styles.menuItem, { backgroundColor: cardBg }]} onPress={onNavigateToOrderHistory}>
-              <ClipboardList size={20} color={accentColor} />
-              <Text style={[styles.menuText, { color: text }]}>Order History</Text>
-            </TouchableOpacity>
+          <Text style={styles.name}>{userProfile?.display_name || "Briano's regular"}</Text>
+          <Text style={styles.email}>{userProfile?.email}</Text>
+          {!!memberSince && (
+            <View style={styles.memberPill}>
+              <Text style={styles.memberText}>Regular since {memberSince}</Text>
+            </View>
           )}
-
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: cardBg }]} onPress={onNavigateToSavedAddresses}>
-            <MapPin size={20} color={accentColor} />
-            <Text style={[styles.menuText, { color: text }]}>Saved Addresses</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: cardBg }]} onPress={onNavigateToSettings}>
-            <Settings size={20} color={accentColor} />
-            <Text style={[styles.menuText, { color: text }]}>Settings</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, { backgroundColor: cardBg }]} onPress={onNavigateToSupport}>
-            <Phone size={20} color={accentColor} />
-            <Text style={[styles.menuText, { color: text }]}>Support</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity
-          style={[styles.logoutButton, { backgroundColor: "#EF4444" }]}
-          onPress={handleLogout}
-        >
-          <LogOut size={20} color="#FFFFFF" />
-          <Text style={styles.logoutText}>Logout</Text>
+        {/* Menu */}
+        <View style={styles.group}>
+          {rows.map(({ icon: Icon, label, hint, onPress }, i) => (
+            <TouchableOpacity
+              key={label}
+              style={[styles.row, i < rows.length - 1 && styles.rowDivider]}
+              onPress={onPress}
+              activeOpacity={0.7}
+            >
+              <View style={styles.rowIcon}>
+                <Icon size={18} color={T.text} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowLabel}>{label}</Text>
+                <Text style={styles.rowHint}>{hint}</Text>
+              </View>
+              <ChevronRight size={18} color={T.placeholder} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.logout} onPress={handleLogout} activeOpacity={0.8}>
+          <LogOut size={18} color={T.danger} />
+          <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", padding: 16, borderBottomWidth: 1 },
-  backButton: { marginRight: 16 },
-  headerTitle: { fontSize: 20, fontWeight: "bold" },
-  content: { flex: 1, padding: 16 },
-  profileSection: { alignItems: "center", marginBottom: 32 },
-  profilePicture: { width: 80, height: 80, borderRadius: 40, justifyContent: "center", alignItems: "center", marginBottom: 16 },
-  profileText: { fontWeight: "700", fontSize: 32 },
-  name: { fontSize: 24, fontWeight: "bold", marginBottom: 4 },
-  email: { fontSize: 16 },
-  menuSection: { marginBottom: 32 },
-  menuItem: { flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 12, marginBottom: 8 },
-  menuText: { fontSize: 16, fontWeight: "500", marginLeft: 12 },
-  logoutButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 16, borderRadius: 12 },
-  logoutText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600", marginLeft: 8 },
+  container: { flex: 1, backgroundColor: T.bg },
+  content: { padding: 16, paddingBottom: 40 },
+
+  identity: { alignItems: "center", paddingVertical: 20 },
+  cameraBadge: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: T.ember,
+    borderWidth: 3,
+    borderColor: T.bg,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  name: { color: T.text, fontSize: 22, fontWeight: "800", marginTop: 14 },
+  email: { color: T.muted, fontSize: 14, marginTop: 2 },
+  memberPill: { marginTop: 10, backgroundColor: T.emberSoft, paddingHorizontal: 12, paddingVertical: 5, borderRadius: R.pill },
+  memberText: { color: T.emberText, fontSize: 12, fontWeight: "700" },
+
+  group: { backgroundColor: T.surface, borderRadius: R.lg, marginTop: 8 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 14 },
+  rowDivider: { borderBottomWidth: 1, borderBottomColor: T.border },
+  rowIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: T.bg, alignItems: "center", justifyContent: "center" },
+  rowLabel: { color: T.text, fontSize: 15, fontWeight: "700" },
+  rowHint: { color: T.muted, fontSize: 12, marginTop: 1 },
+
+  logout: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 52,
+    borderRadius: R.lg,
+    backgroundColor: T.dangerSoft,
+    marginTop: 20,
+  },
+  logoutText: { color: T.danger, fontSize: 15, fontWeight: "800" },
 });

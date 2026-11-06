@@ -12,7 +12,6 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
-	useColorScheme,
 	View
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -52,7 +51,7 @@ export const RestaurantsListScreen = (props: RestaurantsListScreenProps) => {
 	if (!onRestaurantSelect) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
-				<Text style={{ fontSize: 18, color: "#EF4444", textAlign: "center" }}>
+				<Text style={{ fontSize: 18, color: "#000000", textAlign: "center" }}>
 					Error: onRestaurantSelect prop is missing
 				</Text>
 			</View>
@@ -62,20 +61,19 @@ export const RestaurantsListScreen = (props: RestaurantsListScreenProps) => {
 	if (!restaurant) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
-				<Text style={{ fontSize: 18, color: "#EF4444", textAlign: "center" }}>
+				<Text style={{ fontSize: 18, color: "#000000", textAlign: "center" }}>
 					Error: restaurant prop is missing
 				</Text>
 			</View>
 		);
 	}
 
-	const scheme = useColorScheme();
-	const isDark = scheme === "dark";
-	const bg = isDark ? "#05070A" : "#FFFFFF";
-	const text = isDark ? "#FFFFFF" : "#111827";
-	const cardBg = isDark ? "#1F2937" : "#F9FAFB";
-	const subtitleText = isDark ? "#9CA3AF" : "#6B7280";
-	const accentColor = isDark ? "#4F46E5" : "#2563EB";
+	const isDark = false; // Briano's uses a fixed black & white theme
+	const bg = isDark ? "#000000" : "#FFFFFF";
+	const text = isDark ? "#FFFFFF" : "#111111";
+	const cardBg = isDark ? "#262626" : "#FAFAFA";
+	const subtitleText = isDark ? "#A3A3A3" : "#737373";
+	const accentColor = isDark ? "#000000" : "#000000";
 	const screenWidth = Dimensions.get("window").width;
 
 	// Parse and validate images - handle both string and array formats
@@ -134,7 +132,7 @@ export const RestaurantsListScreen = (props: RestaurantsListScreenProps) => {
 
 	return (
 		<View style={[styles.container, { backgroundColor: bg }]}>
-			<View style={[styles.header, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
+			<View style={[styles.header, { borderBottomColor: isDark ? "#404040" : "#E5E5E5" }]}>
 				<TouchableOpacity onPress={onBack} style={styles.backButton}>
 					<ArrowLeft size={24} color={text} />
 				</TouchableOpacity>

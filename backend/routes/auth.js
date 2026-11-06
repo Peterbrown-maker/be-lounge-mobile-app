@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { jwtSecret } = require('../config/jwt');
 
 const router = express.Router();
 
@@ -64,7 +65,6 @@ router.post('/firebase-auth', async (req, res) => {
     }
 
     // Check if JWT_SECRET exists, use default if not
-    const jwtSecret = process.env.JWT_SECRET || 'default-jwt-secret-change-in-production';
     if (!process.env.JWT_SECRET) {
       console.warn('⚠️ JWT_SECRET not found in environment variables, using default secret!');
     }
@@ -72,7 +72,7 @@ router.post('/firebase-auth', async (req, res) => {
     console.log('Generating JWT token...');
     const token = jwt.sign(
       { id: user.id, firebase_uid: user.firebase_uid },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: '7d' }
     );
     console.log('✅ Token generated');
@@ -121,7 +121,7 @@ router.get('/verify', async (req, res) => {
       return res.status(401).json({ message: 'Token required' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
     const user = await User.findById(decoded.id);
 
     if (!user) {

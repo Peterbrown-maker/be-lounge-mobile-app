@@ -1,8 +1,10 @@
 // app/index.tsx
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 import { MobileContainer } from "../components/MobileContainer";
+import type { BookingData as CheckoutBookingData } from "../components/screens/CheckoutScreen";
 import { Order } from "../services/orders";
 import { Restaurant } from "../services/restaurants";
 
@@ -25,7 +27,7 @@ import { ProfileScreen } from "../components/screens/profile/ProfileScreen";
 import { SavedAddressesScreen } from "../components/screens/profile/SavedAddressesScreen";
 import { SettingsScreen } from "../components/screens/profile/SettingsScreen";
 import { SupportScreen } from "../components/screens/profile/SupportScreen";
-import { CheckoutScreen } from "../components/screens/resturant/CheckoutScreen";
+import { CheckoutScreen } from "../components/screens/CheckoutScreen";
 import { RestaurantMenuScreen } from "../components/screens/resturant/RestaurantMenuScreen";
 import { RestaurantsListScreen } from "../components/screens/resturant/RestaurantsListScreen";
 import RiderMapScreen from "../components/screens/Riders/RiderMapScreen";
@@ -98,17 +100,7 @@ interface CartItem {
   quantity: number;
 }
 
-interface BookingData {
-  bookingType: "delivery" | "sitin" | "takeaway";
-  deliveryAddress?: string;
-  sitInTime?: string;
-  partySize?: number;
-  location?: string;
-  specialRequests?: string;
-  totalPrice: number;
-  userEmail?: string;
-  userName?: string;
-}
+type BookingData = CheckoutBookingData;
 
 interface PaymentData {
   paymentId: string;
@@ -117,13 +109,18 @@ interface PaymentData {
   status: string;
   bookingData: BookingData;
   timestamp: string;
+  deliveryCode?: string;
+  orderId?: number;
 }
+
+const ONBOARDING_KEY = "onboardingSeen";
 
 export default function Index() {
   const { user, loading } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<Screen>("splash");
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [checkoutMode, setCheckoutMode] = useState<"delivery" | "sitin" | "takeaway">("delivery");
   const [currentOrderData, setCurrentOrderData] = useState<OrderData | null>(null);
   const [currentRider, setCurrentRider] = useState<RiderInfo | null>(null);
   const [selectedTrackingOrder, setSelectedTrackingOrder] = useState<Order | null>(null);
@@ -152,10 +149,27 @@ export default function Index() {
 
     switch (currentScreen) {
       case "splash":
-        return <SplashScreen onComplete={() => setCurrentScreen("onboarding")} />;
+        return (
+          <SplashScreen
+            onComplete={async () => {
+              let seen = false;
+              try {
+                seen = (await AsyncStorage.getItem(ONBOARDING_KEY)) === "1";
+              } catch {}
+              setCurrentScreen(seen ? "login" : "onboarding");
+            }}
+          />
+        );
 
       case "onboarding":
-        return <OnboardingScreen onComplete={() => setCurrentScreen("login")} />;
+        return (
+          <OnboardingScreen
+            onComplete={() => {
+              AsyncStorage.setItem(ONBOARDING_KEY, "1").catch(() => {});
+              setCurrentScreen("login");
+            }}
+          />
+        );
 
       case "login":
         return <LoginScreen />;
@@ -178,14 +192,12 @@ export default function Index() {
       }}
       onNavigateToMap={() => setCurrentScreen("riderMap")}
 
-      // ✅ FIX #1: pass selectedRestaurant
-      selectedRestaurant={selectedRestaurant}
-
-      // ✅ FIX #2: pass onRestaurantSelect
-      onRestaurantSelect={(restaurant) => {
-        console.log("Restaurant selected:", restaurant.name);
-        setSelectedRestaurant(restaurant);
-        setCurrentScreen("restaurantDetail");
+      initialCart={cart}
+      initialMode={checkoutMode}
+      onCheckout={(items, mode) => {
+        setCart(items);
+        setCheckoutMode(mode);
+        setCurrentScreen("checkout");
       }}
 
       onFoodCategorySelect={() => {}}
@@ -237,15 +249,7 @@ export default function Index() {
 
       case "checkout":
         // New checkout screen with booking types and payment
-        const mockCartItems = cart.length > 0 ? cart : [
-          {
-            id: "mock-1",
-            name: "Classic Chicken Prego",
-            price: 85,
-            quantity: cartCount > 0 ? cartCount : 1,
-            image: require("../../assets/images/Flavor-Hospitality_Chicken-Prego-480x408.png"),
-          },
-        ];
+        const mockCartItems = cart;
         const totalPrice = mockCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
         
         return (
@@ -253,8 +257,9 @@ export default function Index() {
             <CheckoutScreen
               cartItems={mockCartItems}
               totalPrice={totalPrice}
+              initialBookingType={checkoutMode}
               onBack={() => {
-                setCurrentScreen("restaurantMenu");
+                setCurrentScreen(selectedRestaurant ? "restaurantMenu" : "home");
               }}
               onPayment={(bookingData) => {
                 setCurrentBookingData(bookingData);
@@ -269,6 +274,11 @@ export default function Index() {
           <PaymentScreen
             bookingData={currentBookingData}
             onBack={() => setCurrentScreen("checkout")}
+            onDone={() => {
+              setCart([]);
+              setCurrentBookingData(null);
+              setCurrentScreen("home");
+            }}
             onPaymentSuccess={(paymentData) => {
               setCurrentPaymentData(paymentData);
               setCurrentScreen("driverTracking");
@@ -292,7 +302,8 @@ export default function Index() {
               setCurrentScreen("home");
             }}
             onCancel={() => {
-              setCurrentScreen("payment");
+              setCurrentPaymentData(null);
+              setCurrentScreen("home");
             }}
           />
         ) : (
@@ -483,7 +494,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: "#EF4444",
+    color: "#000000",
     textAlign: "center",
   },
 });

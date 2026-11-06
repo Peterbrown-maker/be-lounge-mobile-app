@@ -42,14 +42,14 @@ export const DeliveryCompleteScreen = ({ onDone }: DeliveryCompleteScreenProps) 
   return (
     <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // adjust if needed
       >
       {/* Success Icon */}
       <View style={styles.iconWrapper}>
         <View style={styles.iconBackground} />
         <View style={styles.icon}>
-          <CheckCircle2 size={64} color="#22C55E" />
+          <CheckCircle2 size={64} color="#000000" />
         </View>
       </View>
 
@@ -67,7 +67,7 @@ export const DeliveryCompleteScreen = ({ onDone }: DeliveryCompleteScreenProps) 
             <Image source={{ uri: photoUri }} style={styles.proofImage} />
           ) : (
             <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-              <Camera size={40} color="#9CA3AF" />
+              <Camera size={40} color="#A3A3A3" />
               <Text style={styles.proofText}>Tap to capture photo</Text>
             </Animated.View>
           )}
@@ -82,8 +82,8 @@ export const DeliveryCompleteScreen = ({ onDone }: DeliveryCompleteScreenProps) 
             <TouchableOpacity key={star} onPress={() => setRating(star)}>
               <Star
                 size={40}
-                color={star <= rating ? "#FACC15" : "#9CA3AF"}
-                fill={star <= rating ? "#FACC15" : "transparent"}
+                color={star <= rating ? "#000000" : "#A3A3A3"}
+                fill={star <= rating ? "#000000" : "transparent"}
               />
             </TouchableOpacity>
           ))}
@@ -103,7 +103,7 @@ export const DeliveryCompleteScreen = ({ onDone }: DeliveryCompleteScreenProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FAFAFA",
     paddingHorizontal: 24,
     paddingTop: 40,
     alignItems: "center",
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 180,
     height: 180,
-    backgroundColor: "rgba(34,197,94,0.2)",
+    backgroundColor: "rgba(0,0,0,0.2)",
     borderRadius: 90,
     top: -20,
     left: -20,
@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
     width: 128,
     height: 128,
     borderRadius: 64,
-    backgroundColor: "#22C55E",
+    backgroundColor: "#000000",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -143,12 +143,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#111827",
+    color: "#111111",
     textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#737373",
     textAlign: "center",
   },
   proofWrapper: {
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   proofTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
     marginBottom: 12,
     textAlign: "center",
   },
@@ -167,10 +167,10 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 16 / 9,
     borderRadius: 20,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#E5E5E5",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   proofText: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#A3A3A3",
     textAlign: "center",
     marginTop: 6,
   },
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   ratingTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#111827",
+    color: "#111111",
     marginBottom: 12,
   },
   starsRow: {
@@ -206,12 +206,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   doneButton: {
-    backgroundColor: "#22C55E",
+    backgroundColor: "#000000",
     borderRadius: 14,
     paddingVertical: 16,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,

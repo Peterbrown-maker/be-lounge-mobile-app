@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  useColorScheme,
   ScrollView,
   PanResponder,
   Platform,
@@ -22,7 +21,7 @@ import { socketService } from "../../../services/socket";
 
 const { width, height } = Dimensions.get("window");
 
-// Flavor Hospitality service area coordinates
+// Briano's service area coordinates
 const SOSHANGUVE_CENTER = {
   latitude: -25.5,
   longitude: 28.1,
@@ -70,7 +69,7 @@ const generateRiders = (count: number) => {
     status: Math.random() > 0.3 ? "available" : "busy",
     deliveries: Math.floor(Math.random() * 50) + 10,
     rating: (4 + Math.random()).toFixed(1),
-    bio: "Experienced delivery rider serving Flavor Hospitality area",
+    bio: "Experienced delivery rider serving Briano's area",
     recentDeliveries: Math.floor(Math.random() * 5) + 3,
   }));
 };
@@ -98,7 +97,7 @@ const RiderMarker = ({ rider, isSelected, onPress, isAssignedRider }: RiderMarke
           <Text style={styles.motorcycleEmoji}>🏍️</Text>
         </View>
       ) : (
-        <View style={[styles.markerDot, { backgroundColor: rider.status === "available" ? "#10B981" : "#F59E0B", transform: [{ scale: isSelected ? 1.3 : 1 }] }]}>
+        <View style={[styles.markerDot, { backgroundColor: rider.status === "available" ? "#000000" : "#000000", transform: [{ scale: isSelected ? 1.3 : 1 }] }]}>
           <Bike size={18} color="#FFFFFF" />
         </View>
       )}
@@ -116,21 +115,20 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
   const [mapInteractionEnabled, setMapInteractionEnabled] = useState(true);
   const [activeOrderWithRider, setActiveOrderWithRider] = useState<ActiveOrderWithRider | null>(null);
   const [loading, setLoading] = useState(true);
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-  const { backendUser } = useAuth();
+  const isDark = false; // Briano's uses a fixed black & white theme
+  const { user } = useAuth();
 
   const mapRef = useRef<MapView>(null);
   const sheetPosition = useRef(new Animated.Value(SNAP_POINTS.CLOSED)).current;
   const lastGesture = useRef(SNAP_POINTS.CLOSED);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const bg = isDark ? "#05070A" : "#FFFFFF";
-  const text = isDark ? "#FFFFFF" : "#111827";
-  const cardBg = isDark ? "#1F2937" : "#F9FAFB";
-  const borderColor = isDark ? "#374151" : "#E5E7EB";
-  const subtitleText = isDark ? "#9CA3AF" : "#6B7280";
-  const accentColor = isDark ? "#4F46E5" : "#2563EB";
+  const bg = isDark ? "#000000" : "#FFFFFF";
+  const text = isDark ? "#FFFFFF" : "#111111";
+  const cardBg = isDark ? "#262626" : "#FAFAFA";
+  const borderColor = isDark ? "#404040" : "#E5E5E5";
+  const subtitleText = isDark ? "#A3A3A3" : "#737373";
+  const accentColor = isDark ? "#000000" : "#000000";
 
   const availableRiders = riders.filter(r => r.status === "available").length;
   const busyRiders = riders.filter(r => r.status === "busy").length;
@@ -138,7 +136,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
   // Fetch active orders and check for assigned rider
   useEffect(() => {
     const fetchActiveOrder = async () => {
-      if (!backendUser) {
+      if (!user) {
         setLoading(false);
         return;
       }
@@ -193,7 +191,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
     };
 
     fetchActiveOrder();
-  }, [backendUser]);
+  }, [user]);
 
   const animateToSnapPoint = useCallback((snapPoint: number) => {
     lastGesture.current = snapPoint;
@@ -342,11 +340,11 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
   };
 
   const mapStyle = isDark ? [
-    { elementType: "geometry", stylers: [{ color: "#1F2937" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#9CA3AF" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#1F2937" }] },
-    { featureType: "road", elementType: "geometry", stylers: [{ color: "#374151" }] },
-    { featureType: "water", elementType: "geometry", stylers: [{ color: "#0F172A" }] },
+    { elementType: "geometry", stylers: [{ color: "#262626" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#A3A3A3" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#262626" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#404040" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#0A0A0A" }] },
   ] : [];
 
   const backdropOpacity = sheetPosition.interpolate({
@@ -378,7 +376,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
               Your Rider is On The Way! 🏍️
             </Text>
             <View style={styles.ratingBadge}>
-              <Star size={14} color="#F59E0B" fill="#F59E0B" />
+              <Star size={14} color="#000000" fill="#000000" />
               <Text style={styles.ratingBadgeText}>{rider.rating}</Text>
             </View>
           </View>
@@ -398,7 +396,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
         </View>
 
         {/* Order Info */}
-        <View style={[styles.orderInfoCard, { backgroundColor: isDark ? '#374151' : '#F3F4F6', borderColor }]}>
+        <View style={[styles.orderInfoCard, { backgroundColor: isDark ? '#404040' : '#F5F5F5', borderColor }]}>
           <Text style={[styles.orderLabel, { color: subtitleText }]}>
             Order #{order.id}
           </Text>
@@ -411,7 +409,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
         </View>
 
         {/* Live Tracking Status */}
-        <View style={[styles.liveTrackingBadge, { backgroundColor: '#10B98120' }]}>
+        <View style={[styles.liveTrackingBadge, { backgroundColor: '#00000020' }]}>
           <View style={styles.liveDot} />
           <Text style={styles.liveTrackingText}>Live Tracking Active</Text>
         </View>
@@ -436,7 +434,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
 
         {/* Delivery Code */}
         {order.delivery_code && (
-          <View style={[styles.deliveryCodeCard, { backgroundColor: isDark ? '#374151' : '#FEF3C7' }]}>
+          <View style={[styles.deliveryCodeCard, { backgroundColor: isDark ? '#404040' : '#F5F5F5' }]}>
             <Text style={[styles.deliveryCodeLabel, { color: subtitleText }]}>Delivery Code</Text>
             <Text style={[styles.deliveryCodeValue, { color: text }]}>{order.delivery_code}</Text>
           </View>
@@ -460,14 +458,14 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
         {/* Rider Header */}
         <View style={styles.sheetHeader}>
           <View style={styles.riderHeaderRow}>
-            <View style={[styles.riderAvatar, { backgroundColor: selectedRider.status === "available" ? "#10B981" : "#F59E0B" }]}>
+            <View style={[styles.riderAvatar, { backgroundColor: selectedRider.status === "available" ? "#000000" : "#000000" }]}>
               <Text style={styles.riderInitial}>{selectedRider.name.charAt(0)}</Text>
             </View>
             <View style={styles.riderHeaderInfo}>
               <Text style={[styles.riderName, { color: text }]}>{selectedRider.name}</Text>
               <View style={styles.statusRow}>
-                <View style={[styles.statusDot, { backgroundColor: selectedRider.status === "available" ? "#10B981" : "#F59E0B" }]} />
-                <Text style={[styles.riderStatus, { color: selectedRider.status === "available" ? "#10B981" : "#F59E0B" }]}>
+                <View style={[styles.statusDot, { backgroundColor: selectedRider.status === "available" ? "#000000" : "#000000" }]} />
+                <Text style={[styles.riderStatus, { color: selectedRider.status === "available" ? "#000000" : "#000000" }]}>
                   {selectedRider.status === "available" ? "Available Now" : "On Delivery"}
                 </Text>
               </View>
@@ -486,7 +484,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
           </View>
           <View style={styles.statCard}>
             <View style={styles.ratingRow}>
-              <Star size={18} color="#F59E0B" fill="#F59E0B" />
+              <Star size={18} color="#000000" fill="#000000" />
               <Text style={[styles.statValue, { color: text, marginLeft: 4 }]}>{selectedRider.rating}</Text>
             </View>
             <Text style={[styles.statLabel, { color: subtitleText }]}>Customer Rating</Text>
@@ -504,8 +502,8 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
         </View>
 
         {/* Disabled Contact Buttons with message */}
-        <View style={[styles.noOrderNotice, { backgroundColor: isDark ? '#374151' : '#FEF3C7' }]}>
-          <Text style={[styles.noOrderNoticeText, { color: isDark ? '#FCD34D' : '#92400E' }]}>
+        <View style={[styles.noOrderNotice, { backgroundColor: isDark ? '#404040' : '#F5F5F5' }]}>
+          <Text style={[styles.noOrderNoticeText, { color: isDark ? '#D4D4D4' : '#262626' }]}>
             Place an order to contact this rider
           </Text>
         </View>
@@ -516,14 +514,14 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
             style={[styles.actionButton, styles.disabledButton]}
             onPress={handleContactDisabled}
           >
-            <Phone size={20} color="#9CA3AF" />
+            <Phone size={20} color="#A3A3A3" />
             <Text style={styles.disabledButtonText}>Call Rider</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionButton, styles.disabledButton]}
             onPress={handleContactDisabled}
           >
-            <MessageCircle size={20} color="#9CA3AF" />
+            <MessageCircle size={20} color="#A3A3A3" />
             <Text style={styles.disabledButtonText}>Message</Text>
           </TouchableOpacity>
         </View>
@@ -557,17 +555,17 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
         {!activeOrderWithRider && (
           <View style={[styles.statsBar, { backgroundColor: cardBg, borderColor }]}>
             <View style={styles.statItem}>
-              <Bike size={20} color="#10B981" />
+              <Bike size={20} color="#000000" />
               <Text style={[styles.statText, { color: text }]}>{availableRiders} Available</Text>
             </View>
             <View style={[styles.divider, { backgroundColor: borderColor }]} />
             <View style={styles.statItem}>
-              <Clock size={20} color="#F59E0B" />
+              <Clock size={20} color="#000000" />
               <Text style={[styles.statText, { color: text }]}>~25 min avg</Text>
             </View>
             <View style={[styles.divider, { backgroundColor: borderColor }]} />
             <View style={styles.statItem}>
-              <Bike size={20} color="#EF4444" />
+              <Bike size={20} color="#000000" />
               <Text style={[styles.statText, { color: text }]}>{busyRiders} Busy</Text>
             </View>
           </View>
@@ -575,9 +573,9 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
 
         {/* Active Order Banner */}
         {activeOrderWithRider && (
-          <View style={[styles.activeOrderBanner, { backgroundColor: '#10B98120', borderColor: '#10B981' }]}>
+          <View style={[styles.activeOrderBanner, { backgroundColor: '#00000020', borderColor: '#000000' }]}>
             <View style={styles.liveDotSmall} />
-            <Text style={[styles.activeOrderText, { color: '#10B981' }]}>
+            <Text style={[styles.activeOrderText, { color: '#000000' }]}>
               Live tracking your delivery
             </Text>
           </View>
@@ -635,8 +633,8 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
 
             {/* Area Label */}
             <View style={[styles.areaLabel, { backgroundColor: cardBg, borderColor }]}>
-              <Navigation size={16} color="#3B82F6" />
-              <Text style={[styles.areaText, { color: text }]}>Flavor Hospitality Area</Text>
+              <Navigation size={16} color="#000000" />
+              <Text style={[styles.areaText, { color: text }]}>Briano's Delivery Area</Text>
             </View>
           </View>
         </View>
@@ -704,7 +702,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   activeOrderText: { fontSize: 14, fontWeight: '600' },
-  liveDotSmall: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#10B981', marginRight: 8 },
+  liveDotSmall: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#000000', marginRight: 8 },
   mapHeroContainer: { flex: 1, marginHorizontal: 20, marginBottom: 24, borderRadius: 24, overflow: "hidden" },
   mapWrapper: { position: "relative" },
   map: { width: "100%", height: height * 0.55, borderRadius: 24 },
@@ -721,14 +719,14 @@ const styles = StyleSheet.create({
   },
   areaText: { fontSize: 13, fontWeight: "600", marginLeft: 6 },
   markerContainer: { alignItems: "center", justifyContent: "center" },
-  markerDot: { width: 40, height: 40, borderRadius: 20, justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "#fff" },
+  markerDot: { width: 40, height: 40, borderRadius: 20, justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "#FFFFFF" },
   assignedMarkerDot: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 8,
     borderWidth: 3,
-    borderColor: '#2563EB',
-    shadowColor: '#000',
+    borderColor: '#000000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -745,7 +743,7 @@ const styles = StyleSheet.create({
     height: height,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -763,15 +761,15 @@ const styles = StyleSheet.create({
   ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12
   },
-  ratingBadgeText: { fontSize: 14, fontWeight: '600', color: '#92400E', marginLeft: 4 },
+  ratingBadgeText: { fontSize: 14, fontWeight: '600', color: '#262626', marginLeft: 4 },
   assignedRiderInfo: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16 },
   riderAvatarLarge: { width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center' },
-  riderInitialLarge: { color: '#fff', fontWeight: '700', fontSize: 28 },
+  riderInitialLarge: { color: '#FFFFFF', fontWeight: '700', fontSize: 28 },
   riderDetails: { marginLeft: 16, flex: 1 },
   riderNameLarge: { fontSize: 24, fontWeight: 'bold', marginBottom: 4 },
   vehicleInfo: { fontSize: 16 },
@@ -788,8 +786,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
   },
-  liveDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#10B981', marginRight: 8 },
-  liveTrackingText: { color: '#10B981', fontSize: 14, fontWeight: '600' },
+  liveDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#000000', marginRight: 8 },
+  liveTrackingText: { color: '#000000', fontSize: 14, fontWeight: '600' },
   actionButtonsRow: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 16 },
   actionButtonLarge: {
     flex: 1,
@@ -801,7 +799,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4
   },
   secondaryButtonLarge: { backgroundColor: 'transparent', borderWidth: 1.5 },
-  actionButtonTextWhite: { color: '#FFF', fontSize: 16, fontWeight: '600', marginLeft: 8 },
+  actionButtonTextWhite: { color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginLeft: 8 },
   actionButtonTextColored: { fontSize: 16, fontWeight: '600', marginLeft: 8 },
   deliveryCodeCard: {
     marginHorizontal: 20,
@@ -816,7 +814,7 @@ const styles = StyleSheet.create({
   // Generic Rider Styles
   riderHeaderRow: { flexDirection: "row", alignItems: "center" },
   riderAvatar: { width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center" },
-  riderInitial: { color: "#fff", fontWeight: "700", fontSize: 24 },
+  riderInitial: { color: "#FFFFFF", fontWeight: "700", fontSize: 24 },
   riderHeaderInfo: { flex: 1, marginLeft: 14 },
   riderName: { fontWeight: "700", fontSize: 18, marginBottom: 6 },
   statusRow: { flexDirection: "row", alignItems: "center" },
@@ -841,6 +839,6 @@ const styles = StyleSheet.create({
   noOrderNoticeText: { fontSize: 14, fontWeight: '500' },
   actionButtons: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, marginTop: 8 },
   actionButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", flex: 1, paddingVertical: 12, borderRadius: 12, marginHorizontal: 4 },
-  disabledButton: { backgroundColor: '#E5E7EB' },
-  disabledButtonText: { color: '#9CA3AF', marginLeft: 8, fontWeight: '600' },
+  disabledButton: { backgroundColor: '#E5E5E5' },
+  disabledButtonText: { color: '#A3A3A3', marginLeft: 8, fontWeight: '600' },
 });

@@ -4,7 +4,7 @@
 import usersApiService from "@/src/services/users";
 import { ArrowLeft, CreditCard, MapPin, Minus, Plus } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { WebView } from 'react-native-webview';
 import { useAuth } from '../../../auth/AuthContext';
 import { ordersApiService } from '../../../services/orders';
@@ -64,9 +64,8 @@ export const CheckoutScreen = ({
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string>('');
   const [paymentUrl, setPaymentUrl] = useState<string>('');
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-  const { backendUser } = useAuth();
+  const isDark = false; // Briano's uses a fixed black & white theme
+  const { user } = useAuth();
   const [localCart, setLocalCart] = useState(cart);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
@@ -131,24 +130,19 @@ export const CheckoutScreen = ({
     );
   };
 
-  const bg = isDark ? "#05070A" : "#FFF";
-  const text = isDark ? "#FFF" : "#111827";
-  const cardBg = isDark ? "#1F2937" : "#F9FAFB";
-  const subtitleText = isDark ? "#9CA3AF" : "#6B7280";
-  const accentColor = isDark ? "#4F46E5" : "#2563EB";
+  const bg = isDark ? "#000000" : "#FFFFFF";
+  const text = isDark ? "#FFFFFF" : "#111111";
+  const cardBg = isDark ? "#262626" : "#FAFAFA";
+  const subtitleText = isDark ? "#A3A3A3" : "#737373";
+  const accentColor = isDark ? "#000000" : "#000000";
 
   const subtotal = localCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryFee = 15;
   const total = subtotal + deliveryFee;
 
   const placeOrder = async () => {
-    if (!backendUser) {
+    if (!user) {
       Alert.alert('Error', 'Please log in to place an order');
-      return;
-    }
-
-    if (!backendUser.id) {
-      Alert.alert('Error', 'User ID not found. Please log in again.');
       return;
     }
 
@@ -166,7 +160,7 @@ export const CheckoutScreen = ({
     setLoading(true);
     try {
       const orderData = {
-        user_id: backendUser.id,
+        user_id: user.uid,
         restaurant_id: parseInt(restaurant.id),
         total_amount: total,
         delivery_fee: deliveryFee,
@@ -191,7 +185,7 @@ export const CheckoutScreen = ({
       // Initialize Paystack payment and get the authorization URL
       const paymentResponse = await ordersApiService.initializePayment({
         order_id: response.id,
-        email: backendUser.email,
+        email: user.email || '',
         amount: total * 100, // Amount in kobo
         callback_url: CALLBACK_URL,
       });
@@ -341,7 +335,7 @@ export const CheckoutScreen = ({
             onPress={handleGoHome}
             style={[styles.homeButton, { backgroundColor: onFindDriver ? 'transparent' : accentColor, borderWidth: onFindDriver ? 1 : 0, borderColor: accentColor }]}
           >
-            <Text style={[styles.homeButtonText, { color: onFindDriver ? accentColor : '#FFF' }]}>Back to Home</Text>
+            <Text style={[styles.homeButtonText, { color: onFindDriver ? accentColor : '#FFFFFF' }]}>Back to Home</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -353,7 +347,7 @@ export const CheckoutScreen = ({
       {/* Paystack WebView Modal */}
       <Modal visible={showPaystack} animationType="slide" onRequestClose={() => { setShowPaystack(false); resetPaymentState(); }}>
         <View style={{ flex: 1, backgroundColor: bg }}>
-          <View style={[styles.webviewHeader, { backgroundColor: cardBg, borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
+          <View style={[styles.webviewHeader, { backgroundColor: cardBg, borderBottomColor: isDark ? "#404040" : "#E5E5E5" }]}>
             <TouchableOpacity
               onPress={() => {
                 setShowPaystack(false);
@@ -407,7 +401,7 @@ export const CheckoutScreen = ({
                   setSelectedAddress(address);
                   setShowAddressModal(false);
                 }}
-                style={[styles.addressOption, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}
+                style={[styles.addressOption, { borderBottomColor: isDark ? "#404040" : "#E5E5E5" }]}
               >
                 <MapPin size={20} color={subtitleText} />
                 <View style={{ marginLeft: 8, flex: 1 }}>
@@ -433,7 +427,7 @@ export const CheckoutScreen = ({
 
       <View style={[styles.container, { backgroundColor: bg }]}>
         {/* Header */}
-        <View style={[styles.header, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
+        <View style={[styles.header, { borderBottomColor: isDark ? "#404040" : "#E5E5E5" }]}>
           <TouchableOpacity onPress={onBack} style={styles.backButton}>
             <ArrowLeft size={24} color={text} />
           </TouchableOpacity>
@@ -445,7 +439,7 @@ export const CheckoutScreen = ({
           <View style={[styles.card, { backgroundColor: cardBg }]}>
             <Text style={[styles.sectionTitle, { color: text }]}>Your Order</Text>
             {localCart.map(item => (
-              <View key={item.id} style={[styles.cartItem, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
+              <View key={item.id} style={[styles.cartItem, { borderBottomColor: isDark ? "#404040" : "#E5E5E5" }]}>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.cartItemName, { color: text }]}>{item.name}</Text>
                   <Text style={[styles.cartItemPrice, { color: subtitleText }]}>R {item.price.toFixed(2)}</Text>
@@ -498,7 +492,7 @@ export const CheckoutScreen = ({
               <Text style={[styles.summaryLabel, { color: subtitleText }]}>Delivery Fee</Text>
               <Text style={[styles.summaryValue, { color: text }]}>R {deliveryFee.toFixed(2)}</Text>
             </View>
-            <View style={[styles.summaryRow, { borderTopColor: isDark ? "#374151" : "#E5E7EB", borderTopWidth: 1, paddingTop: 8, marginTop: 8 }]}>
+            <View style={[styles.summaryRow, { borderTopColor: isDark ? "#404040" : "#E5E5E5", borderTopWidth: 1, paddingTop: 8, marginTop: 8 }]}>
               <Text style={[styles.totalLabel, { color: text }]}>Total</Text>
               <Text style={[styles.totalValue, { color: accentColor }]}>R {total.toFixed(2)}</Text>
             </View>
@@ -510,7 +504,7 @@ export const CheckoutScreen = ({
             disabled={loading}
             style={[styles.placeOrderButton, { backgroundColor: accentColor, opacity: loading ? 0.6 : 1 }]}
           >
-            <CreditCard size={20} color="#FFF" />
+            <CreditCard size={20} color="#FFFFFF" />
             <Text style={styles.placeOrderText}>{loading ? 'Processing...' : 'Place Order & Pay'}</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -525,7 +519,7 @@ const styles = StyleSheet.create({
   backButton: { marginRight: 16 },
   headerTitle: { fontSize: 20, fontWeight: "bold" },
   content: { flex: 1, padding: 16 },
-  card: { borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 5 } },
+  card: { borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: "#000000", shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 5 } },
   sectionTitle: { fontSize: 16, fontWeight: "600", marginBottom: 12 },
   cartItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1 },
   cartItemName: { fontSize: 16, fontWeight: "500" },
@@ -542,15 +536,15 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 18, fontWeight: "bold" },
   totalValue: { fontSize: 18, fontWeight: "bold" },
   placeOrderButton: { flexDirection: "row", paddingVertical: 16, borderRadius: 12, justifyContent: "center", alignItems: "center", marginTop: 8, marginBottom: 16 },
-  placeOrderText: { color: "#FFF", fontSize: 16, fontWeight: "bold", marginLeft: 8 },
+  placeOrderText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold", marginLeft: 8 },
   successCard: { borderRadius: 16, padding: 32, alignItems: "center", width: "90%", maxWidth: 400 },
   successEmoji: { fontSize: 64, marginBottom: 16 },
   successTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 8 },
   successText: { fontSize: 16, textAlign: "center", marginBottom: 24 },
   homeButton: { paddingVertical: 16, borderRadius: 12, width: "100%", alignItems: "center" },
-  homeButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
+  homeButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
   findDriverButton: { paddingVertical: 16, borderRadius: 12, width: "100%", alignItems: "center", marginBottom: 12 },
-  findDriverButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
+  findDriverButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
   deliveryCodeTitle: { fontSize: 16, fontWeight: "600", marginBottom: 8 },
   deliveryCode: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 16 },
   qrContainer: { alignItems: "center", marginBottom: 16 },
@@ -566,6 +560,6 @@ const styles = StyleSheet.create({
   addressOption: { flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1 },
   selectedText: { fontSize: 16, fontWeight: "bold" },
   closeButton: { marginTop: 20, paddingVertical: 12, borderRadius: 8, alignItems: "center" },
-  closeButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
+  closeButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
   changeText: { fontSize: 14, fontWeight: "600" },
 });

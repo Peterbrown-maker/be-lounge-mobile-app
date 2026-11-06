@@ -1,24 +1,34 @@
 import { useAuth } from "@/src/auth/AuthContext";
-import { ArrowLeft, Calendar, Clock, Home, MapPin, Users, Zap } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { ScreenHeader } from "@/src/components/ScreenHeader";
+import { useCurrentLocation } from "@/src/location/useCurrentLocation";
+import { BRIANOS_RESTAURANT } from "@/src/services/restaurants";
+import { R, T } from "@/src/theme";
+import { CalendarDays, Clock, LocateFixed, ShoppingBag, Store, Users, Utensils, Zap } from "lucide-react-native";
+import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+
+type BookingType = "delivery" | "sitin" | "takeaway";
 
 interface CheckoutProps {
   onBack?: () => void;
   onPayment?: (bookingData: BookingData) => void;
   cartItems?: CartItem[];
   totalPrice?: number;
+  /** Which booking type to start on (chosen on the Home screen). */
+  initialBookingType?: BookingType;
 }
 
 interface CartItem {
@@ -26,529 +36,374 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  image?: any;
 }
 
-interface BookingData {
-  bookingType: "delivery" | "sitin" | "takeaway";
+export interface BookingData {
+  bookingType: BookingType;
   deliveryAddress?: string;
+  deliveryLatitude?: number;
+  deliveryLongitude?: number;
   sitInTime?: string;
   partySize?: number;
   location?: "inside" | "patio" | "private";
   specialRequests?: string;
+  /** Food subtotal (before fees). */
+  subtotal?: number;
+  deliveryFee?: number;
+  /** Amount to pay = subtotal + deliveryFee. */
   totalPrice: number;
+  items?: { id: string; name: string; price: number; quantity: number }[];
   userEmail?: string;
   userName?: string;
 }
+
+const MODES: { id: BookingType; label: string; hint: string; Icon: typeof Zap }[] = [
+  { id: "delivery", label: "Delivery", hint: "To you", Icon: Zap },
+  { id: "takeaway", label: "Collect", hint: "~20 min", Icon: ShoppingBag },
+  { id: "sitin", label: "Sit-in", hint: "Book a table", Icon: Utensils },
+];
+
+const TIMES = ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+const PARTY = ["2", "3", "4", "5", "6", "8", "10", "10+"];
+const SEATING = [
+  { label: "Inside", value: "inside" as const, hint: "Near the DJ" },
+  { label: "Patio", value: "patio" as const, hint: "By the braai" },
+  { label: "VIP", value: "private" as const, hint: "Private area" },
+];
 
 export const CheckoutScreen: React.FC<CheckoutProps> = ({
   onBack,
   onPayment,
   cartItems = [],
-  totalPrice = 0,
+  initialBookingType = "delivery",
 }) => {
   const { user, userProfile } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { status: locStatus, location: gpsLocation, refresh: refreshLocation } = useCurrentLocation();
 
-  const [bookingType, setBookingType] = useState<"delivery" | "sitin" | "takeaway">("delivery");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [sitInTime, setSitInTime] = useState("18:00");
-  const [partySize, setPartySize] = useState("2");
-  const [location, setLocation] = useState<"inside" | "patio" | "private">("inside");
+  const [bookingType, setBookingType] = useState<BookingType>(initialBookingType);
+  const [addressNote, setAddressNote] = useState("");
+  const [sitInTime, setSitInTime] = useState("19:00");
+  const [partySize, setPartySize] = useState("4");
+  const [seating, setSeating] = useState<"inside" | "patio" | "private">("inside");
   const [specialRequests, setSpecialRequests] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const bgColor = isDark ? "#1a1a1a" : "#ffffff";
-  const textColor = isDark ? "#ffffff" : "#000000";
-  const borderColor = isDark ? "#333333" : "#e0e0e0";
-  const accentColor = "#F59E0B";
+  const subtotal = cartItems.reduce((n, i) => n + i.price * i.quantity, 0);
+  const deliveryFee = bookingType === "delivery" ? BRIANOS_RESTAURANT.delivery_fee : 0;
+  const total = subtotal + deliveryFee;
+  const tableOnly = bookingType === "sitin" && cartItems.length === 0;
 
-  const timeOptions = ["11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
-  const partySizeOptions = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "10+"];
-  const locationOptions = [
-    { label: "Inside", value: "inside" as const },
-    { label: "Patio", value: "patio" as const },
-    { label: "Private Room", value: "private" as const },
-  ];
-
-  const handlePayment = () => {
-    if (bookingType === "delivery" && !deliveryAddress.trim()) {
-      alert("Please enter delivery address");
+  const handleContinue = () => {
+    if (bookingType === "delivery" && !gpsLocation) {
+      Alert.alert(
+        "We need your location",
+        locStatus === "denied"
+          ? "Turn on location access so we can deliver to where you are."
+          : "Still finding you — try again in a moment.",
+        locStatus === "denied"
+          ? [{ text: "Cancel", style: "cancel" }, { text: "Open settings", onPress: () => Linking.openSettings() }]
+          : undefined
+      );
+      refreshLocation();
+      return;
+    }
+    if (bookingType !== "sitin" && cartItems.length === 0) {
+      Alert.alert("Your order is empty", "Add something from the menu first.");
       return;
     }
 
     setLoading(true);
     const bookingData: BookingData = {
       bookingType,
-      deliveryAddress: bookingType === "delivery" ? deliveryAddress : undefined,
+      deliveryAddress:
+        bookingType === "delivery" && gpsLocation
+          ? [gpsLocation.address, addressNote.trim()].filter(Boolean).join(" — ")
+          : undefined,
+      deliveryLatitude: bookingType === "delivery" ? gpsLocation?.latitude : undefined,
+      deliveryLongitude: bookingType === "delivery" ? gpsLocation?.longitude : undefined,
       sitInTime: bookingType === "sitin" ? sitInTime : undefined,
-      partySize: bookingType === "sitin" ? parseInt(partySize) : undefined,
-      location: bookingType === "sitin" ? location : undefined,
-      specialRequests,
-      totalPrice,
+      partySize: bookingType === "sitin" ? parseInt(partySize, 10) || 10 : undefined,
+      location: bookingType === "sitin" ? seating : undefined,
+      specialRequests: specialRequests.trim() || undefined,
+      subtotal,
+      deliveryFee,
+      totalPrice: total,
+      items: cartItems.map(({ id, name, price, quantity }) => ({ id, name, price, quantity })),
       userEmail: user?.email || userProfile?.email || "",
-      userName: user?.displayName || userProfile?.display_name || "Guest",
+      userName: userProfile?.display_name || user?.displayName || "Guest",
     };
-
     setTimeout(() => {
       setLoading(false);
       onPayment?.(bookingData);
-    }, 500);
+    }, 300);
   };
 
+  const ctaLabel = tableOnly ? "Confirm booking" : `Continue to payment · R${total.toFixed(2)}`;
+
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <LinearGradient
-        colors={[accentColor, "#FB923C"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={24} color="#ffffff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Order Details</Text>
-        <View style={{ width: 24 }} />
-      </LinearGradient>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScreenHeader title={tableOnly ? "Book a table" : "Checkout"} subtitle="Briano's · Soshanguve" onBack={onBack} />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* User Info */}
-        <View style={[styles.section, { backgroundColor: isDark ? "#222" : "#f5f5f5", borderColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Your Details</Text>
-          <View style={styles.userInfoRow}>
-            <Text style={[styles.label, { color: textColor }]}>Email:</Text>
-            <Text style={[styles.userValue, { color: accentColor }]}>
-              {user?.email || userProfile?.email || "Not signed in"}
-            </Text>
-          </View>
-          <View style={styles.userInfoRow}>
-            <Text style={[styles.label, { color: textColor }]}>Name:</Text>
-            <Text style={[styles.userValue, { color: accentColor }]}>
-              {user?.displayName || userProfile?.display_name || "Guest"}
-            </Text>
-          </View>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        {/* Mode */}
+        <View style={styles.modes}>
+          {MODES.map(({ id, label, hint, Icon }) => {
+            const active = bookingType === id;
+            return (
+              <TouchableOpacity
+                key={id}
+                style={[styles.mode, active && styles.modeActive]}
+                onPress={() => {
+                  setBookingType(id);
+                  if (id === "delivery" && locStatus !== "ready") refreshLocation();
+                }}
+                accessibilityState={{ selected: active }}
+                activeOpacity={0.8}
+              >
+                <Icon size={20} color={active ? "#FFF" : T.text} />
+                <Text style={[styles.modeLabel, active && { color: "#FFF" }]}>{label}</Text>
+                <Text style={[styles.modeHint, active && { color: "rgba(255,255,255,0.7)" }]}>{hint}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
-        {/* Booking Type Selection */}
-        <View style={[styles.section, { borderColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Booking Type</Text>
-          <View style={styles.bookingTypeContainer}>
-            <BookingTypeButton
-              icon={<Zap size={24} color={bookingType === "delivery" ? "#fff" : textColor} />}
-              label="Delivery"
-              isSelected={bookingType === "delivery"}
-              onPress={() => setBookingType("delivery")}
-              accentColor={accentColor}
-            />
-            <BookingTypeButton
-              icon={<Home size={24} color={bookingType === "sitin" ? "#fff" : textColor} />}
-              label="Sit-in"
-              isSelected={bookingType === "sitin"}
-              onPress={() => setBookingType("sitin")}
-              accentColor={accentColor}
-            />
-            <BookingTypeButton
-              icon={<MapPin size={24} color={bookingType === "takeaway" ? "#fff" : textColor} />}
-              label="Take-away"
-              isSelected={bookingType === "takeaway"}
-              onPress={() => setBookingType("takeaway")}
-              accentColor={accentColor}
-            />
-          </View>
-        </View>
-
-        {/* Delivery Address */}
+        {/* Delivery: current location */}
         {bookingType === "delivery" && (
-          <View style={[styles.section, { borderColor }]}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Delivery Address</Text>
+          <Section title="Delivering to">
+            <View style={styles.locationCard}>
+              <View style={styles.locationIcon}>
+                {locStatus === "locating" ? (
+                  <ActivityIndicator size="small" color={T.emberText} />
+                ) : (
+                  <LocateFixed size={18} color={T.emberText} />
+                )}
+              </View>
+              <View style={{ flex: 1 }}>
+                {gpsLocation ? (
+                  <>
+                    <Text style={styles.locationLabel}>{gpsLocation.label}</Text>
+                    <Text style={styles.locationAddress} numberOfLines={2}>{gpsLocation.address}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.locationLabel}>
+                    {locStatus === "locating"
+                      ? "Finding your location…"
+                      : locStatus === "denied"
+                        ? "Location is off"
+                        : "Couldn't get your location"}
+                  </Text>
+                )}
+              </View>
+              <TouchableOpacity
+                onPress={() => (locStatus === "denied" ? Linking.openSettings() : refreshLocation())}
+                disabled={locStatus === "locating"}
+                hitSlop={8}
+              >
+                <Text style={styles.link}>{locStatus === "denied" ? "Enable" : gpsLocation ? "Refresh" : "Retry"}</Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
-              style={[styles.input, { color: textColor, borderColor }]}
-              placeholder="Enter your delivery address"
-              placeholderTextColor={isDark ? "#888" : "#999"}
-              value={deliveryAddress}
-              onChangeText={setDeliveryAddress}
-              multiline
-              numberOfLines={3}
+              style={[styles.input, { marginTop: 10 }]}
+              placeholder="Unit, gate code or landmark (optional)"
+              placeholderTextColor={T.placeholder}
+              value={addressNote}
+              onChangeText={setAddressNote}
             />
-          </View>
+          </Section>
         )}
 
-        {/* Sit-in Booking Details */}
+        {/* Collect */}
+        {bookingType === "takeaway" && (
+          <Section title="Collect from">
+            <View style={styles.locationCard}>
+              <View style={styles.locationIcon}>
+                <Store size={18} color={T.emberText} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.locationLabel}>Briano's</Text>
+                <Text style={styles.locationAddress}>{BRIANOS_RESTAURANT.address} · Ready in about 20 min</Text>
+              </View>
+            </View>
+          </Section>
+        )}
+
+        {/* Sit-in */}
         {bookingType === "sitin" && (
-          <View style={[styles.section, { borderColor }]}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Booking Details</Text>
+          <Section title="Your table">
+            <FieldLabel Icon={Clock} label="Arrival time" />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+              {TIMES.map((t) => (
+                <Chip key={t} label={t} active={sitInTime === t} onPress={() => setSitInTime(t)} />
+              ))}
+            </ScrollView>
 
-            {/* Time Selection */}
-            <View style={styles.fieldGroup}>
-              <View style={styles.fieldHeader}>
-                <Clock size={18} color={accentColor} />
-                <Text style={[styles.fieldLabel, { color: textColor, marginLeft: 8 }]}>Preferred Time</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.timeScroll}
-                contentContainerStyle={{ paddingHorizontal: 8 }}
-              >
-                {timeOptions.map((time) => (
-                  <TouchableOpacity
-                    key={time}
-                    style={[
-                      styles.timeButton,
-                      {
-                        backgroundColor: sitInTime === time ? accentColor : isDark ? "#333" : "#e0e0e0",
-                      },
-                    ]}
-                    onPress={() => setSitInTime(time)}
-                  >
-                    <Text
-                      style={[styles.timeButtonText, { color: sitInTime === time ? "#fff" : textColor }]}
-                    >
-                      {time}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+            <FieldLabel Icon={Users} label="Guests" />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+              {PARTY.map((p) => (
+                <Chip key={p} label={p} active={partySize === p} onPress={() => setPartySize(p)} />
+              ))}
+            </ScrollView>
 
-            {/* Party Size Selection */}
-            <View style={styles.fieldGroup}>
-              <View style={styles.fieldHeader}>
-                <Users size={18} color={accentColor} />
-                <Text style={[styles.fieldLabel, { color: textColor, marginLeft: 8 }]}>Number of Guests</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.sizeScroll}
-                contentContainerStyle={{ paddingHorizontal: 8 }}
-              >
-                {partySizeOptions.map((size) => (
+            <FieldLabel Icon={CalendarDays} label="Where" />
+            <View style={styles.seating}>
+              {SEATING.map((s) => {
+                const active = seating === s.value;
+                return (
                   <TouchableOpacity
-                    key={size}
-                    style={[
-                      styles.sizeButton,
-                      {
-                        backgroundColor: partySize === size ? accentColor : isDark ? "#333" : "#e0e0e0",
-                      },
-                    ]}
-                    onPress={() => setPartySize(size)}
+                    key={s.value}
+                    style={[styles.seat, active && styles.seatActive]}
+                    onPress={() => setSeating(s.value)}
+                    accessibilityState={{ selected: active }}
                   >
-                    <Text
-                      style={[styles.sizeButtonText, { color: partySize === size ? "#fff" : textColor }]}
-                    >
-                      {size}
-                    </Text>
+                    <Text style={[styles.seatLabel, active && { color: "#FFF" }]}>{s.label}</Text>
+                    <Text style={[styles.seatHint, active && { color: "rgba(255,255,255,0.7)" }]}>{s.hint}</Text>
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
+                );
+              })}
             </View>
-
-            {/* Location Selection */}
-            <View style={styles.fieldGroup}>
-              <View style={styles.fieldHeader}>
-                <MapPin size={18} color={accentColor} />
-                <Text style={[styles.fieldLabel, { color: textColor, marginLeft: 8 }]}>Seating Location</Text>
-              </View>
-              <View style={styles.locationGrid}>
-                {locationOptions.map((opt) => (
-                  <TouchableOpacity
-                    key={opt.value}
-                    style={[
-                      styles.locationOption,
-                      {
-                        backgroundColor: location === opt.value ? accentColor : isDark ? "#333" : "#e0e0e0",
-                        borderColor,
-                      },
-                    ]}
-                    onPress={() => setLocation(opt.value)}
-                  >
-                    <Text
-                      style={[styles.locationText, { color: location === opt.value ? "#fff" : textColor }]}
-                    >
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
+          </Section>
         )}
 
-        {/* Special Requests */}
-        <View style={[styles.section, { borderColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Special Requests (Optional)</Text>
+        {/* Items */}
+        {cartItems.length > 0 && (
+          <Section title={bookingType === "sitin" ? "Pre-order for your table" : "Your order"}>
+            <View style={styles.card}>
+              {cartItems.map((item, i) => (
+                <View key={item.id} style={[styles.itemRow, i < cartItems.length - 1 && styles.divider]}>
+                  {item.image ? <Image source={item.image} style={styles.itemImage} /> : null}
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.itemQty}>× {item.quantity}</Text>
+                  </View>
+                  <Text style={styles.itemPrice}>R{(item.price * item.quantity).toFixed(2)}</Text>
+                </View>
+              ))}
+            </View>
+          </Section>
+        )}
+
+        <Section title="Notes for the kitchen">
           <TextInput
-            style={[styles.input, { color: textColor, borderColor }]}
-            placeholder="Any special requests or allergies?"
-            placeholderTextColor={isDark ? "#888" : "#999"}
+            style={[styles.input, { minHeight: 80, paddingTop: 14 }]}
+            placeholder={bookingType === "sitin" ? "Birthday? Bottle service? Let us know." : "Allergies, how you like your steak…"}
+            placeholderTextColor={T.placeholder}
             value={specialRequests}
             onChangeText={setSpecialRequests}
             multiline
-            numberOfLines={2}
+            textAlignVertical="top"
           />
-        </View>
+        </Section>
 
-        {/* Order Summary */}
-        <View style={[styles.section, { borderColor }]}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Order Summary</Text>
-          {cartItems.length > 0 ? (
-            <>
-              {cartItems.map((item) => (
-                <View key={item.id} style={styles.summaryRow}>
-                  <Text style={[styles.summaryItemName, { color: textColor }]}>
-                    {item.name} x {item.quantity}
-                  </Text>
-                  <Text style={[styles.summaryItemPrice, { color: accentColor }]}>
-                    R{(item.price * item.quantity).toFixed(2)}
-                  </Text>
-                </View>
-              ))}
-              <View style={[styles.divider, { borderColor }]} />
-            </>
-          ) : null}
-          <View style={styles.summaryRow}>
-            <Text style={[styles.totalLabel, { color: textColor }]}>Total Amount</Text>
-            <Text style={[styles.totalPrice, { color: accentColor }]}>R{totalPrice.toFixed(2)}</Text>
+        {/* Totals */}
+        {!tableOnly && (
+          <View style={[styles.card, { marginTop: 20 }]}>
+            <Row label="Subtotal" value={`R${subtotal.toFixed(2)}`} />
+            <Row label="Delivery fee" value={deliveryFee ? `R${deliveryFee.toFixed(2)}` : "Free"} />
+            <View style={[styles.divider, { marginVertical: 10 }]} />
+            <Row label="Total" value={`R${total.toFixed(2)}`} bold />
           </View>
-        </View>
-
-        <View style={{ height: 20 }} />
+        )}
       </ScrollView>
 
-      {/* Payment Button */}
-      <View style={[styles.footer, { borderTopColor: borderColor }]}>
+      <View style={styles.footer}>
         <TouchableOpacity
-          style={[
-            styles.paymentButton,
-            { backgroundColor: accentColor, opacity: loading ? 0.7 : 1 },
-          ]}
-          onPress={handlePayment}
+          style={[styles.cta, loading && { opacity: 0.7 }]}
+          onPress={handleContinue}
           disabled={loading}
+          activeOpacity={0.85}
         >
-          {loading ? (
-            <ActivityIndicator color="#ffffff" size="small" />
-          ) : (
-            <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
-          )}
+          {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.ctaText}>{ctaLabel}</Text>}
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
-const BookingTypeButton: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  isSelected: boolean;
-  onPress: () => void;
-  accentColor: string;
-}> = ({ icon, label, isSelected, onPress, accentColor }) => {
-  return (
-    <TouchableOpacity
-      style={[
-        styles.bookingTypeButton,
-        {
-          backgroundColor: isSelected ? accentColor : "transparent",
-          borderColor: accentColor,
-        },
-      ]}
-      onPress={onPress}
-    >
-      {icon}
-      <Text
-        style={[
-          styles.bookingTypeLabel,
-          {
-            color: isSelected ? "#ffffff" : accentColor,
-            marginTop: 8,
-          },
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-};
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <View style={{ marginTop: 22 }}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    {children}
+  </View>
+);
+
+const FieldLabel = ({ Icon, label }: { Icon: typeof Clock; label: string }) => (
+  <View style={styles.fieldLabel}>
+    <Icon size={16} color={T.muted} />
+    <Text style={styles.fieldLabelText}>{label}</Text>
+  </View>
+);
+
+const Chip = ({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) => (
+  <TouchableOpacity
+    style={[styles.chip, active && styles.chipActive]}
+    onPress={onPress}
+    accessibilityState={{ selected: active }}
+  >
+    <Text style={[styles.chipText, active && { color: "#FFF" }]}>{label}</Text>
+  </TouchableOpacity>
+);
+
+const Row = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
+  <View style={styles.totalRow}>
+    <Text style={[styles.totalLabel, bold && styles.totalBold]}>{label}</Text>
+    <Text style={[styles.totalValue, bold && styles.totalBold]}>{value}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 16,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  section: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-  },
-  userInfoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  userValue: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  bookingTypeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  bookingTypeButton: {
-    flex: 1,
-    borderRadius: 10,
-    borderWidth: 2,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bookingTypeLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  fieldGroup: {
-    marginBottom: 16,
-  },
-  fieldHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  fieldLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  timeScroll: {
-    marginHorizontal: -8,
-  },
-  timeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    minWidth: 70,
-    alignItems: "center",
-  },
-  timeButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  sizeScroll: {
-    marginHorizontal: -8,
-  },
-  sizeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    minWidth: 60,
-    alignItems: "center",
-  },
-  sizeButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  locationGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  locationOption: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  locationText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
+  container: { flex: 1, backgroundColor: T.bg },
+  content: { paddingHorizontal: 16, paddingBottom: 32 },
+  sectionTitle: { color: T.text, fontSize: 17, fontWeight: "800", marginBottom: 10 },
+
+  modes: { flexDirection: "row", gap: 10, marginTop: 4 },
+  mode: { flex: 1, alignItems: "center", gap: 4, paddingVertical: 14, borderRadius: R.lg, backgroundColor: T.surface },
+  modeActive: { backgroundColor: T.text },
+  modeLabel: { color: T.text, fontSize: 14, fontWeight: "800" },
+  modeHint: { color: T.muted, fontSize: 11 },
+
+  locationCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: R.lg, backgroundColor: T.surface },
+  locationIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: T.emberSoft, alignItems: "center", justifyContent: "center" },
+  locationLabel: { color: T.text, fontSize: 15, fontWeight: "700" },
+  locationAddress: { color: T.muted, fontSize: 12, marginTop: 2 },
+  link: { color: T.emberText, fontSize: 13, fontWeight: "800" },
+
   input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    textAlignVertical: "top",
-  },
-  divider: {
-    height: 1,
-    marginVertical: 12,
-    borderTopWidth: 1,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  summaryItemName: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  summaryItemPrice: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  totalLabel: {
+    minHeight: 50,
+    borderRadius: R.md,
+    backgroundColor: T.surface,
+    paddingHorizontal: 14,
     fontSize: 15,
-    fontWeight: "bold",
+    color: T.text,
   },
-  totalPrice: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingBottom: 16,
-    borderTopWidth: 1,
-  },
-  paymentButton: {
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  paymentButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+
+  fieldLabel: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6, marginBottom: 8 },
+  fieldLabelText: { color: T.muted, fontSize: 13, fontWeight: "700" },
+  chips: { gap: 8, paddingBottom: 10 },
+  chip: { paddingHorizontal: 16, height: 40, borderRadius: R.pill, backgroundColor: T.surface, justifyContent: "center" },
+  chipActive: { backgroundColor: T.text },
+  chipText: { color: T.text, fontSize: 14, fontWeight: "700" },
+  seating: { flexDirection: "row", gap: 8 },
+  seat: { flex: 1, paddingVertical: 12, borderRadius: R.md, backgroundColor: T.surface, alignItems: "center" },
+  seatActive: { backgroundColor: T.text },
+  seatLabel: { color: T.text, fontSize: 14, fontWeight: "800" },
+  seatHint: { color: T.muted, fontSize: 11, marginTop: 2 },
+
+  card: { backgroundColor: T.surface, borderRadius: R.lg, padding: 14 },
+  itemRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
+  divider: { borderBottomWidth: 1, borderBottomColor: T.border },
+  itemImage: { width: 48, height: 48, borderRadius: 10 },
+  itemName: { color: T.text, fontSize: 15, fontWeight: "700" },
+  itemQty: { color: T.muted, fontSize: 13, marginTop: 2 },
+  itemPrice: { color: T.text, fontSize: 15, fontWeight: "800" },
+
+  totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
+  totalLabel: { color: T.muted, fontSize: 14 },
+  totalValue: { color: T.text, fontSize: 14, fontWeight: "600" },
+  totalBold: { color: T.text, fontSize: 17, fontWeight: "800" },
+
+  footer: { padding: 16, borderTopWidth: 1, borderTopColor: T.border, backgroundColor: T.bg },
+  cta: { height: 56, borderRadius: R.lg, backgroundColor: T.ember, alignItems: "center", justifyContent: "center" },
+  ctaText: { color: "#000", fontSize: 16, fontWeight: "800" },
 });

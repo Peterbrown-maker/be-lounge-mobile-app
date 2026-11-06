@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dimensions, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { Dimensions, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 import * as Location from "expo-location";
@@ -23,15 +23,14 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
   const [showDeliveryCode, setShowDeliveryCode] = useState(false);
   const [riderAccepted, setRiderAccepted] = useState(false); // Only true when rider has accepted the order
 
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = false; // Briano's uses a fixed black & white theme
 
-  const bg = isDark ? '#05070A' : '#FFF';
-  const text = isDark ? '#FFF' : '#111827';
-  const cardBg = isDark ? '#1F2937' : '#F9FAFB';
-  const subtitleText = isDark ? '#9CA3AF' : '#6B7280';
-  const accentColor = isDark ? '#4F46E5' : '#2563EB';
-  const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const bg = isDark ? '#000000' : '#FFFFFF';
+  const text = isDark ? '#FFFFFF' : '#111111';
+  const cardBg = isDark ? '#262626' : '#FAFAFA';
+  const subtitleText = isDark ? '#A3A3A3' : '#737373';
+  const accentColor = isDark ? '#000000' : '#000000';
+  const borderColor = isDark ? '#404040' : '#E5E5E5';
 
   // Map backend status to display status
   const statusSteps = [
@@ -176,7 +175,7 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       style={[styles.container, { backgroundColor: bg }]}
     >
@@ -235,7 +234,7 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
 
         {/* Rider Found Banner - Only shows when rider has accepted */}
         {riderAccepted && (
-          <View style={[styles.riderFoundBanner, { backgroundColor: '#10B98120', borderColor: '#10B981' }]}>
+          <View style={[styles.riderFoundBanner, { backgroundColor: '#00000020', borderColor: '#000000' }]}>
             <View style={styles.riderFoundDot} />
             <Text style={styles.riderFoundText}>Rider Found! Your delivery is on the way 🏍️</Text>
           </View>
@@ -243,7 +242,7 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
 
         {/* Searching for Rider Banner - Shows when order is confirmed but no rider yet */}
         {!riderAccepted && ['confirmed', 'preparing', 'ready'].includes(status) && (
-          <View style={[styles.searchingRiderBanner, { backgroundColor: '#F59E0B20', borderColor: '#F59E0B' }]}>
+          <View style={[styles.searchingRiderBanner, { backgroundColor: '#00000020', borderColor: '#000000' }]}>
             <Text style={styles.searchingRiderText}>🔍 Searching for a rider nearby...</Text>
           </View>
         )}
@@ -282,7 +281,7 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
                   ]}
                 >
                   {isCompleted ? (
-                    <CheckCircle size={14} color="#FFF" />
+                    <CheckCircle size={14} color="#FFFFFF" />
                   ) : (
                     <Text style={styles.statusCircleText}>{index + 1}</Text>
                   )}
@@ -384,11 +383,11 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: "bold" },
   map: { width, height: height * 0.3 },
   riderMarker: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 6,
     borderWidth: 2,
-    borderColor: '#2563EB',
+    borderColor: '#000000',
   },
   riderEmoji: { fontSize: 20 },
 
@@ -407,11 +406,11 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#10B981',
+    backgroundColor: '#000000',
     marginRight: 10,
   },
   riderFoundText: {
-    color: '#10B981',
+    color: '#000000',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -427,7 +426,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   searchingRiderText: {
-    color: '#F59E0B',
+    color: '#000000',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -475,12 +474,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#E5E5E5",
     justifyContent: "center",
     alignItems: "center",
   },
   statusCircleCurrent: {
-    shadowColor: '#2563EB',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
@@ -488,7 +487,7 @@ const styles = StyleSheet.create({
   },
   statusCircleText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#A3A3A3',
     fontWeight: '600',
   },
   statusContent: {
@@ -508,7 +507,7 @@ const styles = StyleSheet.create({
     top: 32,
     width: 2,
     height: 20,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#E5E5E5",
   },
 
   deliveryCodeCard: {

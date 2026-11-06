@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from 'react-native';
 import { ordersApiService, Order } from '../../services/orders';
@@ -29,15 +28,14 @@ export const ActiveOrdersScreen = ({ onBack, onTrackOrder }: ActiveOrdersScreenP
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = false; // Briano's uses a fixed black & white theme
 
-  const bg = isDark ? '#05070A' : '#FFF';
-  const text = isDark ? '#FFF' : '#111827';
-  const cardBg = isDark ? '#1F2937' : '#F9FAFB';
-  const subtitleText = isDark ? '#9CA3AF' : '#6B7280';
-  const accentColor = isDark ? '#4F46E5' : '#2563EB';
-  const borderColor = isDark ? '#374151' : '#E5E7EB';
+  const bg = isDark ? '#000000' : '#FFFFFF';
+  const text = isDark ? '#FFFFFF' : '#111111';
+  const cardBg = isDark ? '#262626' : '#FAFAFA';
+  const subtitleText = isDark ? '#A3A3A3' : '#737373';
+  const accentColor = isDark ? '#000000' : '#000000';
+  const borderColor = isDark ? '#404040' : '#E5E5E5';
 
   const fetchActiveOrders = async () => {
     try {
@@ -69,15 +67,15 @@ export const ActiveOrdersScreen = ({ onBack, onTrackOrder }: ActiveOrdersScreenP
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return '#F59E0B';
+        return '#000000';
       case 'confirmed':
-        return '#3B82F6';
+        return '#000000';
       case 'preparing':
-        return '#8B5CF6';
+        return '#000000';
       case 'ready':
-        return '#10B981';
+        return '#000000';
       case 'picked_up':
-        return '#2563EB';
+        return '#000000';
       default:
         return subtitleText;
     }
@@ -218,7 +216,7 @@ export const ActiveOrdersScreen = ({ onBack, onTrackOrder }: ActiveOrdersScreenP
                     R {parseFloat(order.total_amount?.toString() || '0').toFixed(2)}
                   </Text>
                   <View style={[styles.trackButton, { backgroundColor: accentColor }]}>
-                    <Navigation size={14} color="#FFF" />
+                    <Navigation size={14} color="#FFFFFF" />
                     <Text style={styles.trackButtonText}>Track</Text>
                   </View>
                 </View>
@@ -292,7 +290,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -366,7 +364,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   trackButtonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 6,

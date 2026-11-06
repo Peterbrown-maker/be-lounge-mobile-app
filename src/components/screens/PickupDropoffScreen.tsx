@@ -56,13 +56,13 @@ export const PickupDropoffScreen = ({ onBack, onContinue }: any) => {
 
   return (
     <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // adjust if needed
     style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={24} color="#111827" />
+          <ArrowLeft size={24} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>📦 Pick Up & Drop Off</Text>
       </View>
@@ -104,7 +104,7 @@ export const PickupDropoffScreen = ({ onBack, onContinue }: any) => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity disabled={!isFormComplete} style={[styles.continueButton, { backgroundColor: isFormComplete ? "#2563EB" : "#9CA3AF" }]} onPress={() => onContinue(pickup, dropoff)}>
+        <TouchableOpacity disabled={!isFormComplete} style={[styles.continueButton, { backgroundColor: isFormComplete ? "#000000" : "#A3A3A3" }]} onPress={() => onContinue(pickup, dropoff)}>
           <Text style={styles.continueButtonText}>Continue →</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -114,17 +114,17 @@ export const PickupDropoffScreen = ({ onBack, onContinue }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", padding: 16, backgroundColor: "#FFF", borderBottomWidth: 1, borderColor: "#E5E7EB" },
-  backButton: { width: 44, height: 44, borderRadius: 12, backgroundColor: "#E5E7EB", alignItems: "center", justifyContent: "center", marginRight: 12 },
-  headerTitle: { fontSize: 20, fontWeight: "bold", color: "#111827" },
+  header: { flexDirection: "row", alignItems: "center", padding: 16, backgroundColor: "#FFFFFF", borderBottomWidth: 1, borderColor: "#E5E5E5" },
+  backButton: { width: 44, height: 44, borderRadius: 12, backgroundColor: "#E5E5E5", alignItems: "center", justifyContent: "center", marginRight: 12 },
+  headerTitle: { fontSize: 20, fontWeight: "bold", color: "#111111" },
   map: { width: "100%", height: 250 },
-  scrollContainer: { padding: 16, backgroundColor: "#F3F4F6" },
-  label: { fontSize: 14, fontWeight: "600", marginBottom: 8, color: "#111827" },
-  input: { backgroundColor: "#FFF", padding: 12, borderRadius: 12, fontSize: 16, marginBottom: 8, borderWidth: 1, borderColor: "#E5E7EB" },
+  scrollContainer: { padding: 16, backgroundColor: "#F5F5F5" },
+  label: { fontSize: 14, fontWeight: "600", marginBottom: 8, color: "#111111" },
+  input: { backgroundColor: "#FFFFFF", padding: 12, borderRadius: 12, fontSize: 16, marginBottom: 8, borderWidth: 1, borderColor: "#E5E5E5" },
   buttonRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
-  selectButton: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: "#E5E7EB", alignItems: "center", marginHorizontal: 4 },
-  activeButton: { backgroundColor: "#2563EB" },
-  buttonText: { color: "#111827", fontWeight: "600" },
+  selectButton: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: "#E5E5E5", alignItems: "center", marginHorizontal: 4 },
+  activeButton: { backgroundColor: "#000000" },
+  buttonText: { color: "#111111", fontWeight: "600" },
   continueButton: { paddingVertical: 16, borderRadius: 16, alignItems: "center", justifyContent: "center", marginTop: 16 },
-  continueButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
+  continueButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "bold" },
 });

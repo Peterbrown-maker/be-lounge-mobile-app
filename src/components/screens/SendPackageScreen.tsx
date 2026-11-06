@@ -20,14 +20,14 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
 
   return (
     <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // adjust if needed
     
     style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <ArrowLeft size={20} color="#111827" />
+          <ArrowLeft size={20} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>📦 Send Package</Text>
       </View>
@@ -41,12 +41,12 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Pickup Location</Text>
           <View style={styles.inputWithIcon}>
-            <MapPin size={20} color="#22C55E" style={styles.icon} />
+            <MapPin size={20} color="#000000" style={styles.icon} />
             <TextInput
               value={pickupLocation}
               onChangeText={setPickupLocation}
               placeholder="Where should we pick up the package?"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A3A3A3"
               style={styles.input}
             />
           </View>
@@ -57,10 +57,10 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
           <Text style={styles.label}>Recipient Details</Text>
           
           <View style={styles.inputWithIcon}>
-            <User size={20} color="#6B7280" style={styles.icon} />
+            <User size={20} color="#737373" style={styles.icon} />
             <TextInput
               placeholder="Recipient name"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A3A3A3"
               value={recipientName}
               onChangeText={setRecipientName}
               style={styles.input}
@@ -68,10 +68,10 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
           </View>
 
           <View style={styles.inputWithIcon}>
-            <Phone size={20} color="#6B7280" style={styles.icon} />
+            <Phone size={20} color="#737373" style={styles.icon} />
             <TextInput
               placeholder="Recipient phone number"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A3A3A3"
               value={recipientPhone}
               onChangeText={setRecipientPhone}
               keyboardType="phone-pad"
@@ -80,10 +80,10 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
           </View>
 
           <View style={styles.inputWithIcon}>
-            <MapPin size={20} color="#3B82F6" style={styles.icon} />
+            <MapPin size={20} color="#000000" style={styles.icon} />
             <TextInput
               placeholder="Recipient address"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A3A3A3"
               value={recipientAddress}
               onChangeText={setRecipientAddress}
               style={styles.input}
@@ -95,10 +95,10 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Package Description</Text>
           <View style={styles.inputWithIcon}>
-            <Package size={20} color="#6B7280" style={styles.iconTop} />
+            <Package size={20} color="#737373" style={styles.iconTop} />
             <TextInput
               placeholder="Describe the package contents"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#A3A3A3"
               value={packageDescription}
               onChangeText={setPackageDescription}
               multiline
@@ -117,7 +117,7 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
               <Image source={{ uri: photoUri }} style={styles.photo} />
             ) : (
               <View style={styles.photoPlaceholder}>
-                <Camera size={32} color="#9CA3AF" />
+                <Camera size={32} color="#A3A3A3" />
                 <Text style={styles.photoText}>Tap to add photo</Text>
               </View>
             )}
@@ -129,7 +129,7 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
           <Text style={styles.label}>Special Instructions (Optional)</Text>
           <TextInput
             placeholder="Any special handling instructions?"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#A3A3A3"
             value={instructions}
             onChangeText={setInstructions}
             multiline
@@ -155,7 +155,7 @@ export const SendPackageScreen = ({ onBack, onContinue }: SendPackageScreenProps
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  container: { flex: 1, backgroundColor: "#FAFAFA" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -163,21 +163,21 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#E5E5E5",
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#F5F5F5",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
   },
-  headerTitle: { fontSize: 20, fontWeight: "800", color: "#111827" },
+  headerTitle: { fontSize: 20, fontWeight: "800", color: "#111111" },
   formContainer: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
   inputGroup: { marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: "700", color: "#111827", marginBottom: 10 },
+  label: { fontSize: 14, fontWeight: "700", color: "#111111", marginBottom: 10 },
 
   // Input styling
   inputWithIcon: {
@@ -202,9 +202,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    color: "#111827",
+    color: "#111111",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#E5E5E5",
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     aspectRatio: 16 / 9,
     borderWidth: 2,
-    borderColor: "#D1D5DB",
+    borderColor: "#D4D4D4",
     borderStyle: "dashed",
     justifyContent: "center",
     alignItems: "center",
@@ -233,23 +233,23 @@ const styles = StyleSheet.create({
     alignItems: "center", 
     gap: 8 
   },
-  photoText: { fontSize: 13, color: "#9CA3AF", marginTop: 8 },
+  photoText: { fontSize: 13, color: "#A3A3A3", marginTop: 8 },
   photo: { width: "100%", height: "100%" },
 
   buttonWrapper: { 
     paddingHorizontal: 20, 
     paddingBottom: 24,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FAFAFA",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#E5E5E5",
     paddingTop: 16,
   },
   continueButton: {
-    backgroundColor: "#22C55E",
+    backgroundColor: "#000000",
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
-    shadowColor: "#22C55E",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

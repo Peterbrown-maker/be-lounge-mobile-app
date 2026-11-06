@@ -1,60 +1,47 @@
-import { apiService } from './api';
+// Saved addresses stored on-device (AsyncStorage) — no backend calls.
+// Profile data lives in AuthContext (Firebase Auth).
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth } from '../auth/firebaseConfig';
 
-export interface UserProfile {
-  id: number;
-  email: string;
-  display_name: string;
-  phone?: string;
-  profile_image?: string;
-  created_at: string;
-  updated_at: string;
-}
+export type { UserProfile } from '../auth/AuthContext';
 
-export interface UpdateUserData {
-  display_name?: string;
-  phone?: string;
-  profile_image?: string;
-}
+const key = () => `addresses:${auth.currentUser?.uid || 'guest'}`;
 
-class UsersApiService {
-  // Get current user profile
-  async getUserProfile(): Promise<UserProfile> {
-    return apiService.get<UserProfile>('/users/profile');
+const read = async (): Promise<any[]> => {
+  try {
+    const raw = await AsyncStorage.getItem(key());
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
   }
+};
 
-  // Update user profile
-  async updateUserProfile(userData: UpdateUserData): Promise<UserProfile> {
-    return apiService.put<UserProfile>('/users/profile', userData);
-  }
+const write = (list: any[]) => AsyncStorage.setItem(key(), JSON.stringify(list));
 
-  // Update user profile image
-  async updateProfileImage(imageUri: string): Promise<UserProfile> {
-    const formData = new FormData();
-    // Note: In React Native, you'll need to handle file upload differently
-    // This is a placeholder for the API structure
-    return apiService.put<UserProfile>('/users/profile/image', { image: imageUri });
-  }
-
-  // Get user addresses
+class UsersService {
   async getUserAddresses(): Promise<any[]> {
-    return apiService.get<any[]>('/users/addresses');
+    return read();
   }
 
-  // Add user address
   async addUserAddress(addressData: any): Promise<any> {
-    return apiService.post<any>('/users/addresses', addressData);
+    const list = await read();
+    const address = { ...addressData, id: Date.now(), created_at: new Date().toISOString() };
+    await write([...list, address]);
+    return address;
   }
 
-  // Update user address
   async updateUserAddress(addressId: number, addressData: any): Promise<any> {
-    return apiService.put<any>(`/users/addresses/${addressId}`, addressData);
+    const list = await read();
+    const updated = list.map((a) => (a.id === addressId ? { ...a, ...addressData } : a));
+    await write(updated);
+    return updated.find((a) => a.id === addressId);
   }
 
-  // Delete user address
   async deleteUserAddress(addressId: number): Promise<{ message: string }> {
-    return apiService.delete<{ message: string }>(`/users/addresses/${addressId}`);
+    await write((await read()).filter((a) => a.id !== addressId));
+    return { message: 'Address deleted' };
   }
 }
 
-export const usersApiService = new UsersApiService();
+export const usersApiService = new UsersService();
 export default usersApiService;

@@ -1,159 +1,190 @@
-import { ArrowLeft, HelpCircle, Mail, MessageCircle, Phone, Send } from "lucide-react-native";
+import { ScreenHeader } from "@/src/components/ScreenHeader";
+import { R, T } from "@/src/theme";
+import { ChevronDown, ChevronRight, Mail, MessageCircle, Phone, Send } from "lucide-react-native";
 import { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
+// TODO: replace with Briano's real contact details.
+const CONTACT = {
+  phone: "+27 12 345 6789",
+  whatsapp: "27123456789", // international format, no +
+  email: "hello@brianos.co.za",
+};
+
+const FAQ = [
+  {
+    q: "How long does delivery take?",
+    a: "Usually 25–40 minutes depending on how busy the braai is and how far you are.",
+  },
+  {
+    q: "Can I book a table for a group?",
+    a: "Yes — choose Sit-in at checkout and pick your time and party size. For 10+ people, give us a call.",
+  },
+  {
+    q: "Do you deliver drinks?",
+    a: "Cocktails and soft drinks, yes. Alcohol is only delivered to customers 18+ and ID may be checked.",
+  },
+  {
+    q: "Where do you deliver to?",
+    a: "We deliver to your current location within our delivery area around Soshanguve.",
+  },
+];
 
 interface SupportScreenProps {
   onBack: () => void;
 }
 
+const open = async (url: string, fallback: string) => {
+  try {
+    await Linking.openURL(url);
+  } catch {
+    Alert.alert("Couldn't open", fallback);
+  }
+};
+
 export const SupportScreen = ({ onBack }: SupportScreenProps) => {
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
-
   const [message, setMessage] = useState("");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const bg = isDark ? "#05070A" : "#FFFFFF";
-  const text = isDark ? "#FFFFFF" : "#111827";
-  const subtitleText = isDark ? "#9CA3AF" : "#6B7280";
-  const cardBg = isDark ? "#1F2937" : "#F9FAFB";
-  const inputBg = isDark ? "#0F172A" : "#F3F4F6";
-  const borderColor = isDark ? "#374151" : "#E5E7EB";
-  const accentColor = isDark ? "#4F46E5" : "#2563EB";
-
-  const supportOptions = [
+  const channels = [
     {
-      icon: MessageCircle,
-      title: "Live Chat",
-      subtitle: "Chat with our support team",
-      action: () => Alert.alert("Live Chat", "Live chat would be opened here."),
+      Icon: MessageCircle,
+      title: "WhatsApp us",
+      hint: "Fastest — usually replies in minutes",
+      onPress: () => open(`https://wa.me/${CONTACT.whatsapp}`, "WhatsApp isn't available on this device."),
     },
     {
-      icon: Phone,
-      title: "Call Support",
-      subtitle: "+27 21 123 4567",
-      action: () => Alert.alert("Call Support", "Dialing support number..."),
+      Icon: Phone,
+      title: "Call Briano's",
+      hint: CONTACT.phone,
+      onPress: () => open(`tel:${CONTACT.phone.replace(/\s/g, "")}`, `Call us on ${CONTACT.phone}`),
     },
     {
-      icon: Mail,
-      title: "Email Support",
-      subtitle: "support@flavorhosdeliveries.com",
-      action: () => Alert.alert("Email Support", "Email client would open here."),
-    },
-    {
-      icon: HelpCircle,
-      title: "FAQ",
-      subtitle: "Frequently asked questions",
-      action: () => Alert.alert("FAQ", "FAQ section would open here."),
+      Icon: Mail,
+      title: "Email",
+      hint: CONTACT.email,
+      onPress: () => open(`mailto:${CONTACT.email}`, `Email us at ${CONTACT.email}`),
     },
   ];
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      Alert.alert("Message Sent", "Thank you for your message. We'll get back to you soon!", [
-        { text: "OK", onPress: () => setMessage("") }
-      ]);
-    } else {
-      Alert.alert("Error", "Please enter a message.");
-    }
+  const sendMessage = () => {
+    if (!message.trim()) return;
+    const url = `mailto:${CONTACT.email}?subject=${encodeURIComponent("App support")}&body=${encodeURIComponent(message.trim())}`;
+    open(url, `Email us at ${CONTACT.email}`).then(() => setMessage(""));
   };
 
   return (
-    <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // adjust if needed
-    style={[styles.container, { backgroundColor: bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <ArrowLeft size={24} color={text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: text }]}>Support</Text>
-      </View>
-
-      <ScrollView style={styles.content}>
-        {/* Quick Support Options */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: text }]}>Get Help</Text>
-          {supportOptions.map((option, index) => (
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScreenHeader title="Help & support" subtitle="We're here till the fire goes out" onBack={onBack} />
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.group}>
+          {channels.map(({ Icon, title, hint, onPress }, i) => (
             <TouchableOpacity
-              key={index}
-              style={[styles.supportOption, { backgroundColor: cardBg }]}
-              onPress={option.action}
+              key={title}
+              style={[styles.row, i < channels.length - 1 && styles.rowDivider]}
+              onPress={onPress}
+              activeOpacity={0.7}
             >
-              <View style={styles.optionLeft}>
-                <option.icon size={24} color={accentColor} />
-                <View style={styles.optionText}>
-                  <Text style={[styles.optionTitle, { color: text }]}>{option.title}</Text>
-                  <Text style={[styles.optionSubtitle, { color: subtitleText }]}>{option.subtitle}</Text>
-                </View>
+              <View style={[styles.rowIcon, i === 0 && { backgroundColor: T.ember }]}>
+                <Icon size={18} color={i === 0 ? "#000" : T.text} />
               </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>{title}</Text>
+                <Text style={styles.rowHint}>{hint}</Text>
+              </View>
+              <ChevronRight size={18} color={T.placeholder} />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Contact Form */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: text }]}>Send us a Message</Text>
-          <View style={[styles.messageContainer, { backgroundColor: cardBg }]}>
-            <TextInput
-              value={message}
-              onChangeText={setMessage}
-              placeholder="Describe your issue or question..."
-              placeholderTextColor={subtitleText}
-              style={[styles.messageInput, { color: text }]}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-            <TouchableOpacity
-              style={[styles.sendButton, { backgroundColor: accentColor }]}
-              onPress={handleSendMessage}
-            >
-              <Send size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
+        <Text style={styles.sectionTitle}>Common questions</Text>
+        <View style={styles.group}>
+          {FAQ.map((item, i) => {
+            const expanded = openFaq === i;
+            return (
+              <TouchableOpacity
+                key={item.q}
+                style={[styles.faq, i < FAQ.length - 1 && styles.rowDivider]}
+                onPress={() => setOpenFaq(expanded ? null : i)}
+                activeOpacity={0.7}
+                accessibilityState={{ expanded }}
+              >
+                <View style={styles.faqHead}>
+                  <Text style={styles.faqQ}>{item.q}</Text>
+                  {expanded ? <ChevronDown size={18} color={T.text} /> : <ChevronRight size={18} color={T.placeholder} />}
+                </View>
+                {expanded && <Text style={styles.faqA}>{item.a}</Text>}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
-        {/* Response Time Info */}
-        <View style={[styles.infoCard, { backgroundColor: cardBg }]}>
-          <Text style={[styles.infoTitle, { color: text }]}>Response Time</Text>
-          <Text style={[styles.infoText, { color: subtitleText }]}>
-            We typically respond to support requests within 24 hours during business days.
-          </Text>
-        </View>
+        <Text style={styles.sectionTitle}>Send us a message</Text>
+        <TextInput
+          style={styles.textarea}
+          placeholder="Tell us what happened with your order…"
+          placeholderTextColor={T.placeholder}
+          value={message}
+          onChangeText={setMessage}
+          multiline
+          textAlignVertical="top"
+        />
+        <TouchableOpacity
+          style={[styles.send, !message.trim() && { backgroundColor: T.surface }]}
+          onPress={sendMessage}
+          disabled={!message.trim()}
+          activeOpacity={0.85}
+        >
+          <Send size={16} color={message.trim() ? "#FFF" : T.muted} />
+          <Text style={[styles.sendText, !message.trim() && { color: T.muted }]}>Send message</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", padding: 16, borderBottomWidth: 1 },
-  backButton: { padding: 8 },
-  headerTitle: { fontSize: 20, fontWeight: "bold" },
-  content: { flex: 1, padding: 16 },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: "600", marginBottom: 12 },
-  supportOption: { padding: 16, borderRadius: 12, marginBottom: 8 },
-  optionLeft: { flexDirection: "row", alignItems: "center" },
-  optionText: { marginLeft: 12 },
-  optionTitle: { fontSize: 16, fontWeight: "500" },
-  optionSubtitle: { fontSize: 14, marginTop: 2 },
-  messageContainer: { borderRadius: 12, padding: 16 },
-  messageInput: { fontSize: 16, minHeight: 100, marginBottom: 12 },
-  sendButton: { alignSelf: "flex-end", padding: 12, borderRadius: 24 },
-  infoCard: { padding: 16, borderRadius: 12 },
-  infoTitle: { fontSize: 16, fontWeight: "600", marginBottom: 8 },
-  infoText: { fontSize: 14, lineHeight: 20 },
+  container: { flex: 1, backgroundColor: T.bg },
+  content: { padding: 16, paddingBottom: 40 },
+  sectionTitle: { color: T.muted, fontSize: 12, fontWeight: "800", letterSpacing: 1.2, textTransform: "uppercase", marginTop: 24, marginBottom: 8, marginLeft: 4 },
+  group: { backgroundColor: T.surface, borderRadius: R.lg },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 14 },
+  rowDivider: { borderBottomWidth: 1, borderBottomColor: T.border },
+  rowIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: T.bg, alignItems: "center", justifyContent: "center" },
+  rowTitle: { color: T.text, fontSize: 15, fontWeight: "700" },
+  rowHint: { color: T.muted, fontSize: 12, marginTop: 1 },
+  faq: { paddingHorizontal: 14, paddingVertical: 14 },
+  faqHead: { flexDirection: "row", alignItems: "center", gap: 10 },
+  faqQ: { flex: 1, color: T.text, fontSize: 15, fontWeight: "700" },
+  faqA: { color: T.muted, fontSize: 14, lineHeight: 20, marginTop: 8 },
+  textarea: {
+    minHeight: 120,
+    borderRadius: R.md,
+    backgroundColor: T.surface,
+    padding: 14,
+    fontSize: 15,
+    color: T.text,
+  },
+  send: {
+    marginTop: 12,
+    height: 52,
+    borderRadius: R.lg,
+    backgroundColor: T.text,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  sendText: { color: "#FFF", fontSize: 15, fontWeight: "800" },
 });

@@ -1,6 +1,6 @@
 import { ArrowRight, MessageCircle, Phone } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 interface Rider {
@@ -32,14 +32,13 @@ export const DriverFoundScreen = ({
   deliveryLongitude,
   onContinueToTracking
 }: DriverFoundScreenProps) => {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = false; // Briano's uses a fixed black & white theme
 
-  const bg = isDark ? '#05070A' : '#FFF';
-  const text = isDark ? '#FFF' : '#111827';
-  const cardBg = isDark ? '#1F2937' : '#F9FAFB';
-  const subtitleText = isDark ? '#9CA3AF' : '#6B7280';
-  const accentColor = isDark ? '#4F46E5' : '#2563EB';
+  const bg = isDark ? '#000000' : '#FFFFFF';
+  const text = isDark ? '#FFFFFF' : '#111111';
+  const cardBg = isDark ? '#262626' : '#FAFAFA';
+  const subtitleText = isDark ? '#A3A3A3' : '#737373';
+  const accentColor = isDark ? '#000000' : '#000000';
 
   const { width, height } = Dimensions.get('window');
 
@@ -136,7 +135,7 @@ export const DriverFoundScreen = ({
           onPress={onContinueToTracking}
         >
           <Text style={styles.continueButtonText}>Continue to Tracking</Text>
-          <ArrowRight size={20} color="#FFF" />
+          <ArrowRight size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
     </View>
@@ -151,12 +150,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   motorcycleMarker: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 8,
     borderWidth: 2,
-    borderColor: '#2563EB',
-    shadowColor: '#000',
+    borderColor: '#000000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -173,7 +172,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -190,7 +189,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   ratingContainer: {
-    backgroundColor: '#FFF3CD',
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -198,7 +197,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#856404',
+    color: '#404040',
   },
   driverInfo: {
     marginBottom: 16,
@@ -252,7 +251,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   continueButtonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 8,

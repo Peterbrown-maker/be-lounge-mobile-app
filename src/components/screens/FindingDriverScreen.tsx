@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ordersApiService } from '../../services/orders';
 
 interface FindingDriverScreenProps {
@@ -22,13 +22,12 @@ export const FindingDriverScreen = ({
   const [isSearching, setIsSearching] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasCalledApi = useRef(false);
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = false; // Briano's uses a fixed black & white theme
 
-  const bg = isDark ? '#05070A' : '#FFF';
-  const text = isDark ? '#FFF' : '#111827';
-  const subtitleText = isDark ? '#9CA3AF' : '#6B7280';
-  const accentColor = isDark ? '#4F46E5' : '#2563EB';
+  const bg = isDark ? '#000000' : '#FFFFFF';
+  const text = isDark ? '#FFFFFF' : '#111111';
+  const subtitleText = isDark ? '#A3A3A3' : '#737373';
+  const accentColor = isDark ? '#000000' : '#000000';
 
   const messages = [
     'Finding available drivers...',
@@ -181,7 +180,7 @@ export const FindingDriverScreen = ({
         </Text>
 
         {/* Order details */}
-        <View style={[styles.orderCard, { backgroundColor: isDark ? '#1F2937' : '#F9FAFB' }]}>
+        <View style={[styles.orderCard, { backgroundColor: isDark ? '#262626' : '#FAFAFA' }]}>
           <Text style={[styles.orderTitle, { color: text }]}>Order #{orderId}</Text>
           <Text style={[styles.orderAddress, { color: subtitleText }]}>
             Delivering to: {deliveryAddress}
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: '#2563EB',
+    borderColor: '#000000',
     opacity: 0.7,
   },
   pulseRing2: {
@@ -231,7 +230,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     width: 200,
     height: 4,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E5E5E5',
     borderRadius: 2,
     marginBottom: 24,
     overflow: 'hidden',
@@ -257,7 +256,7 @@ const styles = StyleSheet.create({
     padding: 16,
     width: '100%',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -285,7 +284,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   retryButtonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',

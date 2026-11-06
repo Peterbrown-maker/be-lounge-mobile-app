@@ -1,6 +1,6 @@
 import { ArrowLeft, Minus, Plus, ShoppingCart } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { MenuItem, Restaurant, restaurantsApiService } from "../../../services/restaurants";
 
 interface CartItem extends MenuItem {
@@ -18,14 +18,13 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
+  const isDark = false; // Briano's uses a fixed black & white theme
 
-  const bg = isDark ? "#05070A" : "#FFF";
-  const text = isDark ? "#FFF" : "#111827";
-  const cardBg = isDark ? "#1F2937" : "#F9FAFB";
-  const subtitleText = isDark ? "#9CA3AF" : "#6B7280";
-  const accentColor = isDark ? "#4F46E5" : "#2563EB";
+  const bg = isDark ? "#000000" : "#FFFFFF";
+  const text = isDark ? "#FFFFFF" : "#111111";
+  const cardBg = isDark ? "#262626" : "#FAFAFA";
+  const subtitleText = isDark ? "#A3A3A3" : "#737373";
+  const accentColor = isDark ? "#000000" : "#000000";
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -105,7 +104,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: isDark ? "#374151" : "#E5E7EB" }]}>
+      <View style={[styles.header, { borderBottomColor: isDark ? "#404040" : "#E5E5E5" }]}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <ArrowLeft size={24} color={text} />
         </TouchableOpacity>
@@ -124,7 +123,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
         </View>
       ) : error ? (
         <View style={[styles.centerContent, { backgroundColor: bg }]}>
-          <Text style={[styles.errorText, { color: '#EF4444' }]}>{error}</Text>
+          <Text style={[styles.errorText, { color: '#000000' }]}>{error}</Text>
           <TouchableOpacity onPress={onBack}>
             <Text style={[styles.retryText, { color: accentColor }]}>Go Back</Text>
           </TouchableOpacity>
@@ -140,14 +139,14 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
         >
           {menu.map(item => {
             const cartItem = cart.find(c => c.id === item.id);
-            const hasImage = item.image && item.image.length > 0;
+            const hasImage = typeof item.image === "number" || (typeof item.image === "string" && item.image.length > 0);
             
             return (
               <View key={item.id} style={[styles.menuCard, { backgroundColor: cardBg }]}>
                 {/* Menu Item Image */}
                 {hasImage ? (
                   <Image
-                    source={{ uri: item.image }}
+                    source={typeof item.image === "number" ? item.image : { uri: item.image }}
                     style={styles.menuImage}
                     resizeMode="cover"
                     onError={(error) => {
@@ -155,7 +154,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
                     }}
                   />
                 ) : (
-                  <View style={[styles.menuImage, { backgroundColor: '#E5E7EB' }]}>
+                  <View style={[styles.menuImage, { backgroundColor: '#E5E5E5' }]}>
                     <Text style={{ color: subtitleText }}>No Image</Text>
                   </View>
                 )}
@@ -201,7 +200,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
                       style={[styles.addButton, { backgroundColor: accentColor }]} 
                       onPress={() => addToCart(item)}
                     >
-                      <Plus size={16} color="#FFF" />
+                      <Plus size={16} color="#FFFFFF" />
                       <Text style={styles.addButtonText}>Add</Text>
                     </TouchableOpacity>
                   )}
@@ -214,12 +213,12 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
 
       {/* Cart Footer */}
       {cart.length > 0 && (
-        <View style={[styles.cartFooter, { backgroundColor: bg, borderTopColor: isDark ? "#374151" : "#E5E7EB" }]}>
+        <View style={[styles.cartFooter, { backgroundColor: bg, borderTopColor: isDark ? "#404040" : "#E5E5E5" }]}>
           <TouchableOpacity 
             style={[styles.checkoutButton, { backgroundColor: accentColor }]} 
             onPress={() => onCheckout(cart)}
           >
-            <ShoppingCart size={20} color="#FFF" />
+            <ShoppingCart size={20} color="#FFFFFF" />
             <View style={styles.checkoutTextContainer}>
               <Text style={styles.checkoutText}>View Cart ({cart.length})</Text>
               <Text style={styles.checkoutPrice}>R {getTotal().toFixed(2)}</Text>
@@ -285,7 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 16, 
     padding: 12, 
     marginBottom: 12, 
-    shadowColor: "#000", 
+    shadowColor: "#000000", 
     shadowOpacity: 0.05, 
     shadowRadius: 10, 
     shadowOffset: { width: 0, height: 5 },
@@ -341,7 +340,7 @@ const styles = StyleSheet.create({
     justifyContent: "center" 
   },
   addButtonText: { 
-    color: "#FFF", 
+    color: "#FFFFFF", 
     fontSize: 14, 
     fontWeight: "600", 
     marginLeft: 6 
@@ -367,12 +366,12 @@ const styles = StyleSheet.create({
     marginLeft: 12 
   },
   checkoutText: { 
-    color: "#FFF", 
+    color: "#FFFFFF", 
     fontSize: 16, 
     fontWeight: "bold" 
   },
   checkoutPrice: { 
-    color: "#FFF", 
+    color: "#FFFFFF", 
     fontSize: 14, 
     fontWeight: "600", 
     marginTop: 4 

@@ -10,12 +10,12 @@ interface InputProps {
 const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E5E5E5',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
-    color: '#1F2937',
+    color: '#262626',
     fontSize: 16,
   },
 });

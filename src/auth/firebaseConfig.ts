@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Auth, getAuth, initializeAuth } from 'firebase/auth';
+import { Platform } from 'react-native';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -16,7 +18,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
-const auth = getAuth(app);
+// On native, persist the session in AsyncStorage so users stay logged in across restarts.
+// getReactNativePersistence only exists in Firebase's React Native build (which Metro
+// picks at runtime), so it isn't in the web typings — hence the require.
+let auth: Auth;
+if (Platform.OS === 'web') {
+  auth = getAuth(app);
+} else {
+  const { getReactNativePersistence } = require('firebase/auth');
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+}
 
 export { auth };
 export default app;

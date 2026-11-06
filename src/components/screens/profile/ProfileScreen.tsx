@@ -89,7 +89,7 @@ export const ProfileScreen = ({
               <Camera size={14} color="#FFFFFF" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.name}>{userProfile?.display_name || "Briano's regular"}</Text>
+          <Text style={styles.name}>{userProfile?.display_name || "Makhanani regular"}</Text>
           <Text style={styles.email}>{userProfile?.email}</Text>
           {!!memberSince && (
             <View style={styles.memberPill}>

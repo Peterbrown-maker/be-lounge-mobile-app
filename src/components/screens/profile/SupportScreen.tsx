@@ -15,29 +15,25 @@ import {
   View,
 } from "react-native";
 
-// TODO: replace with Briano's real contact details.
+// TODO: replace ALL of these placeholders with Makhanani's real contact details.
 const CONTACT = {
   phone: "+27 12 345 6789",
   whatsapp: "27123456789", // international format, no +
-  email: "hello@brianos.co.za",
+  email: "hello@example.com",
 };
 
 const FAQ = [
   {
     q: "How long does delivery take?",
-    a: "Usually 25–40 minutes depending on how busy the braai is and how far you are.",
+    a: "Usually 25–40 minutes depending on how busy the kitchen is and how far you are.",
   },
   {
     q: "Can I book a table for a group?",
     a: "Yes — choose Sit-in at checkout and pick your time and party size. For 10+ people, give us a call.",
   },
   {
-    q: "Do you deliver drinks?",
-    a: "Cocktails and soft drinks, yes. Alcohol is only delivered to customers 18+ and ID may be checked.",
-  },
-  {
     q: "Where do you deliver to?",
-    a: "We deliver to your current location within our delivery area around Soshanguve.",
+    a: "We deliver to your current location within our delivery area.",
   },
 ];
 
@@ -66,7 +62,7 @@ export const SupportScreen = ({ onBack }: SupportScreenProps) => {
     },
     {
       Icon: Phone,
-      title: "Call Briano's",
+      title: "Call Makhanani",
       hint: CONTACT.phone,
       onPress: () => open(`tel:${CONTACT.phone.replace(/\s/g, "")}`, `Call us on ${CONTACT.phone}`),
     },

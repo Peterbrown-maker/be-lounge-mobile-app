@@ -162,14 +162,14 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
       >
         {/* Photo header */}
         <View style={styles.hero}>
-          <Image source={require("../../assets/brianos/hero_feast.jpg")} style={styles.heroImage} />
+          <Image source={require("../../assets/makhanani/full_plate.jpg")} style={styles.heroImage} />
           <LinearGradient
             colors={["rgba(0,0,0,0.25)", "rgba(0,0,0,0.75)"]}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.heroContent}>
-            <Image source={require("../../assets/brianos/logo-white.png")} style={styles.heroLogo} resizeMode="contain" />
-            <Text style={styles.heroTagline}>SHISANYAMA · BAR · LOUNGE</Text>
+            <Image source={require("../../assets/makhanani/wordmark.png")} style={styles.heroLogo} resizeMode="contain" />
+            <Text style={styles.heroTagline}>COOKED TO PERFECTION</Text>
           </View>
         </View>
 
@@ -178,7 +178,7 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
           <Text style={styles.title}>{isLogin ? "Welcome back" : "Join the table"}</Text>
           <Text style={styles.subtitle}>
             {isLogin
-              ? "Sign in to order off the braai and book your spot."
+              ? "Sign in to order your head meat and book your spot."
               : "Create an account to order, book tables and track deliveries."}
           </Text>
 
@@ -301,7 +301,7 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
           </TouchableOpacity>
 
           <Text style={styles.legal}>
-            By continuing you confirm you're 18+ for bar orders and agree to Briano's terms.
+            By continuing you agree to Makhanani's terms.
           </Text>
         </View>
       </ScrollView>
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   hero: { height: 240, backgroundColor: "#000" },
   heroImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   heroContent: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 12 },
-  heroLogo: { width: 180, height: 56 },
+  heroLogo: { width: 240, height: 82 },
   heroTagline: { color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: "700", letterSpacing: 3, marginTop: 8 },
 
   sheet: {

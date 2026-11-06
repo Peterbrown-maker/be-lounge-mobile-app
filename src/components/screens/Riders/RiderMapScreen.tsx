@@ -21,8 +21,8 @@ import { socketService } from "../../../services/socket";
 
 const { width, height } = Dimensions.get("window");
 
-// Briano's service area coordinates
-const SOSHANGUVE_CENTER = {
+// Makhanani service area coordinates
+const DELIVERY_AREA_CENTER = {
   latitude: -25.5,
   longitude: 28.1,
   latitudeDelta: 0.08,
@@ -64,12 +64,12 @@ const generateRiders = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: `rider-${i}`,
     name: riderNames[i],
-    latitude: SOSHANGUVE_CENTER.latitude + (Math.random() - 0.5) * 0.06,
-    longitude: SOSHANGUVE_CENTER.longitude + (Math.random() - 0.5) * 0.06,
+    latitude: DELIVERY_AREA_CENTER.latitude + (Math.random() - 0.5) * 0.06,
+    longitude: DELIVERY_AREA_CENTER.longitude + (Math.random() - 0.5) * 0.06,
     status: Math.random() > 0.3 ? "available" : "busy",
     deliveries: Math.floor(Math.random() * 50) + 10,
     rating: (4 + Math.random()).toFixed(1),
-    bio: "Experienced delivery rider serving Briano's area",
+    bio: "Experienced delivery rider serving Makhanani area",
     recentDeliveries: Math.floor(Math.random() * 5) + 3,
   }));
 };
@@ -115,7 +115,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
   const [mapInteractionEnabled, setMapInteractionEnabled] = useState(true);
   const [activeOrderWithRider, setActiveOrderWithRider] = useState<ActiveOrderWithRider | null>(null);
   const [loading, setLoading] = useState(true);
-  const isDark = false; // Briano's uses a fixed black & white theme
+  const isDark = false; // Makhanani uses a fixed black & white theme
   const { user } = useAuth();
 
   const mapRef = useRef<MapView>(null);
@@ -162,8 +162,8 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
             vehicle: "Honda CBR",
             rating: 4.8,
             currentLocation: {
-              latitude: parseFloat(String(activeOrder.delivery_latitude || activeOrder.delivery_lat)) || SOSHANGUVE_CENTER.latitude + 0.005,
-              longitude: parseFloat(String(activeOrder.delivery_longitude || activeOrder.delivery_lng)) || SOSHANGUVE_CENTER.longitude + 0.003,
+              latitude: parseFloat(String(activeOrder.delivery_latitude || activeOrder.delivery_lat)) || DELIVERY_AREA_CENTER.latitude + 0.005,
+              longitude: parseFloat(String(activeOrder.delivery_longitude || activeOrder.delivery_lng)) || DELIVERY_AREA_CENTER.longitude + 0.003,
             },
           };
 
@@ -244,8 +244,8 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
     setMapInteractionEnabled(false);
     animateToSnapPoint(SNAP_POINTS.HALF);
     mapRef.current?.animateToRegion({
-      latitude: Number(rider.latitude) || SOSHANGUVE_CENTER.latitude,
-      longitude: Number(rider.longitude) || SOSHANGUVE_CENTER.longitude,
+      latitude: Number(rider.latitude) || DELIVERY_AREA_CENTER.latitude,
+      longitude: Number(rider.longitude) || DELIVERY_AREA_CENTER.longitude,
       latitudeDelta: 0.02,
       longitudeDelta: 0.02,
     }, 1000);
@@ -588,7 +588,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
               ref={mapRef}
               provider={PROVIDER_GOOGLE}
               style={styles.map}
-              initialRegion={SOSHANGUVE_CENTER}
+              initialRegion={DELIVERY_AREA_CENTER}
               customMapStyle={mapStyle}
               showsUserLocation
               showsMyLocationButton={false}
@@ -610,8 +610,8 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
                   {/* Delivery destination marker */}
                   <Marker
                     coordinate={{
-                      latitude: parseFloat(String(activeOrderWithRider.order.delivery_latitude || activeOrderWithRider.order.delivery_lat)) || SOSHANGUVE_CENTER.latitude,
-                      longitude: parseFloat(String(activeOrderWithRider.order.delivery_longitude || activeOrderWithRider.order.delivery_lng)) || SOSHANGUVE_CENTER.longitude,
+                      latitude: parseFloat(String(activeOrderWithRider.order.delivery_latitude || activeOrderWithRider.order.delivery_lat)) || DELIVERY_AREA_CENTER.latitude,
+                      longitude: parseFloat(String(activeOrderWithRider.order.delivery_longitude || activeOrderWithRider.order.delivery_lng)) || DELIVERY_AREA_CENTER.longitude,
                     }}
                     title="Delivery Address"
                     description={activeOrderWithRider.order.delivery_address}
@@ -634,7 +634,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
             {/* Area Label */}
             <View style={[styles.areaLabel, { backgroundColor: cardBg, borderColor }]}>
               <Navigation size={16} color="#000000" />
-              <Text style={[styles.areaText, { color: text }]}>Briano's Delivery Area</Text>
+              <Text style={[styles.areaText, { color: text }]}>Makhanani Delivery Area</Text>
             </View>
           </View>
         </View>

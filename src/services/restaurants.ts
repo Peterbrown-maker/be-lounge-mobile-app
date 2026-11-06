@@ -1,5 +1,5 @@
 // Local, offline restaurant data — no backend calls.
-import { ALL_MENU_ITEMS } from '../data/brianosMenu';
+import { ALL_MENU_ITEMS } from '../data/makhananiMenu';
 
 export interface Restaurant {
   id: string;
@@ -46,31 +46,32 @@ export interface PopularFoodCategory {
 
 const NOW = new Date().toISOString();
 
-export const BRIANOS_RESTAURANT: Restaurant = {
-  id: 'brianos',
-  name: "Briano's",
-  description: 'Flame grills, platters, seafood and cocktails',
+export const MAKHANANI_RESTAURANT: Restaurant = {
+  id: 'makhanani',
+  name: "Makhanani Shisanyama",
+  description: 'Head meats, paps and good vibes',
   image: '',
   images: [],
-  address: 'Soshanguve, Pretoria',
+  // TODO: Makhanani's real street address and map coordinates.
+  address: '',
   latitude: -25.5,
   longitude: 28.1,
-  rating: 4.8,
+  rating: 0,
   delivery_time: '25-35 min',
   delivery_fee: 15,
   is_open: true,
-  category: 'Grill',
-  popular_food: 'Grills',
-  emoji: '🍗',
+  category: 'Shisanyama',
+  popular_food: 'Head meats',
+  emoji: '🔥',
   created_at: NOW,
   updated_at: NOW,
 };
 
-const RESTAURANTS: Restaurant[] = [BRIANOS_RESTAURANT];
+const RESTAURANTS: Restaurant[] = [MAKHANANI_RESTAURANT];
 
 const MENU: MenuItem[] = ALL_MENU_ITEMS.map((item) => ({
   id: item.id,
-  restaurant_id: BRIANOS_RESTAURANT.id,
+  restaurant_id: MAKHANANI_RESTAURANT.id,
   name: item.name,
   description: item.description,
   price: item.price,
@@ -87,10 +88,10 @@ class RestaurantsService {
   }
 
   async getRestaurantById(restaurantId: string): Promise<Restaurant> {
-    return RESTAURANTS.find((r) => r.id === restaurantId) || BRIANOS_RESTAURANT;
+    return RESTAURANTS.find((r) => r.id === restaurantId) || MAKHANANI_RESTAURANT;
   }
 
-  // Single-restaurant app: every restaurant id gets the Briano's menu.
+  // Single-restaurant app: every restaurant id gets the Makhanani menu.
   async getRestaurantMenu(_restaurantId: string): Promise<MenuItem[]> {
     return MENU;
   }

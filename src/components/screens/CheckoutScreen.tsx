@@ -1,7 +1,7 @@
 import { useAuth } from "@/src/auth/AuthContext";
 import { ScreenHeader } from "@/src/components/ScreenHeader";
 import { useCurrentLocation } from "@/src/location/useCurrentLocation";
-import { BRIANOS_RESTAURANT } from "@/src/services/restaurants";
+import { MAKHANANI_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
 import { CalendarDays, Clock, LocateFixed, ShoppingBag, Store, Users, Utensils, Zap } from "lucide-react-native";
 import { useState } from "react";
@@ -67,8 +67,8 @@ const MODES: { id: BookingType; label: string; hint: string; Icon: typeof Zap }[
 const TIMES = ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
 const PARTY = ["2", "3", "4", "5", "6", "8", "10", "10+"];
 const SEATING = [
-  { label: "Inside", value: "inside" as const, hint: "Near the DJ" },
-  { label: "Patio", value: "patio" as const, hint: "By the braai" },
+  { label: "Inside", value: "inside" as const, hint: "At the tables" },
+  { label: "Patio", value: "patio" as const, hint: "By the fire" },
   { label: "VIP", value: "private" as const, hint: "Private area" },
 ];
 
@@ -90,7 +90,7 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
   const [loading, setLoading] = useState(false);
 
   const subtotal = cartItems.reduce((n, i) => n + i.price * i.quantity, 0);
-  const deliveryFee = bookingType === "delivery" ? BRIANOS_RESTAURANT.delivery_fee : 0;
+  const deliveryFee = bookingType === "delivery" ? MAKHANANI_RESTAURANT.delivery_fee : 0;
   const total = subtotal + deliveryFee;
   const tableOnly = bookingType === "sitin" && cartItems.length === 0;
 
@@ -143,7 +143,7 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScreenHeader title={tableOnly ? "Book a table" : "Checkout"} subtitle="Briano's · Soshanguve" onBack={onBack} />
+      <ScreenHeader title={tableOnly ? "Book a table" : "Checkout"} subtitle="Makhanani Shisanyama" onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Mode */}
@@ -222,8 +222,8 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
                 <Store size={18} color={T.emberText} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.locationLabel}>Briano's</Text>
-                <Text style={styles.locationAddress}>{BRIANOS_RESTAURANT.address} · Ready in about 20 min</Text>
+                <Text style={styles.locationLabel}>Makhanani Shisanyama</Text>
+                <Text style={styles.locationAddress}>Ready in about 20 min</Text>
               </View>
             </View>
           </Section>

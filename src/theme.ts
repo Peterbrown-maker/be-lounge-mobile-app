@@ -1,4 +1,4 @@
-// Briano's design tokens — light by default: white canvas, near-black type,
+// Makhanani design tokens — light by default: white canvas, near-black type,
 // one ember accent for the fire. Use these instead of hard-coded colours.
 export const T = {
   bg: "#FFFFFF",

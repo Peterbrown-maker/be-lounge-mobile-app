@@ -23,7 +23,7 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
   const [showDeliveryCode, setShowDeliveryCode] = useState(false);
   const [riderAccepted, setRiderAccepted] = useState(false); // Only true when rider has accepted the order
 
-  const isDark = false; // Briano's uses a fixed black & white theme
+  const isDark = false; // Makhanani uses a fixed black & white theme
 
   const bg = isDark ? '#000000' : '#FFFFFF';
   const text = isDark ? '#FFFFFF' : '#111111';

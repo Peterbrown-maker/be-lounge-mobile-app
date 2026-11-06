@@ -1,7 +1,7 @@
 import { useAuth } from "@/src/auth/AuthContext";
 import { ScreenHeader } from "@/src/components/ScreenHeader";
 import { ordersApiService } from "@/src/services/orders";
-import { BRIANOS_RESTAURANT } from "@/src/services/restaurants";
+import { MAKHANANI_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
 import { Banknote, Check, CreditCard, Lock } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -89,16 +89,16 @@ export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess
       // Save to local order history.
       const res = await ordersApiService.createOrder({
         user_id: user?.uid || "guest",
-        restaurant_id: BRIANOS_RESTAURANT.id,
+        restaurant_id: MAKHANANI_RESTAURANT.id,
         total_amount: Math.max(bookingData.totalPrice, 0.01),
         delivery_fee: deliveryFee,
         delivery_address:
           bookingData.deliveryAddress ||
           (bookingData.bookingType === "sitin"
             ? `Table for ${bookingData.partySize} at ${bookingData.sitInTime}`
-            : "Collect at Briano's"),
-        delivery_latitude: bookingData.deliveryLatitude ?? BRIANOS_RESTAURANT.latitude,
-        delivery_longitude: bookingData.deliveryLongitude ?? BRIANOS_RESTAURANT.longitude,
+            : "Collect at Makhanani"),
+        delivery_latitude: bookingData.deliveryLatitude ?? MAKHANANI_RESTAURANT.latitude,
+        delivery_longitude: bookingData.deliveryLongitude ?? MAKHANANI_RESTAURANT.longitude,
         special_instructions: bookingData.specialRequests,
         items: (bookingData.items?.length ? bookingData.items : [{ id: "table", name: "Table booking", price: 0, quantity: 1 }]).map(
           (i) => ({ menu_item_id: i.id, quantity: i.quantity, price: i.price })
@@ -143,7 +143,7 @@ export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess
   if (done) {
     const title = isDelivery ? "Order placed!" : bookingData.bookingType === "sitin" ? "Table booked!" : "Order placed!";
     const subtitle = isDelivery
-      ? "The braai's on. Finding you a driver…"
+      ? "We're on it. Finding you a driver…"
       : bookingData.bookingType === "sitin"
         ? `See you at ${bookingData.sitInTime} · ${bookingData.partySize} guests · ${SEATING_LABEL[bookingData.location || "inside"]}`
         : "We'll have it ready at the counter in about 20 minutes.";

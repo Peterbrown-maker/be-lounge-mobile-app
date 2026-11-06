@@ -18,7 +18,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isDark = false; // Briano's uses a fixed black & white theme
+  const isDark = false; // Makhanani uses a fixed black & white theme
 
   const bg = isDark ? "#000000" : "#FFFFFF";
   const text = isDark ? "#FFFFFF" : "#111111";
@@ -111,7 +111,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
         <View style={styles.headerContent}>
           <Text style={[styles.headerTitle, { color: text }]}>{restaurant.name}</Text>
           <Text style={[styles.headerSubtitle, { color: subtitleText }]}>
-            ⭐ {restaurant.rating || 4.5} • {restaurant.delivery_time}
+            {restaurant.delivery_time}
           </Text>
         </View>
       </View>

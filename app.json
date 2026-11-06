@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Obriano's Food",
+    "name": "Makhanani",
     "slug": "flavor-hos-deliveries",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Allow Obriano's Food to use your location so we can deliver to where you are.",
+        "NSLocationWhenInUseUsageDescription": "Allow Makhanani to use your location so we can deliver to where you are.",
         "NSLocationAlwaysUsageDescription": "We need your location to save delivery addresses"
       }
     },
@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png",
-        "backgroundColor": "#0A0A0A"
+        "backgroundColor": "#000000"
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
@@ -46,9 +46,9 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 300,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#000000",
           "dark": {
             "backgroundColor": "#000000"
           }
@@ -57,13 +57,13 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Briano's to use your location so we can deliver to where you are."
+          "locationWhenInUsePermission": "Allow Makhanani to use your location so we can deliver to where you are."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Briano's to access your photos to set your profile picture."
+          "photosPermission": "Allow Makhanani to access your photos to set your profile picture."
         }
       ]
     ],

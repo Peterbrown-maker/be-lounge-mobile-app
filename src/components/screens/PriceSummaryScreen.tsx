@@ -14,8 +14,8 @@ export const PriceSummaryScreen = ({ onBack, onConfirm }: PriceSummaryScreenProp
   // Mock data
   const deliveryDetails = {
     service: "Pick Up & Drop Off",
-    pickup: "123 Block AA, Briano's",
-    dropoff: "456 Block BB, Briano's",
+    pickup: "123 Block AA, Makhanani",
+    dropoff: "456 Block BB, Makhanani",
     distance: "2.5 km",
     estimatedTime: "15-20 min",
     baseFare: 25,

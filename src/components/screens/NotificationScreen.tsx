@@ -21,11 +21,9 @@ interface Notification {
 
 // Prototype content.
 const SAMPLE: Notification[] = [
-  { id: "1", kind: "event", title: "Amapiano Fridays tonight", message: "Resident DJs from 20:00. Book a table before it fills up.", time: "Just now", read: false },
-  { id: "2", kind: "order", title: "Your order is on the fire", message: "Mixed Grill Platter is on the braai — about 20 minutes.", time: "30 min ago", read: false },
-  { id: "3", kind: "deal", title: "50% off cocktails", message: "Happy hour Monday–Friday, 17:00–19:00.", time: "Yesterday", read: false },
-  { id: "4", kind: "delivery", title: "Driver on the way", message: "Sipho is 8 minutes away with your Briano's order.", time: "2 days ago", read: true },
-  { id: "5", kind: "event", title: "Sunday Chill Sessions", message: "Live band and sundowners from 13:00.", time: "3 days ago", read: true },
+  { id: "1", kind: "order", title: "Your order is on the fire", message: "Head, Feet & Pap is cooking, about 20 minutes.", time: "30 min ago", read: false },
+  { id: "2", kind: "delivery", title: "Driver on the way", message: "Sipho is 8 minutes away with your Makhanani order.", time: "2 days ago", read: true },
+  { id: "3", kind: "event", title: "Welcome to Makhanani", message: "Head meats, paps and good vibes. Book a table and pull through.", time: "3 days ago", read: true },
 ];
 
 const ICONS: Record<Kind, typeof Bell> = { order: Flame, delivery: Truck, event: Music2, deal: Package };

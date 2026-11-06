@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ArrowRight, CalendarDays, Flame, LocateFixed, Music2, ShoppingBag, Utensils, Zap } from "lucide-react-native";
+import { ArrowRight, CalendarDays, Flame, LocateFixed, ShoppingBag, Utensils, Zap } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
   Animated,
@@ -46,24 +46,24 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    kicker: "SHISANYAMA",
+    kicker: "HEAD MEATS",
     KickerIcon: Flame,
-    title: "Straight off\nthe braai",
-    description: "Flame-grilled chops, wors, wings and ribs with pap and sides — the way it should be done.",
-    image: require("../../assets/brianos/mixed_grill_platter.jpg"),
+    title: "Cow, pig and\nsheep heads",
+    description: "Head meats cooked to perfection, the way a proper shisanyama does it.",
+    image: require("../../assets/makhanani/head_plate.jpg"),
     chips: [
-      { label: "Platters", Icon: Utensils },
-      { label: "Grills", Icon: Flame },
+      { label: "Head meats", Icon: Flame },
+      { label: "Feet", Icon: Utensils },
     ],
   },
   {
-    kicker: "THE CLUB",
-    KickerIcon: Music2,
-    title: "Then the night\ngets going",
-    description: "Amapiano Fridays, deep house Saturdays, Sunday chill sessions. Book a table and pull through.",
-    image: require("../../assets/brianos/cocktails.jpg"),
+    kicker: "PAPS",
+    KickerIcon: Utensils,
+    title: "Pap, feet\nand gravy",
+    description: "Soft white pap and feet in rich gravy. Book a table and pull through for the good vibes.",
+    image: require("../../assets/makhanani/feet_and_pap.jpg"),
     chips: [
-      { label: "Weekly line-up", Icon: Music2 },
+      { label: "Pap & gravy", Icon: Utensils },
       { label: "Book a table", Icon: CalendarDays },
     ],
   },
@@ -71,8 +71,8 @@ const SLIDES: Slide[] = [
     kicker: "DELIVERY",
     KickerIcon: LocateFixed,
     title: "Delivered to\nwhere you are",
-    description: "We use your live location — no address to type. Or collect it, or eat in with the squad.",
-    image: require("../../assets/brianos/hero_feast.jpg"),
+    description: "We use your live location, so there's no address to type. Or collect it, or eat in with the squad.",
+    image: require("../../assets/makhanani/full_plate.jpg"),
     chips: [
       { label: "Delivery", Icon: Zap },
       { label: "Collect", Icon: ShoppingBag },
@@ -133,7 +133,9 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
       <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
 
       <View style={styles.header}>
-        <Image source={require("../../assets/brianos/logo-black.png")} style={styles.logo} resizeMode="contain" />
+        <View style={styles.logoTile}>
+          <Image source={require("../../assets/makhanani/wordmark.png")} style={styles.logo} resizeMode="contain" />
+        </View>
         {!isLast && (
           <TouchableOpacity onPress={onComplete} hitSlop={10} accessibilityLabel="Skip introduction">
             <Text style={styles.skip}>Skip</Text>
@@ -198,7 +200,8 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     minHeight: 52,
   },
-  logo: { width: 110, height: 34 },
+  logoTile: { backgroundColor: "#000000", borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  logo: { width: 118, height: 40 },
   skip: { color: C.muted, fontSize: 15, fontWeight: "600" },
 
   slide: { width, paddingHorizontal: 20 },

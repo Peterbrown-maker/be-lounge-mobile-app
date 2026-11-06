@@ -6,7 +6,7 @@ export type LocationStatus = 'idle' | 'locating' | 'ready' | 'denied' | 'error';
 export interface CurrentLocation {
   latitude: number;
   longitude: number;
-  /** Short label for chips, e.g. "Block L, Soshanguve". */
+  /** Short label for chips, e.g. "Block L, Pretoria". */
   label: string;
   /** Full human-readable address used for orders. */
   address: string;

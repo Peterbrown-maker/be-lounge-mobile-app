@@ -7,20 +7,16 @@ import {
   Flame,
   LocateFixed,
   Minus,
-  Music2,
   Plus,
   Search,
   ShoppingBag,
-  Star,
   Store,
   Utensils,
   Zap,
 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
+  ActivityIndicator,  Animated,
   Image,
   ScrollView,
   StatusBar,
@@ -31,13 +27,11 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "../../auth/AuthContext";
-import { venueStatus, WEEKLY_LINEUP } from "../../data/brianosClub";
-import { ALL_MENU_ITEMS, BRIANOS_MENU, BrianosMenuItem } from "../../data/brianosMenu";
+import { ALL_MENU_ITEMS, MAKHANANI_MENU, MakhananiMenuItem } from "../../data/makhananiMenu";
 import { useCurrentLocation } from "../../location/useCurrentLocation";
 import { ProfileAvatar } from "../ProfileAvatar";
-import { SpecialOffersCarousel } from "./SpecialOffersScreen";
 
-// Light by default: white canvas, Briano's black type, one ember accent for the fire.
+// Light by default: white canvas, Makhanani black type, one ember accent for the fire.
 const C = {
   bg: "#FFFFFF",
   surface: "#F5F5F5",
@@ -48,7 +42,6 @@ const C = {
   ember: "#FF6B1A",
   emberText: "#C2410C", // darker ember for small text on white (readable contrast)
   emberSoft: "rgba(255,107,26,0.12)",
-  live: "#22C55E",
   onImage: "#FFFFFF", // text sitting on photos
 };
 
@@ -63,20 +56,16 @@ export interface HomeCartItem {
 }
 
 interface Category {
-  id: keyof typeof BRIANOS_MENU | string;
+  id: keyof typeof MAKHANANI_MENU | string;
   name: string;
   image: any;
 }
 
 const CATEGORIES: Category[] = [
-  { id: "grills", name: "Off the braai", image: require("../../assets/brianos/grilled_chicken.jpg") },
-  { id: "platters", name: "Shisa platters", image: require("../../assets/brianos/mixed_grill_platter.jpg") },
-  { id: "steak", name: "Steak & chops", image: require("../../assets/brianos/steak_and_lamb_chops.jpg") },
-  { id: "wings", name: "Wings & wors", image: require("../../assets/brianos/wings_and_sausage.jpg") },
-  { id: "ribs", name: "Sticky ribs", image: require("../../assets/brianos/glazed_ribs.jpg") },
-  { id: "burgers", name: "Burgers", image: require("../../assets/brianos/cheeseburger_and_chips.jpg") },
-  { id: "seafood", name: "Seafood", image: require("../../assets/brianos/seafood_platter.jpg") },
-  { id: "cocktails", name: "Bar & cocktails", image: require("../../assets/brianos/cocktails.jpg") },
+  { id: "heads", name: "Head meats", image: require("../../assets/makhanani/head_plate.jpg") },
+  { id: "feet", name: "Feet", image: require("../../assets/makhanani/feet_gravy.jpg") },
+  { id: "sides", name: "Pap & gravy", image: require("../../assets/makhanani/head_and_pap.jpg") },
+  { id: "combos", name: "Combos", image: require("../../assets/makhanani/full_plate.jpg") },
 ];
 
 const MODES: { id: OrderMode; label: string; Icon: typeof Zap }[] = [
@@ -121,8 +110,6 @@ export const HomeScreen = ({
     Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
   }, []);
 
-  const venue = venueStatus();
-  const today = new Date().getDay();
   const firstName = (userProfile?.display_name || "").split(" ")[0];
 
   // ----- cart -----
@@ -149,8 +136,8 @@ export const HomeScreen = ({
         (i) => i.name.toLowerCase().includes(query) || i.description.toLowerCase().includes(query)
       )
     : [];
-  const categoryItems = selectedCategory ? BRIANOS_MENU[selectedCategory] || [] : [];
-  const crowdFavourites = [...ALL_MENU_ITEMS].sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const categoryItems = selectedCategory ? MAKHANANI_MENU[selectedCategory] || [] : [];
+  const featuredItems = ALL_MENU_ITEMS.slice(0, 4);
 
   // ----- location chip -----
   const locationLine =
@@ -163,10 +150,10 @@ export const HomeScreen = ({
             ? "Turn on location to deliver"
             : "Tap to use my location"
       : mode === "takeaway"
-        ? "Collect at Briano's · ready in 20 min"
-        : "Grab a table at Briano's";
+        ? "Collect at Makhanani · ready in 20 min"
+        : "Grab a table at Makhanani";
 
-  const renderMenuRow = (item: BrianosMenuItem) => {
+  const renderMenuRow = (item: MakhananiMenuItem) => {
     const qty = cart[item.id] || 0;
     return (
       <View key={item.id} style={styles.menuRow}>
@@ -174,13 +161,7 @@ export const HomeScreen = ({
         <View style={styles.menuInfo}>
           <Text style={styles.menuName} numberOfLines={1}>{item.name}</Text>
           <Text style={styles.menuDesc} numberOfLines={2}>{item.description}</Text>
-          <View style={styles.menuFooter}>
-            <Text style={styles.menuPrice}>R{item.price}</Text>
-            <View style={styles.ratingPill}>
-              <Star size={11} color={C.emberText} fill={C.emberText} />
-              <Text style={styles.ratingText}>{item.rating}</Text>
-            </View>
-          </View>
+          <Text style={styles.menuPrice}>R{item.price}</Text>
         </View>
         {qty === 0 ? (
           <TouchableOpacity style={styles.addBtn} onPress={() => changeQty(item.id, 1)} accessibilityLabel={`Add ${item.name}`}>
@@ -238,7 +219,7 @@ export const HomeScreen = ({
         <Search size={18} color={C.muted} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search the braai, bar & more"
+          placeholder="Search heads, feet, pap & more"
           placeholderTextColor={C.muted}
           value={searchText}
           onChangeText={setSearchText}
@@ -272,35 +253,31 @@ export const HomeScreen = ({
           </View>
         ) : (
           <>
-            {/* Hero: tonight at Briano's */}
+            {/* Hero */}
             <View style={styles.heroWrap}>
-              <Image source={require("../../assets/brianos/hero_feast.jpg")} style={styles.heroImage} />
+              <Image source={require("../../assets/makhanani/full_plate.jpg")} style={styles.heroImage} />
               <LinearGradient
                 colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.55)", "rgba(0,0,0,0.95)"]}
                 style={StyleSheet.absoluteFill}
               />
               <View style={styles.heroContent}>
                 <Image
-                  source={require("../../assets/brianos/logo-white.png")}
+                  source={require("../../assets/makhanani/wordmark.png")}
                   style={styles.heroLogo}
                   resizeMode="contain"
                 />
-                <View style={styles.statusPill}>
-                  <View style={[styles.statusDot, { backgroundColor: venue.open ? C.live : C.muted }]} />
-                  <Text style={styles.statusText}>{venue.open ? "Open now" : "Closed"} · {venue.label}</Text>
-                </View>
-                <Text style={styles.heroTitle}>Braai. Drinks. Vibes.</Text>
-                <Text style={styles.heroSub}>Shisanyama by day, club by night. Order the meat — or come through.</Text>
+                <Text style={styles.heroTitle}>Cooked to perfection.</Text>
+                <Text style={styles.heroSub}>Head meats, paps and good vibes. Order it to your door, or come through.</Text>
                 <View style={styles.heroCtas}>
                   <TouchableOpacity
                     style={styles.ctaPrimary}
                     onPress={() => {
                       setMode("delivery");
-                      setSelectedCategory("platters");
+                      setSelectedCategory("heads");
                     }}
                   >
                     <Flame size={16} color="#000" />
-                    <Text style={styles.ctaPrimaryText}>Order the braai</Text>
+                    <Text style={styles.ctaPrimaryText}>Order now</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.ctaGhost}
@@ -334,49 +311,12 @@ export const HomeScreen = ({
               })}
             </View>
 
-            {/* Weekly line-up */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Music2 size={18} color={C.ember} />
-                <Text style={styles.sectionTitle}>This week at Briano's</Text>
-              </View>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
-                {WEEKLY_LINEUP.map((ev) => {
-                  const isToday = ev.day === today;
-                  return (
-                    <View key={ev.id} style={[styles.eventCard, isToday && { borderColor: C.ember }]}>
-                      <Image source={ev.image} style={styles.eventImage} />
-                      <LinearGradient colors={["transparent", "rgba(0,0,0,0.92)"]} style={StyleSheet.absoluteFill} />
-                      <View style={[styles.dayBadge, isToday && { backgroundColor: C.ember }]}>
-                        <Text style={[styles.dayBadgeText, isToday && { color: "#000" }]}>
-                          {isToday ? "TONIGHT" : ev.dayLabel}
-                        </Text>
-                      </View>
-                      <View style={styles.eventInfo}>
-                        <Text style={styles.eventTitle}>{ev.title}</Text>
-                        <Text style={styles.eventVibe} numberOfLines={1}>{ev.vibe}</Text>
-                        <Text style={styles.eventTime}>{ev.time}</Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            </View>
-
-            {/* Limited time deals */}
-            <SpecialOffersCarousel
-              onOfferPress={(offer) =>
-                Alert.alert(offer.title, `${offer.description}
-
-Valid: ${offer.validOn}`)
-              }
-            />
 
             {/* Categories */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Flame size={18} color={C.ember} />
-                <Text style={styles.sectionTitle}>From the fire</Text>
+                <Text style={styles.sectionTitle}>The menu</Text>
               </View>
               <View style={styles.categoryGrid}>
                 {CATEGORIES.map((cat) => (
@@ -394,29 +334,29 @@ Valid: ${offer.validOn}`)
               </View>
             </View>
 
-            {/* Squad platter banner */}
+            {/* Combo banner */}
             <View style={styles.section}>
-              <TouchableOpacity style={styles.banner} onPress={() => setSelectedCategory("platters")} activeOpacity={0.85}>
+              <TouchableOpacity style={styles.banner} onPress={() => setSelectedCategory("combos")} activeOpacity={0.85}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.bannerKicker}>FOR THE SQUAD</Text>
-                  <Text style={styles.bannerTitle}>Mixed Grill Platter</Text>
-                  <Text style={styles.bannerSub}>Chops, wors, wings & pap — made to share</Text>
+                  <Text style={styles.bannerKicker}>THE FULL PLATE</Text>
+                  <Text style={styles.bannerTitle}>Head, Feet & Pap</Text>
+                  <Text style={styles.bannerSub}>Head meat and feet on one plate, with soft white pap</Text>
                   <View style={styles.bannerLink}>
-                    <Text style={styles.bannerLinkText}>See platters</Text>
+                    <Text style={styles.bannerLinkText}>See combos</Text>
                     <ChevronRight size={16} color="#000" />
                   </View>
                 </View>
-                <Image source={require("../../assets/brianos/mixed_grill_platter.jpg")} style={styles.bannerImage} />
+                <Image source={require("../../assets/makhanani/full_plate.jpg")} style={styles.bannerImage} />
               </TouchableOpacity>
             </View>
 
-            {/* Crowd favourites */}
+            {/* Start with these */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Star size={18} color={C.ember} fill={C.ember} />
-                <Text style={styles.sectionTitle}>Crowd favourites</Text>
+                <Flame size={18} color={C.ember} />
+                <Text style={styles.sectionTitle}>Start with these</Text>
               </View>
-              {crowdFavourites.map(renderMenuRow)}
+              {featuredItems.map(renderMenuRow)}
             </View>
           </>
         )}
@@ -477,13 +417,7 @@ const styles = StyleSheet.create({
   heroWrap: { marginHorizontal: 16, height: 300, borderRadius: 22, overflow: "hidden", backgroundColor: C.surface },
   heroImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   heroContent: { flex: 1, justifyContent: "flex-end", padding: 18 },
-  heroLogo: { position: "absolute", top: 16, left: 18, width: 110, height: 40 },
-  statusPill: {
-    flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start",
-    backgroundColor: "rgba(0,0,0,0.6)", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, marginBottom: 10,
-  },
-  statusDot: { width: 8, height: 8, borderRadius: 4 },
-  statusText: { color: C.onImage, fontSize: 12, fontWeight: "600" },
+  heroLogo: { position: "absolute", top: 12, left: 14, width: 140, height: 48 },
   heroTitle: { color: C.onImage, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   heroSub: { color: "#D4D4D4", fontSize: 14, marginTop: 4, lineHeight: 20 },
   heroCtas: { flexDirection: "row", gap: 10, marginTop: 14 },
@@ -509,22 +443,7 @@ const styles = StyleSheet.create({
   section: { marginTop: 24, paddingHorizontal: 16 },
   sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
   sectionTitle: { color: C.text, fontSize: 18, fontWeight: "700" },
-  hScroll: { gap: 12, paddingRight: 16 },
 
-  eventCard: {
-    width: 220, height: 150, borderRadius: 18, overflow: "hidden",
-    backgroundColor: C.surface, borderWidth: 2, borderColor: "transparent",
-  },
-  eventImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
-  dayBadge: {
-    position: "absolute", top: 10, left: 10, backgroundColor: "rgba(0,0,0,0.7)",
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
-  },
-  dayBadgeText: { color: C.onImage, fontSize: 11, fontWeight: "800", letterSpacing: 1 },
-  eventInfo: { position: "absolute", left: 12, right: 12, bottom: 10 },
-  eventTitle: { color: C.onImage, fontSize: 16, fontWeight: "700" },
-  eventVibe: { color: "#D4D4D4", fontSize: 12, marginTop: 2 },
-  eventTime: { color: C.ember, fontSize: 12, fontWeight: "700", marginTop: 4 },
 
   categoryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   categoryTile: { width: "48%", flexGrow: 1, height: 96, borderRadius: 16, overflow: "hidden", backgroundColor: C.surface },
@@ -555,11 +474,6 @@ const styles = StyleSheet.create({
   menuDesc: { color: C.muted, fontSize: 12, marginTop: 2, lineHeight: 17 },
   menuFooter: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 6 },
   menuPrice: { color: C.text, fontSize: 15, fontWeight: "800" },
-  ratingPill: {
-    flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: C.emberSoft,
-    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 999,
-  },
-  ratingText: { color: C.emberText, fontSize: 11, fontWeight: "700" },
   addBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.ember, justifyContent: "center", alignItems: "center" },
   stepper: {
     flexDirection: "row", alignItems: "center", backgroundColor: C.surface2,

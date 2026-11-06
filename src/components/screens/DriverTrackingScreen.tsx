@@ -1,5 +1,5 @@
 import { ordersApiService } from "@/src/services/orders";
-import { BRIANOS_RESTAURANT } from "@/src/services/restaurants";
+import { MAKHANANI_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
 import { Bike, Check, ChefHat, Flame, MapPin, MessageCircle, Package, Phone, Star } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -34,7 +34,7 @@ interface OrderCompletionData {
 type Stage = "confirmed" | "cooking" | "pickup" | "onway" | "arrived" | "delivered";
 const TIMELINE: { stage: Stage; at: number; label: string; Icon: typeof Check }[] = [
   { stage: "confirmed", at: 0, label: "Order confirmed", Icon: Check },
-  { stage: "cooking", at: 3, label: "On the braai", Icon: Flame },
+  { stage: "cooking", at: 3, label: "On the fire", Icon: Flame },
   { stage: "pickup", at: 8, label: "Driver picking up", Icon: Package },
   { stage: "onway", at: 12, label: "On the way to you", Icon: Bike },
   { stage: "arrived", at: 24, label: "Driver is outside", Icon: MapPin },
@@ -60,7 +60,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
     [paymentData.deliveryCode]
   );
 
-  const shop = { latitude: BRIANOS_RESTAURANT.latitude, longitude: BRIANOS_RESTAURANT.longitude };
+  const shop = { latitude: MAKHANANI_RESTAURANT.latitude, longitude: MAKHANANI_RESTAURANT.longitude };
   const home = {
     latitude: paymentData.bookingData?.deliveryLatitude ?? shop.latitude - 0.012,
     longitude: paymentData.bookingData?.deliveryLongitude ?? shop.longitude + 0.01,
@@ -105,7 +105,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
         : stage === "pickup"
           ? "Driver picking up your order"
           : stage === "cooking"
-            ? "Your order is on the braai"
+            ? "Your order is on the fire"
             : "Order confirmed";
 
   // Keep the saved order's status in step with the simulation.
@@ -128,7 +128,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
     });
 
   const confirmCancel = () =>
-    Alert.alert("Cancel order?", "If the braai has started we may not be able to refund the full amount.", [
+    Alert.alert("Cancel order?", "If we've started cooking we may not be able to refund the full amount.", [
       { text: "Keep order", style: "cancel" },
       {
         text: "Cancel order",
@@ -150,7 +150,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
           <Check size={44} color="#000" strokeWidth={3} />
         </View>
         <Text style={styles.doneTitle}>Enjoy your meal!</Text>
-        <Text style={styles.doneSub}>Thanks for ordering from Briano's. Come through for the vibes soon.</Text>
+        <Text style={styles.doneSub}>Thanks for ordering from Makhanani. Come through for the vibes soon.</Text>
         <View style={styles.receipt}>
           <ReceiptRow label="Reference" value={paymentData.paymentId} />
           <ReceiptRow label="Total" value={`R${paymentData.amount.toFixed(2)}`} />
@@ -184,7 +184,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
           toolbarEnabled={false}
         >
           <Polyline coordinates={[shop, home]} strokeColor={T.text} strokeWidth={3} lineDashPattern={[6, 6]} />
-          <Marker coordinate={shop} title="Briano's" anchor={{ x: 0.5, y: 0.5 }}>
+          <Marker coordinate={shop} title="Makhanani" anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.shopPin}>
               <ChefHat size={16} color="#FFF" />
             </View>

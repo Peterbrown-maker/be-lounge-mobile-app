@@ -45,3 +45,6 @@ app-example
 nul
 **/nul
 
+
+# Server credentials - never commit
+*firebase-adminsdk*.json

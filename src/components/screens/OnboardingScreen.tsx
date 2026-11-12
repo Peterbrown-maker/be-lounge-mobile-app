@@ -21,9 +21,9 @@ const C = {
   border: "#E5E5E5",
   text: "#0A0A0A",
   muted: "#737373",
-  ember: "#FF6B1A",
-  emberText: "#C2410C",
-  emberSoft: "rgba(255,107,26,0.12)",
+  ember: "#E31E24",
+  emberText: "#B9151B",
+  emberSoft: "rgba(227,30,36,0.10)",
 };
 
 interface OnboardingScreenProps {
@@ -46,24 +46,24 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    kicker: "HEAD MEATS",
-    KickerIcon: Flame,
-    title: "Cow, pig and\nsheep heads",
-    description: "Head meats cooked to perfection, the way a proper shisanyama does it.",
-    image: require("../../assets/makhanani/head_plate.jpg"),
+    kicker: "MOGODU MONDAY",
+    KickerIcon: Utensils,
+    title: "Proudly South\nAfrican",
+    description: "Mogodu, tlhogo, tlhakwana and more every Monday, with pap, ting, samp or dumpling and 2 veggies.",
+    image: require("../../assets/macnose/traditional_food.jpg"),
     chips: [
-      { label: "Head meats", Icon: Flame },
-      { label: "Feet", Icon: Utensils },
+      { label: "Traditional", Icon: Utensils },
+      { label: "Cooked meals", Icon: Flame },
     ],
   },
   {
-    kicker: "PAPS",
-    KickerIcon: Utensils,
-    title: "Pap, feet\nand gravy",
-    description: "Soft white pap and feet in rich gravy. Book a table and pull through for the good vibes.",
-    image: require("../../assets/makhanani/feet_and_pap.jpg"),
+    kicker: "GRILLS & BUBBLES",
+    KickerIcon: Flame,
+    title: "Grills, seafood\nand fine wines",
+    description: "Flame grilled wings, steaks, platters and oysters, with superior wines, premium bottles and feel good music.",
+    image: require("../../assets/macnose/food_drink.jpg"),
     chips: [
-      { label: "Pap & gravy", Icon: Utensils },
+      { label: "Grills", Icon: Flame },
       { label: "Book a table", Icon: CalendarDays },
     ],
   },
@@ -71,8 +71,8 @@ const SLIDES: Slide[] = [
     kicker: "DELIVERY",
     KickerIcon: LocateFixed,
     title: "Delivered to\nwhere you are",
-    description: "We use your live location, so there's no address to type. Or collect it, or eat in with the squad.",
-    image: require("../../assets/makhanani/full_plate.jpg"),
+    description: "We use your live location, so there's no address to type. Or collect it, or take a Short Left and eat in.",
+    image: require("../../assets/macnose/food.jpg"),
     chips: [
       { label: "Delivery", Icon: Zap },
       { label: "Collect", Icon: ShoppingBag },
@@ -134,7 +134,7 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
 
       <View style={styles.header}>
         <View style={styles.logoTile}>
-          <Image source={require("../../assets/makhanani/wordmark.png")} style={styles.logo} resizeMode="contain" />
+          <Image source={require("../../assets/macnose/logo.jpg")} style={styles.logo} resizeMode="contain" />
         </View>
         {!isLast && (
           <TouchableOpacity onPress={onComplete} hitSlop={10} accessibilityLabel="Skip introduction">
@@ -181,7 +181,7 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
           style={[styles.cta, isLast && { backgroundColor: C.ember }]}
           accessibilityLabel={isLast ? "Get started" : "Next"}
         >
-          <Text style={[styles.ctaText, isLast && { color: "#000" }]}>{isLast ? "Let's get started" : "Next"}</Text>
+          <Text style={[styles.ctaText, isLast && { color: "#FFF" }]}>{isLast ? "Let's get started" : "Next"}</Text>
           <ArrowRight size={18} color={isLast ? "#000" : "#FFF"} />
         </TouchableOpacity>
       </View>
@@ -200,8 +200,8 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     minHeight: 52,
   },
-  logoTile: { backgroundColor: "#000000", borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
-  logo: { width: 118, height: 40 },
+  logoTile: { backgroundColor: "#000000", borderRadius: 12, overflow: "hidden" },
+  logo: { width: 52, height: 52 },
   skip: { color: C.muted, fontSize: 15, fontWeight: "600" },
 
   slide: { width, paddingHorizontal: 20 },

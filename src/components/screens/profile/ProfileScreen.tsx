@@ -12,10 +12,19 @@ import {
   Settings,
   User,
 } from "lucide-react-native";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface ProfileScreenProps {
   onBack: () => void;
+  /** Called after a successful sign-out (go to the login screen). */
+  onLoggedOut: () => void;
   onNavigateToEditProfile: () => void;
   onNavigateToSavedAddresses: () => void;
   onNavigateToSettings: () => void;
@@ -25,6 +34,7 @@ interface ProfileScreenProps {
 
 export const ProfileScreen = ({
   onBack,
+  onLoggedOut,
   onNavigateToEditProfile,
   onNavigateToSavedAddresses,
   onNavigateToSettings,
@@ -34,14 +44,20 @@ export const ProfileScreen = ({
   const { signOut, userProfile, changeProfilePhoto } = useAuth();
 
   const memberSince = userProfile?.created_at
-    ? new Date(userProfile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    ? new Date(userProfile.created_at).toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      })
     : "";
 
   const handleChangePhoto = async () => {
     try {
       await changeProfilePhoto();
     } catch (error: any) {
-      Alert.alert("Error", error?.message || "Could not update profile picture.");
+      Alert.alert(
+        "Error",
+        error?.message || "Could not update profile picture.",
+      );
     }
   };
 
@@ -54,9 +70,10 @@ export const ProfileScreen = ({
         onPress: async () => {
           try {
             await signOut();
-            onBack();
-          } catch (error) {
+            onLoggedOut();
+          } catch (error: any) {
             console.error("Logout error:", error);
+            Alert.alert("Couldn't log out", error?.message || "Please try again.");
           }
         },
       },
@@ -64,32 +81,66 @@ export const ProfileScreen = ({
   };
 
   const rows = [
-    { icon: User, label: "Edit profile", hint: "Name and phone", onPress: onNavigateToEditProfile },
+    {
+      icon: User,
+      label: "Edit profile",
+      hint: "Name and phone",
+      onPress: onNavigateToEditProfile,
+    },
     onNavigateToOrderHistory && {
       icon: ClipboardList,
       label: "Order history",
       hint: "Past orders and receipts",
       onPress: onNavigateToOrderHistory,
     },
-    { icon: MapPin, label: "Saved places", hint: "Home, work and more", onPress: onNavigateToSavedAddresses },
-    { icon: Settings, label: "Settings", hint: "Notifications and location", onPress: onNavigateToSettings },
-    { icon: LifeBuoy, label: "Help & support", hint: "Call, WhatsApp or email us", onPress: onNavigateToSupport },
-  ].filter(Boolean) as { icon: typeof User; label: string; hint: string; onPress: () => void }[];
+    {
+      icon: MapPin,
+      label: "Saved places",
+      hint: "Home, work and more",
+      onPress: onNavigateToSavedAddresses,
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      hint: "Notifications and location",
+      onPress: onNavigateToSettings,
+    },
+    {
+      icon: LifeBuoy,
+      label: "Help & support",
+      hint: "Call, WhatsApp or email us",
+      onPress: onNavigateToSupport,
+    },
+  ].filter(Boolean) as {
+    icon: typeof User;
+    label: string;
+    hint: string;
+    onPress: () => void;
+  }[];
 
   return (
     <View style={styles.container}>
       <ScreenHeader title="Profile" onBack={onBack} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Identity card */}
         <View style={styles.identity}>
-          <TouchableOpacity onPress={handleChangePhoto} activeOpacity={0.8} accessibilityLabel="Change profile picture">
+          <TouchableOpacity
+            onPress={handleChangePhoto}
+            activeOpacity={0.8}
+            accessibilityLabel="Change profile picture"
+          >
             <ProfileAvatar size={84} />
             <View style={styles.cameraBadge}>
               <Camera size={14} color="#FFFFFF" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.name}>{userProfile?.display_name || "Makhanani regular"}</Text>
+          <Text style={styles.name}>
+            {userProfile?.display_name || "MacNose regular"}
+          </Text>
           <Text style={styles.email}>{userProfile?.email}</Text>
           {!!memberSince && (
             <View style={styles.memberPill}>
@@ -119,7 +170,11 @@ export const ProfileScreen = ({
           ))}
         </View>
 
-        <TouchableOpacity style={styles.logout} onPress={handleLogout} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.logout}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
           <LogOut size={18} color={T.danger} />
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
@@ -148,13 +203,32 @@ const styles = StyleSheet.create({
   },
   name: { color: T.text, fontSize: 22, fontWeight: "800", marginTop: 14 },
   email: { color: T.muted, fontSize: 14, marginTop: 2 },
-  memberPill: { marginTop: 10, backgroundColor: T.emberSoft, paddingHorizontal: 12, paddingVertical: 5, borderRadius: R.pill },
+  memberPill: {
+    marginTop: 10,
+    backgroundColor: T.emberSoft,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: R.pill,
+  },
   memberText: { color: T.emberText, fontSize: 12, fontWeight: "700" },
 
   group: { backgroundColor: T.surface, borderRadius: R.lg, marginTop: 8 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 14 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
   rowDivider: { borderBottomWidth: 1, borderBottomColor: T.border },
-  rowIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: T.bg, alignItems: "center", justifyContent: "center" },
+  rowIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: T.bg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   rowLabel: { color: T.text, fontSize: 15, fontWeight: "700" },
   rowHint: { color: T.muted, fontSize: 12, marginTop: 1 },
 

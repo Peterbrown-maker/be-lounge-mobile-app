@@ -28,8 +28,8 @@ const C = {
   text: "#0A0A0A",
   muted: "#737373",
   placeholder: "#A3A3A3",
-  ember: "#FF6B1A",
-  emberText: "#C2410C",
+  ember: "#E31E24",
+  emberText: "#B9151B",
   error: "#DC2626",
 };
 
@@ -162,14 +162,14 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
       >
         {/* Photo header */}
         <View style={styles.hero}>
-          <Image source={require("../../assets/makhanani/full_plate.jpg")} style={styles.heroImage} />
+          <Image source={require("../../assets/macnose/food.jpg")} style={styles.heroImage} />
           <LinearGradient
             colors={["rgba(0,0,0,0.25)", "rgba(0,0,0,0.75)"]}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.heroContent}>
-            <Image source={require("../../assets/makhanani/wordmark.png")} style={styles.heroLogo} resizeMode="contain" />
-            <Text style={styles.heroTagline}>COOKED TO PERFECTION</Text>
+            <Image source={require("../../assets/macnose/logo.jpg")} style={styles.heroLogo} resizeMode="contain" />
+            <Text style={styles.heroTagline}>GOOD FOOD TAKES TIME TO PREPARE</Text>
           </View>
         </View>
 
@@ -178,7 +178,7 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
           <Text style={styles.title}>{isLogin ? "Welcome back" : "Join the table"}</Text>
           <Text style={styles.subtitle}>
             {isLogin
-              ? "Sign in to order your head meat and book your spot."
+              ? "Sign in to order your favourites and book your table."
               : "Create an account to order, book tables and track deliveries."}
           </Text>
 
@@ -301,7 +301,7 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
           </TouchableOpacity>
 
           <Text style={styles.legal}>
-            By continuing you agree to Makhanani's terms.
+            By continuing you confirm you're 18+ for alcohol orders and agree to MacNose Cafe's terms.
           </Text>
         </View>
       </ScrollView>
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   hero: { height: 240, backgroundColor: "#000" },
   heroImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   heroContent: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 12 },
-  heroLogo: { width: 240, height: 82 },
+  heroLogo: { width: 96, height: 96, borderRadius: 20 },
   heroTagline: { color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: "700", letterSpacing: 3, marginTop: 8 },
 
   sheet: {
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255,107,26,0.12)",
+    backgroundColor: "rgba(227,30,36,0.10)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,

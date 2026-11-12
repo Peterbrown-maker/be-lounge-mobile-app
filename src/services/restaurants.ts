@@ -1,5 +1,5 @@
 // Local, offline restaurant data — no backend calls.
-import { ALL_MENU_ITEMS } from '../data/makhananiMenu';
+import { ALL_MENU_ITEMS } from '../data/macnoseMenu';
 
 export interface Restaurant {
   id: string;
@@ -46,32 +46,50 @@ export interface PopularFoodCategory {
 
 const NOW = new Date().toISOString();
 
-export const MAKHANANI_RESTAURANT: Restaurant = {
-  id: 'makhanani',
-  name: "Makhanani Shisanyama",
-  description: 'Head meats, paps and good vibes',
+export const MACNOSE_RESTAURANT: Restaurant = {
+  id: 'macnose',
+  name: 'MacNose Cafe',
+  description: 'Pub & restaurant in Short Left, Soshanguve. South African classics, grills, seafood, platters and drinks. Est. 2007.',
   image: '',
   images: [],
-  // TODO: Makhanani's real street address and map coordinates.
-  address: '',
-  latitude: -25.5,
-  longitude: 28.1,
+  address: '43 Aubrey Matlakala St, Short Left, Soshanguve, 0164',
+  latitude: -25.5238705,
+  longitude: 28.0804518,
   rating: 0,
   delivery_time: '25-35 min',
   delivery_fee: 15,
   is_open: true,
-  category: 'Shisanyama',
-  popular_food: 'Head meats',
-  emoji: '🔥',
+  category: 'Pub & Restaurant',
+  popular_food: 'Mogodu Monday',
+  emoji: '🍽️',
   created_at: NOW,
   updated_at: NOW,
 };
 
-const RESTAURANTS: Restaurant[] = [MAKHANANI_RESTAURANT];
+/** Venue details from macnosecafeshortleft.co.za. */
+export const MACNOSE_INFO = {
+  tagline: 'Take a Short Left',
+  established: 2007,
+  about:
+    'Our extensive menu offers a huge variety of South African dishes specializing in African cuisine (e.g. Ox Tripe), seafood options (e.g. Oysters) & quality meat (e.g. Steak). Superior wines, premium bottles, bubbles & feel good music makes for a unique dining experience.',
+  promise:
+    'Good food takes time to prepare. Our food is freshly prepared to order. If you are in a hurry, have any allergies or queries, please bring it to our attention and we will do our utmost to accommodate you where possible.',
+  hours: [
+    { days: 'Mon – Thu', time: '10:00 – 22:00' },
+    { days: 'Fri – Sat', time: '10:00 – 02:00' },
+    { days: 'Sunday', time: '10:00 – 23:00' },
+  ],
+  website: 'https://macnosecafeshortleft.co.za/',
+  facebook: 'https://www.facebook.com/p/Macnose-Cafe-Short-Left-100064692908943/',
+  instagram: 'https://www.instagram.com/shortleft_soshanguve/',
+  instagramHandle: '@shortleft_soshanguve',
+} as const;
+
+const RESTAURANTS: Restaurant[] = [MACNOSE_RESTAURANT];
 
 const MENU: MenuItem[] = ALL_MENU_ITEMS.map((item) => ({
   id: item.id,
-  restaurant_id: MAKHANANI_RESTAURANT.id,
+  restaurant_id: MACNOSE_RESTAURANT.id,
   name: item.name,
   description: item.description,
   price: item.price,
@@ -88,10 +106,10 @@ class RestaurantsService {
   }
 
   async getRestaurantById(restaurantId: string): Promise<Restaurant> {
-    return RESTAURANTS.find((r) => r.id === restaurantId) || MAKHANANI_RESTAURANT;
+    return RESTAURANTS.find((r) => r.id === restaurantId) || MACNOSE_RESTAURANT;
   }
 
-  // Single-restaurant app: every restaurant id gets the Makhanani menu.
+  // Single-restaurant app: every restaurant id gets the MacNose menu.
   async getRestaurantMenu(_restaurantId: string): Promise<MenuItem[]> {
     return MENU;
   }

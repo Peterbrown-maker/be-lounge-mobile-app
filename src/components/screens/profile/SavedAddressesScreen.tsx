@@ -117,7 +117,7 @@ export const SavedAddressesScreen = ({ onBack }: SavedAddressesScreenProps) => {
               >
                 <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }}>
                   <View style={styles.pin}>
-                    <MapPin size={16} color="#000" />
+                    <MapPin size={16} color="#FFF" />
                   </View>
                 </Marker>
               </MapView>
@@ -183,7 +183,7 @@ export const SavedAddressesScreen = ({ onBack }: SavedAddressesScreenProps) => {
             disabled={!location || saving}
             activeOpacity={0.85}
           >
-            {saving ? <ActivityIndicator color="#000" /> : <Text style={styles.ctaText}>Save {label}</Text>}
+            {saving ? <ActivityIndicator color="#FFF" /> : <Text style={styles.ctaText}>Save {label}</Text>}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -198,7 +198,7 @@ export const SavedAddressesScreen = ({ onBack }: SavedAddressesScreenProps) => {
         onBack={onBack}
         right={
           <TouchableOpacity style={styles.addBtn} onPress={startAdding} accessibilityLabel="Add a place">
-            <Plus size={20} color="#000" />
+            <Plus size={20} color="#FFF" />
           </TouchableOpacity>
         }
       />
@@ -276,5 +276,5 @@ const styles = StyleSheet.create({
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: T.border, backgroundColor: T.bg },
   cta: { height: 54, borderRadius: R.lg, backgroundColor: T.ember, alignItems: "center", justifyContent: "center" },
   ctaDisabled: { opacity: 0.5 },
-  ctaText: { color: "#000", fontSize: 16, fontWeight: "800" },
+  ctaText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
 });

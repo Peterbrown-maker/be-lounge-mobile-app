@@ -1,5 +1,5 @@
 import { ScreenHeader } from "@/src/components/ScreenHeader";
-import { ALL_MENU_ITEMS } from "@/src/data/makhananiMenu";
+import { ALL_MENU_ITEMS } from "@/src/data/macnoseMenu";
 import { Order, ordersApiService } from "@/src/services/orders";
 import { R, T } from "@/src/theme";
 import { CalendarDays, ChevronRight, ClipboardList, ShoppingBag, X, Zap } from "lucide-react-native";
@@ -25,7 +25,7 @@ interface OrderHistoryScreenProps {
 type Kind = "delivery" | "takeaway" | "sitin";
 
 const kindOf = (o: Order): Kind =>
-  o.delivery_address?.startsWith("Table for") ? "sitin" : o.delivery_address === "Collect at Makhanani" ? "takeaway" : "delivery";
+  o.delivery_address?.startsWith("Table for") ? "sitin" : o.delivery_address?.startsWith("Collect at") ? "takeaway" : "delivery";
 
 const KIND: Record<Kind, { label: string; Icon: typeof Zap }> = {
   delivery: { label: "Delivery", Icon: Zap },

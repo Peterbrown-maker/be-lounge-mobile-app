@@ -1,7 +1,7 @@
 import { useAuth } from "@/src/auth/AuthContext";
 import { ScreenHeader } from "@/src/components/ScreenHeader";
 import { useCurrentLocation } from "@/src/location/useCurrentLocation";
-import { MAKHANANI_RESTAURANT } from "@/src/services/restaurants";
+import { MACNOSE_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
 import { CalendarDays, Clock, LocateFixed, ShoppingBag, Store, Users, Utensils, Zap } from "lucide-react-native";
 import { useState } from "react";
@@ -90,7 +90,7 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
   const [loading, setLoading] = useState(false);
 
   const subtotal = cartItems.reduce((n, i) => n + i.price * i.quantity, 0);
-  const deliveryFee = bookingType === "delivery" ? MAKHANANI_RESTAURANT.delivery_fee : 0;
+  const deliveryFee = bookingType === "delivery" ? MACNOSE_RESTAURANT.delivery_fee : 0;
   const total = subtotal + deliveryFee;
   const tableOnly = bookingType === "sitin" && cartItems.length === 0;
 
@@ -143,7 +143,7 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScreenHeader title={tableOnly ? "Book a table" : "Checkout"} subtitle="Makhanani Shisanyama" onBack={onBack} />
+      <ScreenHeader title={tableOnly ? "Book a table" : "Checkout"} subtitle="MacNose Cafe · Short Left" onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Mode */}
@@ -222,7 +222,7 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
                 <Store size={18} color={T.emberText} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.locationLabel}>Makhanani Shisanyama</Text>
+                <Text style={styles.locationLabel}>MacNose Cafe, Short Left</Text>
                 <Text style={styles.locationAddress}>Ready in about 20 min</Text>
               </View>
             </View>
@@ -314,7 +314,7 @@ export const CheckoutScreen: React.FC<CheckoutProps> = ({
           disabled={loading}
           activeOpacity={0.85}
         >
-          {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.ctaText}>{ctaLabel}</Text>}
+          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.ctaText}>{ctaLabel}</Text>}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -405,5 +405,5 @@ const styles = StyleSheet.create({
 
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: T.border, backgroundColor: T.bg },
   cta: { height: 56, borderRadius: R.lg, backgroundColor: T.ember, alignItems: "center", justifyContent: "center" },
-  ctaText: { color: "#000", fontSize: 16, fontWeight: "800" },
+  ctaText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
 });

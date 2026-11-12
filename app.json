@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Makhanani",
+    "name": "MacNose Cafe",
     "slug": "flavor-hos-deliveries",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Allow Makhanani to use your location so we can deliver to where you are.",
+        "NSLocationWhenInUseUsageDescription": "Allow MacNose Cafe to use your location so we can deliver to where you are.",
         "NSLocationAlwaysUsageDescription": "We need your location to save delivery addresses"
       }
     },
@@ -57,13 +57,13 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Makhanani to use your location so we can deliver to where you are."
+          "locationWhenInUsePermission": "Allow MacNose Cafe to use your location so we can deliver to where you are."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Makhanani to access your photos to set your profile picture."
+          "photosPermission": "Allow MacNose Cafe to access your photos to set your profile picture."
         }
       ]
     ],

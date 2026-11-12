@@ -1,39 +1,27 @@
 import { ScreenHeader } from "@/src/components/ScreenHeader";
+import { AppNotification, NotificationKind, timeAgo, useNotifications } from "@/src/services/notifications";
 import { R, T } from "@/src/theme";
-import { Bell, Flame, Music2, Package, Truck } from "lucide-react-native";
-import { useState } from "react";
+import { Bell, ChevronRight, Flame, Music2, Tag, Truck } from "lucide-react-native";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface NotificationScreenProps {
   onBack: () => void;
+  /** Open an event's details (event notifications). */
+  onOpenEvent?: (eventId: string) => void;
+  /** Open a menu category, e.g. specials (deal notifications). */
+  onOpenCategory?: (categoryId: string) => void;
 }
 
-type Kind = "order" | "delivery" | "event" | "deal";
+const ICONS: Record<NotificationKind, typeof Bell> = { order: Flame, delivery: Truck, event: Music2, deal: Tag };
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  kind: Kind;
-  read: boolean;
-}
+export const NotificationScreen = ({ onBack, onOpenEvent, onOpenCategory }: NotificationScreenProps) => {
+  const { items, unread, markRead, markAllRead } = useNotifications();
 
-// Prototype content.
-const SAMPLE: Notification[] = [
-  { id: "1", kind: "order", title: "Your order is on the fire", message: "Head, Feet & Pap is cooking, about 20 minutes.", time: "30 min ago", read: false },
-  { id: "2", kind: "delivery", title: "Driver on the way", message: "Sipho is 8 minutes away with your Makhanani order.", time: "2 days ago", read: true },
-  { id: "3", kind: "event", title: "Welcome to Makhanani", message: "Head meats, paps and good vibes. Book a table and pull through.", time: "3 days ago", read: true },
-];
-
-const ICONS: Record<Kind, typeof Bell> = { order: Flame, delivery: Truck, event: Music2, deal: Package };
-
-export const NotificationScreen = ({ onBack }: NotificationScreenProps) => {
-  const [items, setItems] = useState(SAMPLE);
-  const unread = items.filter((n) => !n.read).length;
-
-  const markRead = (id: string) => setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  const markAll = () => setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+  const open = (n: AppNotification) => {
+    markRead(n.id);
+    if (n.eventId && onOpenEvent) onOpenEvent(n.eventId);
+    else if (n.categoryId && onOpenCategory) onOpenCategory(n.categoryId);
+  };
 
   return (
     <View style={styles.container}>
@@ -43,7 +31,7 @@ export const NotificationScreen = ({ onBack }: NotificationScreenProps) => {
         onBack={onBack}
         right={
           unread ? (
-            <TouchableOpacity onPress={markAll} hitSlop={8}>
+            <TouchableOpacity onPress={markAllRead} hitSlop={8}>
               <Text style={styles.markAll}>Mark all read</Text>
             </TouchableOpacity>
           ) : null
@@ -63,11 +51,12 @@ export const NotificationScreen = ({ onBack }: NotificationScreenProps) => {
           {items.map((n) => {
             const Icon = ICONS[n.kind];
             const highlight = n.kind === "event" || n.kind === "deal";
+            const linked = !!(n.eventId || n.categoryId);
             return (
               <TouchableOpacity
                 key={n.id}
                 style={[styles.item, !n.read && styles.itemUnread]}
-                onPress={() => markRead(n.id)}
+                onPress={() => open(n)}
                 activeOpacity={0.75}
               >
                 <View
@@ -81,12 +70,15 @@ export const NotificationScreen = ({ onBack }: NotificationScreenProps) => {
                 </View>
                 <View style={{ flex: 1 }}>
                   <View style={styles.titleRow}>
-                    <Text style={[styles.title, !n.read && { fontWeight: "800" }]} numberOfLines={1}>{n.title}</Text>
+                    <Text style={[styles.title, !n.read && { fontWeight: "800" }]} numberOfLines={1}>
+                      {n.title}
+                    </Text>
                     {!n.read && <View style={styles.dot} />}
                   </View>
                   <Text style={styles.message}>{n.message}</Text>
-                  <Text style={styles.time}>{n.time}</Text>
+                  <Text style={styles.time}>{timeAgo(n.createdAt)}</Text>
                 </View>
+                {linked && <ChevronRight size={18} color={T.placeholder} style={{ alignSelf: "center" }} />}
               </TouchableOpacity>
             );
           })}

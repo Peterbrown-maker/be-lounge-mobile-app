@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Animated, Easing, Image, StatusBar, StyleSheet, Text, View } from "react-native";
 
-// Black to match the Makhanani emblem.
+// Black to match the MacNose logo.
 const C = {
   bg: "#000000",
   muted: "#A3A3A3",
-  ember: "#FF6B1A",
+  ember: "#E31E24",
   track: "#262626",
 };
 
@@ -48,14 +48,14 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
       <StatusBar barStyle="light-content" backgroundColor={C.bg} />
 
       <Animated.View style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}>
-        <Image source={require("../../assets/makhanani/emblem.jpg")} style={styles.emblem} resizeMode="contain" />
+        <Image source={require("../../assets/macnose/logo.jpg")} style={styles.emblem} resizeMode="contain" />
       </Animated.View>
 
       <View style={styles.footer}>
         <View style={styles.track}>
           <Animated.View style={[styles.bar, { width: barWidth }]} />
         </View>
-        <Text style={styles.footerText}>Firing up the grill…</Text>
+        <Text style={styles.footerText}>Take a Short Left…</Text>
       </View>
     </Animated.View>
   );
@@ -63,7 +63,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg, alignItems: "center", justifyContent: "center" },
-  emblem: { width: 300, height: 300 },
+  emblem: { width: 256, height: 256 },
   footer: { position: "absolute", bottom: 56, left: 48, right: 48, alignItems: "center" },
   track: { width: "100%", height: 4, borderRadius: 2, backgroundColor: C.track, overflow: "hidden" },
   bar: { height: 4, borderRadius: 2, backgroundColor: C.ember },

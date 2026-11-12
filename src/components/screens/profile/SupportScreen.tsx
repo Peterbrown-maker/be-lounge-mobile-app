@@ -1,39 +1,30 @@
 import { ScreenHeader } from "@/src/components/ScreenHeader";
+import { MACNOSE_INFO, MACNOSE_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
-import { ChevronDown, ChevronRight, Mail, MessageCircle, Phone, Send } from "lucide-react-native";
+import { Camera, ChevronDown, ChevronRight, Clock, Globe, MapPin, ThumbsUp } from "lucide-react-native";
 import { useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-// TODO: replace ALL of these placeholders with Makhanani's real contact details.
-const CONTACT = {
-  phone: "+27 12 345 6789",
-  whatsapp: "27123456789", // international format, no +
-  email: "hello@example.com",
-};
+import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const FAQ = [
   {
-    q: "How long does delivery take?",
-    a: "Usually 25–40 minutes depending on how busy the kitchen is and how far you are.",
+    q: "When is Mogodu Monday?",
+    a: "Our traditional meals (mogodu, tlhogo, tlhakwana, chicken feet, masonja, skop and marapo) are served on Mondays. Ask your waitron for today's selection.",
   },
   {
-    q: "Can I book a table for a group?",
-    a: "Yes — choose Sit-in at checkout and pick your time and party size. For 10+ people, give us a call.",
+    q: "What are your opening hours?",
+    a: MACNOSE_INFO.hours.map((h) => `${h.days}: ${h.time}`).join("\n"),
   },
   {
-    q: "Where do you deliver to?",
-    a: "We deliver to your current location within our delivery area.",
+    q: "I have an allergy or I'm in a hurry",
+    a: MACNOSE_INFO.promise,
+  },
+  {
+    q: "Do you deliver drinks?",
+    a: "Alcohol is only sold to persons 18 and older, and ID may be checked on delivery or collection. Drink responsibly.",
+  },
+  {
+    q: "Where are you?",
+    a: `${MACNOSE_RESTAURANT.address}. Take a Short Left!`,
   },
 ];
 
@@ -50,40 +41,41 @@ const open = async (url: string, fallback: string) => {
 };
 
 export const SupportScreen = ({ onBack }: SupportScreenProps) => {
-  const [message, setMessage] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const { latitude, longitude, address } = MACNOSE_RESTAURANT;
 
   const channels = [
     {
-      Icon: MessageCircle,
-      title: "WhatsApp us",
-      hint: "Fastest — usually replies in minutes",
-      onPress: () => open(`https://wa.me/${CONTACT.whatsapp}`, "WhatsApp isn't available on this device."),
+      Icon: MapPin,
+      title: "Get directions",
+      hint: address,
+      onPress: () =>
+        open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, address),
     },
     {
-      Icon: Phone,
-      title: "Call Makhanani",
-      hint: CONTACT.phone,
-      onPress: () => open(`tel:${CONTACT.phone.replace(/\s/g, "")}`, `Call us on ${CONTACT.phone}`),
+      Icon: Camera,
+      title: "Instagram",
+      hint: MACNOSE_INFO.instagramHandle,
+      onPress: () => open(MACNOSE_INFO.instagram, MACNOSE_INFO.instagram),
     },
     {
-      Icon: Mail,
-      title: "Email",
-      hint: CONTACT.email,
-      onPress: () => open(`mailto:${CONTACT.email}`, `Email us at ${CONTACT.email}`),
+      Icon: ThumbsUp,
+      title: "Facebook",
+      hint: "Macnose Cafe - Short Left",
+      onPress: () => open(MACNOSE_INFO.facebook, MACNOSE_INFO.facebook),
+    },
+    {
+      Icon: Globe,
+      title: "Website",
+      hint: "macnosecafeshortleft.co.za",
+      onPress: () => open(MACNOSE_INFO.website, MACNOSE_INFO.website),
     },
   ];
 
-  const sendMessage = () => {
-    if (!message.trim()) return;
-    const url = `mailto:${CONTACT.email}?subject=${encodeURIComponent("App support")}&body=${encodeURIComponent(message.trim())}`;
-    open(url, `Email us at ${CONTACT.email}`).then(() => setMessage(""));
-  };
-
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScreenHeader title="Help & support" subtitle="We're here till the fire goes out" onBack={onBack} />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <View style={styles.container}>
+      <ScreenHeader title="Help & support" subtitle="Good memories are made here" onBack={onBack} />
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.group}>
           {channels.map(({ Icon, title, hint, onPress }, i) => (
             <TouchableOpacity
@@ -93,7 +85,7 @@ export const SupportScreen = ({ onBack }: SupportScreenProps) => {
               activeOpacity={0.7}
             >
               <View style={[styles.rowIcon, i === 0 && { backgroundColor: T.ember }]}>
-                <Icon size={18} color={i === 0 ? "#000" : T.text} />
+                <Icon size={18} color={i === 0 ? T.onDark : T.text} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>{title}</Text>
@@ -101,6 +93,17 @@ export const SupportScreen = ({ onBack }: SupportScreenProps) => {
               </View>
               <ChevronRight size={18} color={T.placeholder} />
             </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Opening hours</Text>
+        <View style={styles.group}>
+          {MACNOSE_INFO.hours.map((h, i) => (
+            <View key={h.days} style={[styles.row, i < MACNOSE_INFO.hours.length - 1 && styles.rowDivider]}>
+              <Clock size={16} color={T.muted} />
+              <Text style={[styles.rowTitle, { flex: 1 }]}>{h.days}</Text>
+              <Text style={styles.hoursTime}>{h.time}</Text>
+            </View>
           ))}
         </View>
 
@@ -125,28 +128,8 @@ export const SupportScreen = ({ onBack }: SupportScreenProps) => {
             );
           })}
         </View>
-
-        <Text style={styles.sectionTitle}>Send us a message</Text>
-        <TextInput
-          style={styles.textarea}
-          placeholder="Tell us what happened with your order…"
-          placeholderTextColor={T.placeholder}
-          value={message}
-          onChangeText={setMessage}
-          multiline
-          textAlignVertical="top"
-        />
-        <TouchableOpacity
-          style={[styles.send, !message.trim() && { backgroundColor: T.surface }]}
-          onPress={sendMessage}
-          disabled={!message.trim()}
-          activeOpacity={0.85}
-        >
-          <Send size={16} color={message.trim() ? "#FFF" : T.muted} />
-          <Text style={[styles.sendText, !message.trim() && { color: T.muted }]}>Send message</Text>
-        </TouchableOpacity>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -164,23 +147,5 @@ const styles = StyleSheet.create({
   faqHead: { flexDirection: "row", alignItems: "center", gap: 10 },
   faqQ: { flex: 1, color: T.text, fontSize: 15, fontWeight: "700" },
   faqA: { color: T.muted, fontSize: 14, lineHeight: 20, marginTop: 8 },
-  textarea: {
-    minHeight: 120,
-    borderRadius: R.md,
-    backgroundColor: T.surface,
-    padding: 14,
-    fontSize: 15,
-    color: T.text,
-  },
-  send: {
-    marginTop: 12,
-    height: 52,
-    borderRadius: R.lg,
-    backgroundColor: T.text,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  sendText: { color: "#FFF", fontSize: 15, fontWeight: "800" },
+  hoursTime: { color: T.muted, fontSize: 14, fontWeight: "600" },
 });

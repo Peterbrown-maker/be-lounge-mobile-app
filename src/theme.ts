@@ -1,5 +1,5 @@
-// Makhanani design tokens — light by default: white canvas, near-black type,
-// one ember accent for the fire. Use these instead of hard-coded colours.
+// MacNose Cafe design tokens — light by default: white canvas, near-black type,
+// one MacNose red accent (from the logo). Use these instead of hard-coded colours.
 export const T = {
   bg: "#FFFFFF",
   surface: "#F5F5F5",
@@ -8,10 +8,10 @@ export const T = {
   text: "#0A0A0A",
   muted: "#737373",
   placeholder: "#A3A3A3",
-  ember: "#FF6B1A",
-  /** Darker ember for small text/icons on white (readable contrast). */
-  emberText: "#C2410C",
-  emberSoft: "rgba(255,107,26,0.12)",
+  ember: "#E31E24",
+  /** Darker red for small text/icons on white (readable contrast). */
+  emberText: "#B9151B",
+  emberSoft: "rgba(227,30,36,0.10)",
   success: "#16A34A",
   successSoft: "rgba(22,163,74,0.12)",
   danger: "#DC2626",

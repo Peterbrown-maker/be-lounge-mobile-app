@@ -1,5 +1,5 @@
 import { ordersApiService } from "@/src/services/orders";
-import { MAKHANANI_RESTAURANT } from "@/src/services/restaurants";
+import { MACNOSE_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
 import { Bike, Check, ChefHat, Flame, MapPin, MessageCircle, Package, Phone, Star } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -60,7 +60,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
     [paymentData.deliveryCode]
   );
 
-  const shop = { latitude: MAKHANANI_RESTAURANT.latitude, longitude: MAKHANANI_RESTAURANT.longitude };
+  const shop = { latitude: MACNOSE_RESTAURANT.latitude, longitude: MACNOSE_RESTAURANT.longitude };
   const home = {
     latitude: paymentData.bookingData?.deliveryLatitude ?? shop.latitude - 0.012,
     longitude: paymentData.bookingData?.deliveryLongitude ?? shop.longitude + 0.01,
@@ -147,10 +147,10 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
       <View style={[styles.container, styles.doneWrap]}>
         <StatusBar barStyle="dark-content" backgroundColor={T.bg} />
         <View style={styles.doneBadge}>
-          <Check size={44} color="#000" strokeWidth={3} />
+          <Check size={44} color="#FFF" strokeWidth={3} />
         </View>
         <Text style={styles.doneTitle}>Enjoy your meal!</Text>
-        <Text style={styles.doneSub}>Thanks for ordering from Makhanani. Come through for the vibes soon.</Text>
+        <Text style={styles.doneSub}>Thanks for ordering from MacNose. Take a Short Left and come through soon.</Text>
         <View style={styles.receipt}>
           <ReceiptRow label="Reference" value={paymentData.paymentId} />
           <ReceiptRow label="Total" value={`R${paymentData.amount.toFixed(2)}`} />
@@ -184,20 +184,20 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
           toolbarEnabled={false}
         >
           <Polyline coordinates={[shop, home]} strokeColor={T.text} strokeWidth={3} lineDashPattern={[6, 6]} />
-          <Marker coordinate={shop} title="Makhanani" anchor={{ x: 0.5, y: 0.5 }}>
+          <Marker coordinate={shop} title="MacNose Cafe" anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.shopPin}>
               <ChefHat size={16} color="#FFF" />
             </View>
           </Marker>
           <Marker coordinate={home} title="You" anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.homePin}>
-              <MapPin size={16} color="#000" />
+              <MapPin size={16} color="#FFF" />
             </View>
           </Marker>
           {currentIdx >= 3 && (
             <Marker coordinate={driverPos} title={DRIVER.name} anchor={{ x: 0.5, y: 0.5 }}>
               <View style={styles.driverPin}>
-                <Bike size={18} color="#000" />
+                <Bike size={18} color="#FFF" />
               </View>
             </Marker>
           )}
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
 
   address: { color: T.muted, fontSize: 13, marginTop: 14, lineHeight: 19 },
   primary: { height: 56, borderRadius: R.lg, backgroundColor: T.ember, alignItems: "center", justifyContent: "center", marginTop: 18, alignSelf: "stretch" },
-  primaryText: { color: "#000", fontSize: 16, fontWeight: "800" },
+  primaryText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
   cancel: { alignItems: "center", paddingVertical: 14, marginTop: 10 },
   cancelText: { color: T.danger, fontSize: 14, fontWeight: "700" },
 

@@ -1,7 +1,7 @@
 import { useAuth } from "@/src/auth/AuthContext";
 import { ScreenHeader } from "@/src/components/ScreenHeader";
 import { ordersApiService } from "@/src/services/orders";
-import { MAKHANANI_RESTAURANT } from "@/src/services/restaurants";
+import { MACNOSE_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
 import { Banknote, Check, CreditCard, Lock } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -89,16 +89,16 @@ export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess
       // Save to local order history.
       const res = await ordersApiService.createOrder({
         user_id: user?.uid || "guest",
-        restaurant_id: MAKHANANI_RESTAURANT.id,
+        restaurant_id: MACNOSE_RESTAURANT.id,
         total_amount: Math.max(bookingData.totalPrice, 0.01),
         delivery_fee: deliveryFee,
         delivery_address:
           bookingData.deliveryAddress ||
           (bookingData.bookingType === "sitin"
             ? `Table for ${bookingData.partySize} at ${bookingData.sitInTime}`
-            : "Collect at Makhanani"),
-        delivery_latitude: bookingData.deliveryLatitude ?? MAKHANANI_RESTAURANT.latitude,
-        delivery_longitude: bookingData.deliveryLongitude ?? MAKHANANI_RESTAURANT.longitude,
+            : "Collect at MacNose"),
+        delivery_latitude: bookingData.deliveryLatitude ?? MACNOSE_RESTAURANT.latitude,
+        delivery_longitude: bookingData.deliveryLongitude ?? MACNOSE_RESTAURANT.longitude,
         special_instructions: bookingData.specialRequests,
         items: (bookingData.items?.length ? bookingData.items : [{ id: "table", name: "Table booking", price: 0, quantity: 1 }]).map(
           (i) => ({ menu_item_id: i.id, quantity: i.quantity, price: i.price })
@@ -150,7 +150,7 @@ export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess
     return (
       <View style={[styles.container, styles.success]}>
         <Animated.View style={[styles.successBadge, { transform: [{ scale: pop }] }]}>
-          <Check size={44} color="#000" strokeWidth={3} />
+          <Check size={44} color="#FFF" strokeWidth={3} />
         </Animated.View>
         <Text style={styles.successTitle}>{title}</Text>
         <Text style={styles.successSub}>{subtitle}</Text>
@@ -272,7 +272,7 @@ export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess
       <View style={styles.footer}>
         <TouchableOpacity style={[styles.cta, processing && { opacity: 0.7 }]} onPress={submit} disabled={processing} activeOpacity={0.85}>
           {processing ? (
-            <ActivityIndicator color="#000" />
+            <ActivityIndicator color="#FFF" />
           ) : (
             <Text style={styles.ctaText}>
               {isFree ? "Confirm booking" : method === "card" ? `Pay R${bookingData.totalPrice.toFixed(2)}` : "Place order"}
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
 
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: T.border, backgroundColor: T.bg },
   cta: { height: 56, borderRadius: R.lg, backgroundColor: T.ember, alignItems: "center", justifyContent: "center" },
-  ctaText: { color: "#000", fontSize: 16, fontWeight: "800" },
+  ctaText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
 
   success: { alignItems: "center", justifyContent: "center", padding: 24 },
   successBadge: {

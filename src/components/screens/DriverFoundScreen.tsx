@@ -32,7 +32,7 @@ export const DriverFoundScreen = ({
   deliveryLongitude,
   onContinueToTracking
 }: DriverFoundScreenProps) => {
-  const isDark = false; // Makhanani uses a fixed black & white theme
+  const isDark = false; // MacNose uses a fixed light theme
 
   const bg = isDark ? '#000000' : '#FFFFFF';
   const text = isDark ? '#FFFFFF' : '#111111';

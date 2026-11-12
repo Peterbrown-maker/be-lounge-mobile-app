@@ -28,7 +28,7 @@ export const ActiveOrdersScreen = ({ onBack, onTrackOrder }: ActiveOrdersScreenP
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const isDark = false; // Makhanani uses a fixed black & white theme
+  const isDark = false; // MacNose uses a fixed light theme
 
   const bg = isDark ? '#000000' : '#FFFFFF';
   const text = isDark ? '#FFFFFF' : '#111111';

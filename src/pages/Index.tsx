@@ -1,7 +1,7 @@
 // app/index.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { BackHandler, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 import { MobileContainer } from "../components/MobileContainer";
 import type { BookingData as CheckoutBookingData } from "../components/screens/CheckoutScreen";
@@ -18,6 +18,7 @@ import { FindingDriverScreen } from "../components/screens/FindingDriverScreen";
 import { HomeScreen } from "../components/screens/HomeScreen";
 import { LoginScreen } from "../components/screens/LoginScreen";
 import { NotificationScreen } from "../components/screens/NotificationScreen";
+import { EventsScreen } from "../components/screens/EventsScreen";
 import { OnboardingScreen } from "../components/screens/OnboardingScreen";
 import { OrderHistoryScreen } from "../components/screens/OrderHistoryScreen";
 import { PickupDropoffScreen } from "../components/screens/PickupDropoffScreen";
@@ -66,7 +67,8 @@ type Screen =
   | "savedAddresses"
   | "settings"
   | "support"
-  | "notifications";
+  | "notifications"
+  | "events";
 
 interface OrderData {
   orderId: string;
@@ -126,6 +128,60 @@ export default function Index() {
   const [selectedTrackingOrder, setSelectedTrackingOrder] = useState<Order | null>(null);
   const [currentBookingData, setCurrentBookingData] = useState<BookingData | null>(null);
   const [currentPaymentData, setCurrentPaymentData] = useState<PaymentData | null>(null);
+  // Events: which event to open, and where "back" returns to.
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [eventsReturnTo, setEventsReturnTo] = useState<Screen>("home");
+  // Menu category for Home to open on (e.g. from a deal notification); used once.
+  const [homeCategory, setHomeCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (currentScreen === "home" && homeCategory) setHomeCategory(null);
+  }, [currentScreen, homeCategory]);
+
+  const openEvents = (eventId: string | null, from: Screen) => {
+    setSelectedEventId(eventId);
+    setEventsReturnTo(from);
+    setCurrentScreen("events");
+  };
+
+  // Android hardware back button. Mirrors each screen's on-screen back arrow.
+  // "home" and "events" return false so those screens' own handlers run
+  // (closing a category / search, or an event's details) before the app exits.
+  useEffect(() => {
+    const parentOf: Partial<Record<Screen, Screen>> = {
+      restaurantDetail: "home",
+      restaurantMenu: "restaurantDetail",
+      checkout: selectedRestaurant ? "restaurantMenu" : "home",
+      payment: "checkout",
+      driverTracking: "home",
+      findingDriver: "home",
+      driverFound: "home",
+      tracking: "home",
+      complete: "home",
+      orderHistory: "profile",
+      activeOrders: "home",
+      riderMap: "home",
+      pickup: "home",
+      buy: "home",
+      send: "home",
+      fetch: "home",
+      emergency: "home",
+      price: "home",
+      profile: "home",
+      editProfile: "profile",
+      savedAddresses: "profile",
+      settings: "profile",
+      support: "profile",
+      notifications: "home",
+    };
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      const parent = parentOf[currentScreen];
+      if (!parent) return false; // splash, onboarding, login, home, events
+      setCurrentScreen(parent);
+      return true;
+    });
+    return () => sub.remove();
+  }, [currentScreen, selectedRestaurant]);
 
   useEffect(() => {
     if (!loading) {
@@ -172,6 +228,7 @@ export default function Index() {
         );
 
       case "login":
+        // On successful sign-in the auth effect above switches to "home".
         return <LoginScreen />;
 
       case "home":
@@ -194,6 +251,9 @@ export default function Index() {
 
       initialCart={cart}
       initialMode={checkoutMode}
+      initialCategory={homeCategory}
+      onEventsPress={() => openEvents(null, "home")}
+      onEventPress={(id) => openEvents(id, "home")}
       onCheckout={(items, mode) => {
         setCart(items);
         setCheckoutMode(mode);
@@ -433,6 +493,10 @@ export default function Index() {
       case "profile":
         return <ProfileScreen
           onBack={() => setCurrentScreen("home")}
+          onLoggedOut={() => {
+            setCart([]);
+            setCurrentScreen("login");
+          }}
           onNavigateToEditProfile={() => setCurrentScreen("editProfile")}
           onNavigateToSavedAddresses={() => setCurrentScreen("savedAddresses")}
           onNavigateToSettings={() => setCurrentScreen("settings")}
@@ -453,7 +517,28 @@ export default function Index() {
         return <SupportScreen onBack={() => setCurrentScreen("profile")} />;
 
       case "notifications":
-        return <NotificationScreen onBack={() => setCurrentScreen("home")} />;
+        return (
+          <NotificationScreen
+            onBack={() => setCurrentScreen("home")}
+            onOpenEvent={(id) => openEvents(id, "notifications")}
+            onOpenCategory={(id) => {
+              setHomeCategory(id);
+              setCurrentScreen("home");
+            }}
+          />
+        );
+
+      case "events":
+        return (
+          <EventsScreen
+            initialEventId={selectedEventId}
+            onBack={() => setCurrentScreen(eventsReturnTo)}
+            onBookTable={() => {
+              setCheckoutMode("sitin");
+              setCurrentScreen("checkout");
+            }}
+          />
+        );
 
       default:
         return null;

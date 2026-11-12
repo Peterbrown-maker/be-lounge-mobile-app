@@ -21,10 +21,10 @@ import { socketService } from "../../../services/socket";
 
 const { width, height } = Dimensions.get("window");
 
-// MacNose service area coordinates
+// Be Lounge service area coordinates
 const DELIVERY_AREA_CENTER = {
-  latitude: -25.5238705,
-  longitude: 28.0804518,
+  latitude: -25.513655,
+  longitude: 28.108461,
   latitudeDelta: 0.08,
   longitudeDelta: 0.08,
 };
@@ -115,7 +115,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
   const [mapInteractionEnabled, setMapInteractionEnabled] = useState(true);
   const [activeOrderWithRider, setActiveOrderWithRider] = useState<ActiveOrderWithRider | null>(null);
   const [loading, setLoading] = useState(true);
-  const isDark = false; // MacNose uses a fixed light theme
+  const isDark = false; // Be Lounge uses a fixed light theme
   const { user } = useAuth();
 
   const mapRef = useRef<MapView>(null);
@@ -634,7 +634,7 @@ export default function RiderMapScreen({ onBack }: RiderMapScreenProps) {
             {/* Area Label */}
             <View style={[styles.areaLabel, { backgroundColor: cardBg, borderColor }]}>
               <Navigation size={16} color="#000000" />
-              <Text style={[styles.areaText, { color: text }]}>MacNose Delivery Area</Text>
+              <Text style={[styles.areaText, { color: text }]}>Be Lounge Delivery Area</Text>
             </View>
           </View>
         </View>

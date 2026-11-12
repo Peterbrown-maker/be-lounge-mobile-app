@@ -1,7 +1,7 @@
 import { ScreenHeader } from "@/src/components/ScreenHeader";
 import { MACNOSE_INFO, MACNOSE_RESTAURANT } from "@/src/services/restaurants";
 import { R, T } from "@/src/theme";
-import { Camera, ChevronDown, ChevronRight, Clock, Globe, MapPin, ThumbsUp } from "lucide-react-native";
+import { ChevronDown, ChevronRight, Clock, MapPin } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -24,7 +24,7 @@ const FAQ = [
   },
   {
     q: "Where are you?",
-    a: `${MACNOSE_RESTAURANT.address}. Take a Short Left!`,
+    a: `${MACNOSE_RESTAURANT.address}. Tap "Get directions" above to open it on the map.`,
   },
 ];
 
@@ -52,24 +52,7 @@ export const SupportScreen = ({ onBack }: SupportScreenProps) => {
       onPress: () =>
         open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, address),
     },
-    {
-      Icon: Camera,
-      title: "Instagram",
-      hint: MACNOSE_INFO.instagramHandle,
-      onPress: () => open(MACNOSE_INFO.instagram, MACNOSE_INFO.instagram),
-    },
-    {
-      Icon: ThumbsUp,
-      title: "Facebook",
-      hint: "Macnose Cafe - Short Left",
-      onPress: () => open(MACNOSE_INFO.facebook, MACNOSE_INFO.facebook),
-    },
-    {
-      Icon: Globe,
-      title: "Website",
-      hint: "macnosecafeshortleft.co.za",
-      onPress: () => open(MACNOSE_INFO.website, MACNOSE_INFO.website),
-    },
+    // Add Be Lounge's Instagram / Facebook / website here once available.
   ];
 
   return (

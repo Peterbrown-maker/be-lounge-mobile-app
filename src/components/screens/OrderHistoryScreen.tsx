@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   sheetTitle: { color: T.text, fontSize: 20, fontWeight: "800" },
   codeCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 16, padding: 14, borderRadius: R.lg, backgroundColor: T.text },
   codeLabel: { color: "#FFF", fontSize: 14, fontWeight: "700" },
-  code: { color: T.ember, fontSize: 24, fontWeight: "900", letterSpacing: 4 },
+  code: { color: T.silver, fontSize: 24, fontWeight: "900", letterSpacing: 4 },
   detailCard: { marginTop: 14, padding: 14, borderRadius: R.lg, backgroundColor: T.surface },
   detailRow: { flexDirection: "row", justifyContent: "space-between", gap: 12, paddingVertical: 5 },
   detailName: { color: T.text, fontSize: 14, fontWeight: "600", flex: 1 },

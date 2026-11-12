@@ -1,4 +1,4 @@
-// MacNose Cafe events and home-screen promos (prototype content).
+// Be Lounge events and home-screen promos (prototype content).
 // PROTOTYPE: dates, times and entry prices below are placeholders — replace them
 // with the confirmed details before going live.
 
@@ -31,7 +31,7 @@ export const MACNOSE_EVENTS: MacnoseEvent[] = [
     endTime: "02:00",
     entry: 150, // PROTOTYPE placeholder
     description:
-      "Phori takes over MacNose for a full amapiano night. Good food, chilled drinks and feel good music till late. Take a Short Left!",
+      "Phori takes over Be Lounge for a full amapiano night. Good food, chilled drinks and feel good music till late. See you there!",
     perks: ["Book a table for your crew", "Bottle specials all night", "Kitchen open till late"],
   },
   {
@@ -45,7 +45,7 @@ export const MACNOSE_EVENTS: MacnoseEvent[] = [
     endTime: "02:00",
     entry: 100, // PROTOTYPE placeholder
     description:
-      "Mdu aka TRP brings the deep, soulful private school piano sound to Short Left. Come early, grab a platter and stay for the set.",
+      "Mdu aka TRP brings the deep, soulful private school piano sound to Be Lounge. Come early, grab a platter and stay for the set.",
     perks: ["Book a table for your crew", "Sharing platters & bubbles", "Kitchen open till late"],
   },
 ];
@@ -119,7 +119,7 @@ export const PROMOS: Promo[] = [
     id: "promo-maphorisa",
     kicker: `LIVE · ${formatEventDay(ev("dj-maphorisa-2026-11-28")).toUpperCase()}`,
     title: "DJ Maphorisa",
-    sub: "Amapiano Saturday at MacNose. Book your table before it's full.",
+    sub: "Amapiano Saturday at Be Lounge. Book your table before it's full.",
     image: require("../assets/macnose/events/dj_maphorisa.jpg"),
     cta: "See event",
     target: { type: "event", id: "dj-maphorisa-2026-11-28" },
@@ -137,7 +137,7 @@ export const PROMOS: Promo[] = [
     id: "promo-mdu",
     kicker: `LIVE · ${formatEventDay(ev("mdu-aka-trp-2026-12-04")).toUpperCase()}`,
     title: "Mdu aka TRP",
-    sub: "Amapiano Friday. Private school piano in Short Left.",
+    sub: "Amapiano Friday. Private school piano at Be Lounge.",
     image: require("../assets/macnose/events/mdu_aka_trp.jpg"),
     cta: "See event",
     target: { type: "event", id: "mdu-aka-trp-2026-12-04" },

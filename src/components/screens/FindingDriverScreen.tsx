@@ -22,7 +22,7 @@ export const FindingDriverScreen = ({
   const [isSearching, setIsSearching] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasCalledApi = useRef(false);
-  const isDark = false; // MacNose uses a fixed light theme
+  const isDark = false; // Be Lounge uses a fixed light theme
 
   const bg = isDark ? '#000000' : '#FFFFFF';
   const text = isDark ? '#FFFFFF' : '#111111';

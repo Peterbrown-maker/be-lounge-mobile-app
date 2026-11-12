@@ -1,17 +1,22 @@
-// MacNose Cafe design tokens — light by default: white canvas, near-black type,
-// one MacNose red accent (from the logo). Use these instead of hard-coded colours.
+// Be Lounge design tokens, taken from the logo: deep blue-black ink, white, and
+// the steel/silver of the logo's gloss. White canvas with ink as the accent;
+// on dark surfaces (photos, ink cards) the accent flips to white/silver.
+// Use these instead of hard-coded colours.
 export const T = {
   bg: "#FFFFFF",
-  surface: "#F5F5F5",
-  surfaceAlt: "#FAFAFA",
-  border: "#E5E5E5",
-  text: "#0A0A0A",
-  muted: "#737373",
-  placeholder: "#A3A3A3",
-  ember: "#E31E24",
-  /** Darker red for small text/icons on white (readable contrast). */
-  emberText: "#B9151B",
-  emberSoft: "rgba(227,30,36,0.10)",
+  surface: "#F3F4F6",
+  surfaceAlt: "#F9FAFB",
+  border: "#E2E4E8",
+  text: "#03060E",
+  muted: "#6B7079",
+  placeholder: "#A2A7AF",
+  /** Primary accent: logo ink (buttons, active states, badges). */
+  ember: "#0B0F19",
+  /** Steel from the logo gloss: kickers, links, small accent text on white. */
+  emberText: "#4B515C",
+  emberSoft: "rgba(11,15,25,0.07)",
+  /** Light silver: accent text/icons on ink or photo backgrounds. */
+  silver: "#C9CED6",
   success: "#16A34A",
   successSoft: "rgba(22,163,74,0.12)",
   danger: "#DC2626",

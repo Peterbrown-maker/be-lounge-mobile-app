@@ -150,7 +150,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
           <Check size={44} color="#FFF" strokeWidth={3} />
         </View>
         <Text style={styles.doneTitle}>Enjoy your meal!</Text>
-        <Text style={styles.doneSub}>Thanks for ordering from MacNose. Take a Short Left and come through soon.</Text>
+        <Text style={styles.doneSub}>Thanks for ordering from Be Lounge. Come through and visit us soon.</Text>
         <View style={styles.receipt}>
           <ReceiptRow label="Reference" value={paymentData.paymentId} />
           <ReceiptRow label="Total" value={`R${paymentData.amount.toFixed(2)}`} />
@@ -184,7 +184,7 @@ export const DriverTrackingScreen: React.FC<DriverTrackingProps> = ({ paymentDat
           toolbarEnabled={false}
         >
           <Polyline coordinates={[shop, home]} strokeColor={T.text} strokeWidth={3} lineDashPattern={[6, 6]} />
-          <Marker coordinate={shop} title="MacNose Cafe" anchor={{ x: 0.5, y: 0.5 }}>
+          <Marker coordinate={shop} title="Be Lounge" anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.shopPin}>
               <ChefHat size={16} color="#FFF" />
             </View>
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   codeCard: { flexDirection: "row", alignItems: "center", marginTop: 16, padding: 14, borderRadius: R.lg, backgroundColor: T.text },
   codeLabel: { color: "#FFF", fontSize: 15, fontWeight: "800" },
   codeHint: { color: "rgba(255,255,255,0.65)", fontSize: 12, marginTop: 2 },
-  code: { color: T.ember, fontSize: 26, fontWeight: "900", letterSpacing: 4 },
+  code: { color: T.silver, fontSize: 26, fontWeight: "900", letterSpacing: 4 },
 
   driverCard: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12, padding: 14, borderRadius: R.lg, backgroundColor: T.surface },
   driverAvatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: T.text, alignItems: "center", justifyContent: "center" },

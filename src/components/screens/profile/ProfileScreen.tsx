@@ -139,7 +139,7 @@ export const ProfileScreen = ({
             </View>
           </TouchableOpacity>
           <Text style={styles.name}>
-            {userProfile?.display_name || "MacNose regular"}
+            {userProfile?.display_name || "Be Lounge regular"}
           </Text>
           <Text style={styles.email}>{userProfile?.email}</Text>
           {!!memberSince && (

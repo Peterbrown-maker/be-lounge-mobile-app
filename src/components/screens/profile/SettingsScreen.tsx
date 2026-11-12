@@ -55,7 +55,7 @@ export const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
           <SwitchRow
             Icon={Megaphone}
             title="News & specials"
-            hint="What's new at MacNose"
+            hint="What's new at Be Lounge"
             value={prefs.lineupAlerts}
             onValueChange={toggle("lineupAlerts")}
           />

@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Animated, Easing, Image, StatusBar, StyleSheet, Text, View } from "react-native";
 
-// Black to match the MacNose logo.
+// Ink + silver, from the Be Lounge logo.
 const C = {
-  bg: "#000000",
+  bg: "#03060E",
   muted: "#A3A3A3",
-  ember: "#E31E24",
-  track: "#262626",
+  ember: "#C9CED6",
+  track: "#1C212C",
 };
 
 const DURATION = 2400;
@@ -48,14 +48,14 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
       <StatusBar barStyle="light-content" backgroundColor={C.bg} />
 
       <Animated.View style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}>
-        <Image source={require("../../assets/macnose/logo.jpg")} style={styles.emblem} resizeMode="contain" />
+        <Image source={require("../../assets/belounge/logo.png")} style={styles.emblem} resizeMode="contain" />
       </Animated.View>
 
       <View style={styles.footer}>
         <View style={styles.track}>
           <Animated.View style={[styles.bar, { width: barWidth }]} />
         </View>
-        <Text style={styles.footerText}>Take a Short Left…</Text>
+        <Text style={styles.footerText}>Good food. Good vibes…</Text>
       </View>
     </Animated.View>
   );

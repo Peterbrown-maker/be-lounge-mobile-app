@@ -96,7 +96,7 @@ export const PaymentScreen: React.FC<PaymentProps> = ({ onBack, onPaymentSuccess
           bookingData.deliveryAddress ||
           (bookingData.bookingType === "sitin"
             ? `Table for ${bookingData.partySize} at ${bookingData.sitInTime}`
-            : "Collect at MacNose"),
+            : "Collect at Be Lounge"),
         delivery_latitude: bookingData.deliveryLatitude ?? MACNOSE_RESTAURANT.latitude,
         delivery_longitude: bookingData.deliveryLongitude ?? MACNOSE_RESTAURANT.longitude,
         special_instructions: bookingData.specialRequests,

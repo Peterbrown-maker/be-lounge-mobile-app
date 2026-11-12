@@ -23,13 +23,13 @@ import { useAuth } from "../../auth/AuthContext";
 
 const C = {
   bg: "#FFFFFF",
-  surface: "#F5F5F5",
-  border: "#E5E5E5",
-  text: "#0A0A0A",
-  muted: "#737373",
+  surface: "#F3F4F6",
+  border: "#E2E4E8",
+  text: "#03060E",
+  muted: "#6B7079",
   placeholder: "#A3A3A3",
-  ember: "#E31E24",
-  emberText: "#B9151B",
+  ember: "#0B0F19",
+  emberText: "#4B515C",
   error: "#DC2626",
 };
 
@@ -168,7 +168,7 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.heroContent}>
-            <Image source={require("../../assets/macnose/logo.jpg")} style={styles.heroLogo} resizeMode="contain" />
+            <Image source={require("../../assets/belounge/logo.png")} style={styles.heroLogo} resizeMode="contain" />
             <Text style={styles.heroTagline}>GOOD FOOD TAKES TIME TO PREPARE</Text>
           </View>
         </View>
@@ -301,7 +301,7 @@ export const LoginScreen = ({ onLogin }: { onLogin?: () => void }) => {
           </TouchableOpacity>
 
           <Text style={styles.legal}>
-            By continuing you confirm you're 18+ for alcohol orders and agree to MacNose Cafe's terms.
+            By continuing you confirm you're 18+ for alcohol orders and agree to Be Lounge's terms.
           </Text>
         </View>
       </ScrollView>
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   scrollContent: { flexGrow: 1 },
 
-  hero: { height: 240, backgroundColor: "#000" },
+  hero: { height: 240, backgroundColor: "#03060E" },
   heroImage: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   heroContent: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 12 },
   heroLogo: { width: 96, height: 96, borderRadius: 20 },
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(227,30,36,0.10)",
+    backgroundColor: "rgba(11,15,25,0.07)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,

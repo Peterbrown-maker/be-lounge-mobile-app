@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MacNose Cafe",
+    "name": "Be Lounge",
     "slug": "flavor-hos-deliveries",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Allow MacNose Cafe to use your location so we can deliver to where you are.",
+        "NSLocationWhenInUseUsageDescription": "Allow Be Lounge to use your location so we can deliver to where you are.",
         "NSLocationAlwaysUsageDescription": "We need your location to save delivery addresses"
       }
     },
@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#03060E"
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
@@ -48,22 +48,22 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 300,
           "resizeMode": "contain",
-          "backgroundColor": "#000000",
+          "backgroundColor": "#03060E",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#03060E"
           }
         }
       ],
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow MacNose Cafe to use your location so we can deliver to where you are."
+          "locationWhenInUsePermission": "Allow Be Lounge to use your location so we can deliver to where you are."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow MacNose Cafe to access your photos to set your profile picture."
+          "photosPermission": "Allow Be Lounge to access your photos to set your profile picture."
         }
       ]
     ],

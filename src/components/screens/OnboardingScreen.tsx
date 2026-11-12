@@ -17,13 +17,13 @@ const { width, height } = Dimensions.get("window");
 
 const C = {
   bg: "#FFFFFF",
-  surface: "#F5F5F5",
-  border: "#E5E5E5",
-  text: "#0A0A0A",
-  muted: "#737373",
-  ember: "#E31E24",
-  emberText: "#B9151B",
-  emberSoft: "rgba(227,30,36,0.10)",
+  surface: "#F3F4F6",
+  border: "#E2E4E8",
+  text: "#03060E",
+  muted: "#6B7079",
+  ember: "#0B0F19",
+  emberText: "#4B515C",
+  emberSoft: "rgba(11,15,25,0.07)",
 };
 
 interface OnboardingScreenProps {
@@ -71,7 +71,7 @@ const SLIDES: Slide[] = [
     kicker: "DELIVERY",
     KickerIcon: LocateFixed,
     title: "Delivered to\nwhere you are",
-    description: "We use your live location, so there's no address to type. Or collect it, or take a Short Left and eat in.",
+    description: "We use your live location, so there's no address to type. Or collect it, or come through and eat in.",
     image: require("../../assets/macnose/food.jpg"),
     chips: [
       { label: "Delivery", Icon: Zap },
@@ -134,7 +134,7 @@ export const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
 
       <View style={styles.header}>
         <View style={styles.logoTile}>
-          <Image source={require("../../assets/macnose/logo.jpg")} style={styles.logo} resizeMode="contain" />
+          <Image source={require("../../assets/belounge/logo.png")} style={styles.logo} resizeMode="contain" />
         </View>
         {!isLast && (
           <TouchableOpacity onPress={onComplete} hitSlop={10} accessibilityLabel="Skip introduction">
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     minHeight: 52,
   },
-  logoTile: { backgroundColor: "#000000", borderRadius: 12, overflow: "hidden" },
+  logoTile: { backgroundColor: "#03060E", borderRadius: 12, overflow: "hidden" },
   logo: { width: 52, height: 52 },
   skip: { color: C.muted, fontSize: 15, fontWeight: "600" },
 

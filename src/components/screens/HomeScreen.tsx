@@ -46,17 +46,17 @@ import { useNotifications } from "../../services/notifications";
 import { MACNOSE_INFO, MACNOSE_RESTAURANT } from "../../services/restaurants";
 import { ProfileAvatar } from "../ProfileAvatar";
 
-// Light by default: white canvas, black type, one MacNose red accent (from the logo).
+// Be Lounge palette (from the logo): white canvas, ink accent, steel for small accent text.
 const C = {
   bg: "#FFFFFF",
-  surface: "#F5F5F5",
+  surface: "#F3F4F6",
   surface2: "#FFFFFF",
-  border: "#E5E5E5",
-  text: "#0A0A0A",
-  muted: "#737373",
-  ember: "#E31E24",
-  emberText: "#B9151B", // darker ember for small text on white (readable contrast)
-  emberSoft: "rgba(227,30,36,0.10)",
+  border: "#E2E4E8",
+  text: "#03060E",
+  muted: "#6B7079",
+  ember: "#0B0F19",
+  emberText: "#4B515C",
+  emberSoft: "rgba(11,15,25,0.07)",
   onImage: "#FFFFFF", // text sitting on photos
 };
 
@@ -237,8 +237,8 @@ export const HomeScreen = ({
             ? "Turn on location to deliver"
             : "Tap to use my location"
       : mode === "takeaway"
-        ? "Collect at MacNose · ready in 20 min"
-        : "Grab a table at MacNose";
+        ? "Collect at Be Lounge · ready in 20 min"
+        : "Grab a table at Be Lounge";
 
   const renderMenuRow = (item: MacnoseMenuItem) => {
     const qty = cart[item.id] || 0;
@@ -400,7 +400,7 @@ export const HomeScreen = ({
               />
               <View style={styles.heroContent}>
                 <Image
-                  source={require("../../assets/macnose/logo.jpg")}
+                  source={require("../../assets/belounge/logo.png")}
                   style={styles.heroLogo}
                   resizeMode="contain"
                 />
@@ -409,7 +409,7 @@ export const HomeScreen = ({
                 </Text>
                 <Text style={styles.heroSub}>
                   South African classics, grills, seafood and premium drinks.
-                  Order it to your door, or take a Short Left.
+                  Order it to your door, or come through to the lounge.
                 </Text>
                 <View style={styles.heroCtas}>
                   <TouchableOpacity
@@ -419,7 +419,7 @@ export const HomeScreen = ({
                       setSelectedCategory("specials");
                     }}
                   >
-                    <Flame size={16} color="#FFF" />
+                    <Flame size={16} color={C.ember} />
                     <Text style={styles.ctaPrimaryText}>Order now</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -569,7 +569,7 @@ export const HomeScreen = ({
                           <Text style={styles.promoSub} numberOfLines={2}>{promo.sub}</Text>
                           <View style={styles.promoCta}>
                             <Text style={styles.promoCtaText}>{promo.cta}</Text>
-                            <ChevronRight size={16} color="#FFF" />
+                            <ChevronRight size={16} color={C.ember} />
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -602,7 +602,7 @@ export const HomeScreen = ({
                 />
                 <View style={styles.visitBody}>
                   <Text style={styles.visitKicker}>
-                    EST. {MACNOSE_INFO.established} · PUB & RESTAURANT
+                    LOUNGE & RESTAURANT
                   </Text>
                   <Text style={styles.visitTitle}>
                     “{MACNOSE_INFO.tagline}”
@@ -754,12 +754,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: C.ember,
+    backgroundColor: "#FFFFFF", // white on the dark hero, like the logo
     paddingHorizontal: 16,
     height: 44,
     borderRadius: 999,
   },
-  ctaPrimaryText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
+  ctaPrimaryText: { color: C.ember, fontWeight: "700", fontSize: 14 },
   ctaGhost: {
     flexDirection: "row",
     alignItems: "center",
@@ -885,9 +885,9 @@ const styles = StyleSheet.create({
   promoSub: { color: "#E5E5E5", fontSize: 13, marginTop: 4, lineHeight: 18 },
   promoCta: {
     flexDirection: "row", alignItems: "center", alignSelf: "flex-start", marginTop: 10,
-    backgroundColor: C.ember, borderRadius: 999, paddingLeft: 12, paddingRight: 8, height: 32,
+    backgroundColor: "#FFFFFF", borderRadius: 999, paddingLeft: 12, paddingRight: 8, height: 32,
   },
-  promoCtaText: { color: "#FFF", fontWeight: "700", fontSize: 13 },
+  promoCtaText: { color: C.ember, fontWeight: "700", fontSize: 13 },
   dots: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 10 },
   dotPill: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.border },
   dotPillActive: { width: 18, backgroundColor: C.ember },

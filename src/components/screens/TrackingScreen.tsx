@@ -23,7 +23,7 @@ export const TrackingScreen = ({ onBack, onComplete, orderId, orderData }: Track
   const [showDeliveryCode, setShowDeliveryCode] = useState(false);
   const [riderAccepted, setRiderAccepted] = useState(false); // Only true when rider has accepted the order
 
-  const isDark = false; // MacNose uses a fixed light theme
+  const isDark = false; // Be Lounge uses a fixed light theme
 
   const bg = isDark ? '#000000' : '#FFFFFF';
   const text = isDark ? '#FFFFFF' : '#111111';

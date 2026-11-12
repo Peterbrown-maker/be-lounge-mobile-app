@@ -18,7 +18,7 @@ export const RestaurantMenuScreen = ({ restaurant, onBack, onCheckout }: Restaur
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isDark = false; // MacNose uses a fixed light theme
+  const isDark = false; // Be Lounge uses a fixed light theme
 
   const bg = isDark ? "#000000" : "#FFFFFF";
   const text = isDark ? "#FFFFFF" : "#111111";

@@ -25,19 +25,19 @@ const KEY_REMINDERS = "events:reminders";
 
 const at = (iso: string) => new Date(iso).getTime();
 
-// Announcements MacNose would send (prototype content).
+// Announcements Be Lounge would send (prototype content).
 const SEED: AppNotification[] = [
   {
     id: "welcome",
     kind: "event",
-    title: "Welcome to MacNose Cafe",
-    message: "Good food takes time to prepare. Good memories are made here. Book a table and take a Short Left.",
+    title: "Welcome to Be Lounge",
+    message: "Good food takes time to prepare. Good memories are made here. Book a table and come through.",
     createdAt: at("2026-11-01T10:00:00+02:00"),
   },
   ...MACNOSE_EVENTS.map((e, i) => ({
     id: `announce-${e.id}`,
     kind: "event" as const,
-    title: `${e.artist} live at MacNose`,
+    title: `${e.artist} live at Be Lounge`,
     message: `${e.title}: ${formatEventWhen(e)}. Tap to see details and book your table.`,
     createdAt: at("2026-11-10T12:00:00+02:00") + i * 3600 * 1000,
     eventId: e.id,
@@ -97,8 +97,8 @@ function ensureLoaded() {
               addOnce({
                 id: `tonight-${e.id}`,
                 kind: "event",
-                title: `Tonight: ${e.artist} at MacNose`,
-                message: `${e.title} starts at ${e.startTime}. See you in Short Left!`,
+                title: `Tonight: ${e.artist} at Be Lounge`,
+                message: `${e.title} starts at ${e.startTime}. See you at Be Lounge!`,
                 createdAt: Date.now(),
                 eventId: e.id,
               }) || changed;
@@ -170,7 +170,7 @@ export function useEventReminder(eventId: string): [boolean, () => void] {
         id: `reminder-${eventId}-${Date.now()}`,
         kind: "event",
         title: `Reminder set: ${e.artist}`,
-        message: `We'll remind you on ${formatEventWhen(e)}. ${e.title} at MacNose Cafe.`,
+        message: `We'll remind you on ${formatEventWhen(e)}. ${e.title} at Be Lounge.`,
         createdAt: Date.now(),
         eventId,
       });

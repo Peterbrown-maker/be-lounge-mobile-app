@@ -52,7 +52,7 @@ export const EventsScreen = ({ onBack, initialEventId, onBookTable }: EventsScre
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="What's on" subtitle="Live at MacNose Cafe" onBack={onBack} />
+      <ScreenHeader title="What's on" subtitle="Live at Be Lounge" onBack={onBack} />
       {events.length === 0 ? (
         <View style={styles.empty}>
           <View style={styles.emptyIcon}>
@@ -134,7 +134,7 @@ const EventDetail = ({
           <View style={styles.facts}>
             <Fact Icon={CalendarDays} text={formatEventWhen(event)} />
             <Fact Icon={Ticket} text={formatEntry(event)} />
-            <Fact Icon={MapPin} text={`MacNose Cafe, ${MACNOSE_RESTAURANT.address}`} />
+            <Fact Icon={MapPin} text={`Be Lounge, ${MACNOSE_RESTAURANT.address}`} />
           </View>
 
           <Text style={styles.description}>{event.description}</Text>

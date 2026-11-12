@@ -48,28 +48,28 @@ const NOW = new Date().toISOString();
 
 export const MACNOSE_RESTAURANT: Restaurant = {
   id: 'macnose',
-  name: 'MacNose Cafe',
-  description: 'Pub & restaurant in Short Left, Soshanguve. South African classics, grills, seafood, platters and drinks. Est. 2007.',
+  name: 'Be Lounge',
+  description: 'Lounge & restaurant in Soshanguve. South African classics, grills, seafood, platters and drinks.',
   image: '',
   images: [],
-  address: '43 Aubrey Matlakala St, Short Left, Soshanguve, 0164',
-  latitude: -25.5238705,
-  longitude: 28.0804518,
+  // Map pin from Be Lounge's Bing Maps listing. TODO: confirm the street address.
+  address: 'Soshanguve, Pretoria',
+  latitude: -25.513655,
+  longitude: 28.108461,
   rating: 0,
   delivery_time: '25-35 min',
   delivery_fee: 15,
   is_open: true,
-  category: 'Pub & Restaurant',
+  category: 'Lounge & Restaurant',
   popular_food: 'Mogodu Monday',
   emoji: '🍽️',
   created_at: NOW,
   updated_at: NOW,
 };
 
-/** Venue details from macnosecafeshortleft.co.za. */
+/** Be Lounge venue details. */
 export const MACNOSE_INFO = {
-  tagline: 'Take a Short Left',
-  established: 2007,
+  tagline: 'Good food. Good vibes.',
   about:
     'Our extensive menu offers a huge variety of South African dishes specializing in African cuisine (e.g. Ox Tripe), seafood options (e.g. Oysters) & quality meat (e.g. Steak). Superior wines, premium bottles, bubbles & feel good music makes for a unique dining experience.',
   promise:
@@ -79,10 +79,6 @@ export const MACNOSE_INFO = {
     { days: 'Fri – Sat', time: '10:00 – 02:00' },
     { days: 'Sunday', time: '10:00 – 23:00' },
   ],
-  website: 'https://macnosecafeshortleft.co.za/',
-  facebook: 'https://www.facebook.com/p/Macnose-Cafe-Short-Left-100064692908943/',
-  instagram: 'https://www.instagram.com/shortleft_soshanguve/',
-  instagramHandle: '@shortleft_soshanguve',
 } as const;
 
 const RESTAURANTS: Restaurant[] = [MACNOSE_RESTAURANT];
@@ -109,7 +105,7 @@ class RestaurantsService {
     return RESTAURANTS.find((r) => r.id === restaurantId) || MACNOSE_RESTAURANT;
   }
 
-  // Single-restaurant app: every restaurant id gets the MacNose menu.
+  // Single-restaurant app: every restaurant id gets the Be Lounge menu.
   async getRestaurantMenu(_restaurantId: string): Promise<MenuItem[]> {
     return MENU;
   }

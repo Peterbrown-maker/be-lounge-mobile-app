@@ -28,7 +28,7 @@ export const ActiveOrdersScreen = ({ onBack, onTrackOrder }: ActiveOrdersScreenP
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const isDark = false; // MacNose uses a fixed light theme
+  const isDark = false; // Be Lounge uses a fixed light theme
 
   const bg = isDark ? '#000000' : '#FFFFFF';
   const text = isDark ? '#FFFFFF' : '#111111';

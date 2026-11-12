@@ -14,7 +14,7 @@ export const PriceSummaryScreen = ({ onBack, onConfirm }: PriceSummaryScreenProp
   // Mock data
   const deliveryDetails = {
     service: "Pick Up & Drop Off",
-    pickup: "43 Aubrey Matlakala St, Soshanguve",
+    pickup: "Be Lounge, Soshanguve",
     dropoff: "456 Block BB, Soshanguve",
     distance: "2.5 km",
     estimatedTime: "15-20 min",

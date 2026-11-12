@@ -1,5 +1,5 @@
-// MacNose Cafe menu: the single local source of menu data (no backend).
-// Names, descriptions and prices as published on macnosecafeshortleft.co.za/menu.
+// Be Lounge menu: the single local source of menu data (no backend).
+// Names, descriptions and prices for the in-app menu.
 // Specials are transcribed from the promo posters on the same page.
 
 export interface MacnoseMenuItem {
@@ -51,7 +51,7 @@ export const MACNOSE_MENU: { [categoryId: string]: MacnoseMenuItem[] } = {
     { id: "specials-hennessy-vs-4-tonic-lemonade", name: "Hennessy VS & 4 Tonic / Lemonade", category: "Specials", price: 950, image: require("../assets/macnose/hennessy_tonic.jpeg"), description: "Weekend special, Thursday to Sunday till 20:00." },
     { id: "specials-jameson-2-mixed-grill-meals", name: "Jameson & 2 Mixed Grill Meals", category: "Specials", price: 950, image: require("../assets/macnose/weekends_and_specials_bottles.jpeg"), description: "1 Jameson, 2 pork chop & wors mixed grill meals, 6 Fitch & Leedes. Fri–Mon till 20:00, Tue–Thu till closing." },
     { id: "specials-skyy-vodka-1l-tonic-lemonade", name: "SKYY Vodka & 1L Tonic / Lemonade", category: "Specials", price: 480, image: require("../assets/macnose/weekends_and_specials_bottles.jpeg"), description: "Fri–Mon till 20:00, Tue–Thu till closing." },
-    { id: "specials-hennessy-vs-olmeca-macnose-platter", name: "Hennessy VS, Olmeca & MacNose Platter", category: "Specials", price: 1750, image: require("../assets/macnose/weekends_and_specials_bottles.jpeg"), description: "Hennessy VS, Olmeca Silver/Gold, 6 Fitch & Leedes and a MacNose platter. Fri–Mon till 20:00, Tue–Thu till closing." },
+    { id: "specials-hennessy-vs-olmeca-macnose-platter", name: "Hennessy VS, Olmeca & Be Lounge Platter", category: "Specials", price: 1750, image: require("../assets/macnose/weekends_and_specials_bottles.jpeg"), description: "Hennessy VS, Olmeca Silver/Gold, 6 Fitch & Leedes and a Be Lounge platter. Fri–Mon till 20:00, Tue–Thu till closing." },
   ],
   traditional: [
     { id: "traditional-buffet", name: "Buffet", category: "Traditional Monday Meals", price: 100, image: require("../assets/macnose/traditional_food.jpg"), description: "4 Proteins, starch of your choice and 2 Veggies" },
@@ -107,20 +107,20 @@ export const MACNOSE_MENU: { [categoryId: string]: MacnoseMenuItem[] } = {
     { id: "sides-tlhakwana-tlhogo-mix", name: "Tlhakwana + Tlhogo (Mix)", category: "Meat (Proteins) & Extras", price: 80, image: require("../assets/macnose/traditional_food.jpg"), description: "" },
   ],
   platters: [
-    { id: "platters-macnose-shisanyama-platter", name: "MacNose Shisanyama Platter", category: "Sharing Platters", price: 590, image: require("../assets/macnose/food_drink.jpg"), description: "4 short ribs, 4 wings, 2 pork chops, served with 4 pap, salsa & gravy" },
+    { id: "platters-macnose-shisanyama-platter", name: "Be Lounge Shisanyama Platter", category: "Sharing Platters", price: 590, image: require("../assets/macnose/food_drink.jpg"), description: "4 short ribs, 4 wings, 2 pork chops, served with 4 pap, salsa & gravy" },
     { id: "platters-seafood-platter-for-one", name: "Seafood Platter for One", category: "Sharing Platters", price: 180, image: require("../assets/macnose/food_drink.jpg"), description: "Hake, Calamari, Prawns, Mussels, Squid heads and fries" },
     { id: "platters-platter-for-one", name: "Platter for One", category: "Sharing Platters", price: 180, image: require("../assets/macnose/food_drink.jpg"), description: "3 Wings, Cocktail sausages, ribs served with fries" },
     { id: "platters-sharing-platter", name: "Sharing Platter", category: "Sharing Platters", price: 450, image: require("../assets/macnose/food_drink.jpg"), description: "Cocktail sausages, Ribs, hake fillet, crumbled wings / grilled wings, calamari and fries" },
-    { id: "platters-macnose-meaty-platter", name: "MacNose Meaty Platter", category: "Sharing Platters", price: 460, image: require("../assets/macnose/food_drink.jpg"), description: "Lamb chops, Short rib, Cocktail wors, chicken wings & Fries" },
+    { id: "platters-macnose-meaty-platter", name: "Be Lounge Meaty Platter", category: "Sharing Platters", price: 460, image: require("../assets/macnose/food_drink.jpg"), description: "Lamb chops, Short rib, Cocktail wors, chicken wings & Fries" },
   ],
   light: [
     { id: "light-chicken-salad", name: "Chicken Salad", category: "Light Meals", price: 90, image: require("../assets/macnose/food.jpg"), description: "" },
     { id: "light-chorizo-olives", name: "Chorizo & Olives", category: "Light Meals", price: 78, image: require("../assets/macnose/food.jpg"), description: "" },
-    { id: "light-macnose-wings-and-calamari", name: "MacNose Wings and Calamari", category: "Light Meals", price: 105, image: require("../assets/macnose/food_drink.jpg"), description: "" },
+    { id: "light-macnose-wings-and-calamari", name: "Be Lounge Wings and Calamari", category: "Light Meals", price: 105, image: require("../assets/macnose/food_drink.jpg"), description: "" },
     { id: "light-large-oysters", name: "Large Oysters", category: "Light Meals", price: 40, image: require("../assets/macnose/macnose_champagne_oysters.jpg"), description: "" },
-    { id: "light-macnose-champagne-oysters", name: "MacNose Champagne Oysters", category: "Light Meals", price: 180, image: require("../assets/macnose/macnose_champagne_oysters.jpg"), description: "Combo of 6x Oysters — served fresh with champagne mignonette" },
-    { id: "light-macnose-prawn-tempura", name: "MacNose Prawn Tempura", category: "Light Meals", price: 85, image: require("../assets/macnose/food.jpg"), description: "Deep fried prawns served with creamy dip sauce" },
-    { id: "light-macnose-sweet-treat", name: "MacNose Sweet Treat", category: "Dessert", price: 70, image: require("../assets/macnose/warm_treats.jpeg"), description: "Ice cream or Cake of the day (with a drizzle of Custard)" },
+    { id: "light-macnose-champagne-oysters", name: "Be Lounge Champagne Oysters", category: "Light Meals", price: 180, image: require("../assets/macnose/macnose_champagne_oysters.jpg"), description: "Combo of 6x Oysters — served fresh with champagne mignonette" },
+    { id: "light-macnose-prawn-tempura", name: "Be Lounge Prawn Tempura", category: "Light Meals", price: 85, image: require("../assets/macnose/food.jpg"), description: "Deep fried prawns served with creamy dip sauce" },
+    { id: "light-macnose-sweet-treat", name: "Be Lounge Sweet Treat", category: "Dessert", price: 70, image: require("../assets/macnose/warm_treats.jpeg"), description: "Ice cream or Cake of the day (with a drizzle of Custard)" },
     { id: "light-snack-bowl", name: "Snack Bowl", category: "Dessert", price: 80, image: require("../assets/macnose/warm_treats.jpeg"), description: "Biltong, Peanuts (Light snack)" },
   ],
   cocktails: [
@@ -268,7 +268,7 @@ export const MACNOSE_MENU: { [categoryId: string]: MacnoseMenuItem[] } = {
     { id: "drinks-fitch-leedes-lemonade", name: "Fitch & Leedes Lemonade", category: "Cold Drinks", price: 20, image: require("../assets/macnose/interior.jpg"), description: "" },
     { id: "drinks-fitch-leedes-soda-tonic", name: "Fitch & Leedes Soda / Tonic", category: "Cold Drinks", price: 20, image: require("../assets/macnose/interior.jpg"), description: "" },
     { id: "drinks-tonic-water-1l", name: "Tonic Water 1L", category: "Cold Drinks", price: 30, image: require("../assets/macnose/interior.jpg"), description: "" },
-    { id: "drinks-macnose-coffee", name: "MacNose Coffee", category: "Hot Beverages", price: 50, image: require("../assets/macnose/warm_treats.jpeg"), description: "" },
+    { id: "drinks-macnose-coffee", name: "Be Lounge Coffee", category: "Hot Beverages", price: 50, image: require("../assets/macnose/warm_treats.jpeg"), description: "" },
     { id: "drinks-rooibos-tea", name: "Rooibos Tea", category: "Hot Beverages", price: 30, image: require("../assets/macnose/warm_treats.jpeg"), description: "" },
     { id: "drinks-hot-chocolate", name: "Hot Chocolate", category: "Hot Beverages", price: 58, image: require("../assets/macnose/warm_treats.jpeg"), description: "" },
     { id: "drinks-coffee-cake-slice", name: "Coffee & Cake Slice", category: "Hot Beverages", price: 80, image: require("../assets/macnose/warm_treats.jpeg"), description: "" },
